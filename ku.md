@@ -38,7 +38,7 @@
 | ١ | ئامادەکردنی کۆمپیوتەر (Python) | ✅ |
 | ٢ | فۆڵدەری پڕۆژە و پێکهاتەکەی | ✅ |
 | ٣ | یەکەم سێرڤەر — «Hello» | ✅ |
-| ٤ | داتابەیس (`database.py`) | ⏳ |
+| ٤ | داتابەیس (`database.py`) | ✅ |
 | ٥ | Templates و فەنکشنی `render()` | ⏳ |
 | ٦ | CSS — دیزاینی پەڕەکان | ⏳ |
 | ٧ | **R** — پیشاندانی لیستی قوتابیان | ⏳ |
@@ -503,4 +503,232 @@ student-system/
 
 ---
 
-> هەنگاوی ٤ لێرە زیاد دەکرێت.
+# هەنگاوی ٤ — داتابەیس
+
+> لە کۆتایی ئەم هەنگاوەدا فایلێکی نوێ لە پڕۆژەکەتدا دەردەکەوێت کە خۆت
+> دروستت نەکردووە — داتابەیسەکە.
+
+## چی دەکەین
+
+فایلی `database.py` دەنووسین و خشتەی `students` دروست دەکەین.
+
+## بۆچی فایلێکی جیا؟
+
+دەمانتوانی هەموو شتێک بخەینە ناو `app.py`ـەوە. بەڵام:
+
+| فایل | ئەرکی |
+|------|-------|
+| `app.py` | بەشی وێب — پەڕەکان، فۆڕمەکان، بڕیارەکان |
+| `database.py` | بەشی داتا — خشتەکە، خوێندنەوە، نووسین |
+
+**سوودەکەی:** ئەگەر ڕۆژێک بمانەوێت لە SQLiteـەوە بچینە بۆ MySQL، تەنها یەک
+فایل دەگۆڕین. `app.py` هیچی لێ ناگۆڕدرێت.
+
+ئەمە هەمان بیرۆکەی **جیاکردنەوەی ئەرکەکانە** کە لە وانەی تیۆریدا باسکراوە.
+
+---
+
+## ٤.١ — فایلی `database.py` دروست بکە
+
+لە VS Code، **New File** → ناوی لێبنێ:
+
+```
+database.py
+```
+
+لە هەمان شوێنی `app.py` بێت — ڕاستەوخۆ لەناو فۆڵدەری پڕۆژەکە.
+
+## ٤.٢ — کۆدەکە بنووسە
+
+```python
+import os
+import sqlite3
+
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "students.db")
+
+
+def get_connection():
+    connection = sqlite3.connect(DB_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
+
+
+def init_db():
+    with get_connection() as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS students (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id  TEXT NOT NULL UNIQUE,
+                full_name   TEXT NOT NULL,
+                department  TEXT NOT NULL,
+                gender      TEXT NOT NULL,
+                email       TEXT,
+                phone       TEXT,
+                created_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+            )
+            """
+        )
+```
+
+`Ctrl + S` پاشەکەوتی بکە.
+
+## ٤.٣ — ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `import sqlite3` | داتابەیسەکە دەهێنێت — لەگەڵ Python خۆیدا دێت |
+| `DB_PATH = os.path.join(...)` | ڕێڕەوی فایلی داتابەیس |
+| `os.path.dirname(os.path.abspath(__file__))` | «هەمان فۆڵدەری ئەم فایلە» |
+| `sqlite3.connect(DB_PATH)` | پەیوەندی دەکات — **ئەگەر فایلەکە نەبێت، دروستی دەکات** |
+| `row_factory = sqlite3.Row` | ڕێگە دەدات ستوونەکە بە ناوەکەی بخوێنینەوە: `row["full_name"]` |
+| `with get_connection() as ...` | دوای تەواوبوون، خۆی گۆڕانکارییەکان پاشەکەوت دەکات |
+| `CREATE TABLE IF NOT EXISTS` | خشتەکە دروست دەکات — **ئەگەر پێشتر نەبووبێت** |
+
+> **بۆچی `os.path.dirname(...)`؟**
+> بەبێ ئەو، داتابەیسەکە لەو فۆڵدەرەدا دروست دەبێت کە تێرمیناڵ لێیەوە
+> کاردەکات — نەک لەتەنیشت کۆدەکە. ئەمە هۆکاری هەڵەیەکی زۆر باوە:
+> داتابەیسێک هەیە، بەڵام بەتاڵە، چونکە فایلێکی تری هەمان ناوە.
+
+## ٤.٤ — ستوونەکان
+
+| ستوون | جۆر | واتای |
+|-------|-----|-------|
+| `id` | INTEGER | ژمارەی ناوخۆیی، خۆی زیاد دەبێت |
+| `student_id` | TEXT | ژمارەی زانکۆیی — **ناکرێت دووبارە بێتەوە** |
+| `full_name` | TEXT | ناوی تەواو — پێویستە |
+| `department` | TEXT | بەش — پێویستە |
+| `gender` | TEXT | ڕەگەز — پێویستە |
+| `email` | TEXT | دەکرێت بەتاڵ بێت |
+| `phone` | TEXT | دەکرێت بەتاڵ بێت |
+| `created_at` | TEXT | کاتی تۆمارکردن — خۆکارانە پڕ دەبێتەوە |
+
+> **ژمارەی تەلەفۆن بۆچی `TEXT`ـە نەک `INTEGER`؟**
+> چونکە `0770` سەرەتای سفرەکەی لەدەست دەدات، و هەندێک ژمارە `+` یان بۆشایی
+> تێدایە. ژمارەیەک کە هەرگیز کۆی ناکەیتەوە، ژمارە نییە — دەقە.
+
+---
+
+## ٤.٥ — بەستنەوەی بە `app.py`
+
+`database.py` بە تەنها هیچ ناکات — کەس بانگی نەکردووە. لە `app.py`دا
+**دوو دێڕ** زیاد بکە:
+
+```python
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+import database                                    # ← نوێ
+
+
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
+
+
+database.init_db()                                 # ← نوێ
+server = HTTPServer(("localhost", 8000), StudentAppHandler)
+print("Server running at http://localhost:8000")
+print("Press Ctrl + C to stop.")
+server.serve_forever()
+```
+
+`Ctrl + S` هەردوو فایلەکە پاشەکەوت بکە.
+
+## ٤.٦ — تاقیکردنەوە
+
+```
+python app.py
+```
+
+## چی دەبینیت
+
+سەیری **Explorer**ی VS Code بکە. فایلێکی نوێ دەردەکەوێت:
+
+```
+student-system/
+├── app.py
+├── database.py
+├── students.db     ← نوێ، خۆکارانە
+├── templates/
+└── static/
+```
+
+**ئەمە داتابەیسەکەتە.** فایلێکی ئاسایی — دەتوانیت کۆپی بکەیت، بینێریت،
+یان بیسڕیتەوە.
+
+`Ctrl + C` بۆ وەستاندن.
+
+## ٤.٧ — دڵنیابوونەوەی ورد
+
+بۆ ئەوەی دڵنیا ببیت خشتەکە بەڕاستی دروست بووە، ئەمە لە تێرمیناڵدا بنووسە:
+
+```
+python -c "import database; print([r['name'] for r in database.get_connection().execute('SELECT name FROM sqlite_master')])"
+```
+
+دەبێت ئەمە دەربکەوێت:
+
+```
+['students', 'sqlite_autoindex_students_1', 'sqlite_sequence']
+```
+
+یەکەمیان خشتەکەی خۆمانە. ئەو دووانەی تر SQLite خۆی دروستی کردوون — یەکێک
+بۆ `UNIQUE` و یەکێک بۆ `AUTOINCREMENT`.
+
+---
+
+## ⚠️ خاڵێک کە دواتر سەری لێدەشێوێنیت
+
+`CREATE TABLE IF NOT EXISTS` تەنها کاردەکات ئەگەر خشتەکە **نەبووبێت**.
+
+ئەگەر دواتر ستوونێک زیاد بکەیت یان بگۆڕیت، پاشان دووبارە کاری پێبکەیت:
+
+> **هیچ ناگۆڕێت.** چونکە خشتەکە پێشتر هەیە، و SQLite دەڵێت «باشە، هەیە» و
+> تێپەڕ دەبێت.
+
+**چارەسەرەکە:** فایلی `students.db` بسڕەوە و دووبارە `python app.py` بکە.
+خشتەیەکی نوێ بە پێکهاتەی نوێوە دروست دەبێت.
+
+> لە کاتی فێربووندا ئەمە هیچ کێشەیەک نییە — هێشتا داتای گرنگت تێدا نییە.
+
+---
+
+## ئەگەر هەڵە دەرکەوت
+
+| پەیامی هەڵە | چارەسەر |
+|-------------|---------|
+| `ModuleNotFoundError: No module named 'database'` | ناوی فایلەکە دروست نییە، یان لە فۆڵدەرێکی ترە. دەبێت `database.py` بێت، لەتەنیشت `app.py` |
+| `sqlite3.OperationalError: near "..."` | هەڵەیەکی نووسین لە SQLەکەدا. کۆمای `,` نێوان ستوونەکان بپشکنە |
+| `students.db` دەرنەکەوت | `database.init_db()`ت زیاد نەکردووە، یان `python app.py`ت نەکردووە |
+| `no such table: students` | `init_db()` بانگ نەکراوە پێش بەکارهێنانی خشتەکە |
+| ستوونێکم گۆڕی، بەڵام هیچ نەگۆڕا | خشتەکە پێشتر هەیە. `students.db` بسڕەوە (بڕوانە سەرەوە) |
+| `IndentationError` | بۆشاییەکان ڕێک نین. ٤ بۆشایی بەکاربهێنە |
+| فایلەکە لە Explorerدا نابینم | `Ctrl + Shift + E`، یان کلیکی ڕاست → **Refresh Explorer** |
+
+---
+
+## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
+
+```
+student-system/
+├── app.py          ← دوو دێڕی نوێی تێدایە
+├── database.py     ← نوێ
+├── students.db     ← خۆکارانە دروست بوو
+├── templates/
+└── static/
+```
+
+- خشتەی `students` بوونی هەیە
+- دەزانیت بۆچی داتا لە فایلێکی جیادایە
+- دەزانیت ئەگەر خشتەکە بگۆڕیت، دەبێت `students.db` بسڕیتەوە
+
+**ئێستا شوێنێکمان هەیە بۆ هەڵگرتنی زانیاری** — بەڵام هێشتا بەتاڵە، و
+پەڕەکەشمان هێشتا `Hello` دەڵێت. لە هەنگاوی داهاتوودا فێر دەبین چۆن
+پەڕەیەکی ڕاستەقینە دروست بکەین.
+
+---
+
+> هەنگاوی ٥ لێرە زیاد دەکرێت.

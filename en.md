@@ -37,7 +37,7 @@ For a student who:
 | 1 | Preparing the computer (Python) | ✅ |
 | 2 | The project folder and its structure | ✅ |
 | 3 | The first server — "Hello" | ✅ |
-| 4 | The database (`database.py`) | ⏳ |
+| 4 | The database (`database.py`) | ✅ |
 | 5 | Templates and the `render()` function | ⏳ |
 | 6 | CSS — designing the pages | ⏳ |
 | 7 | **R** — showing the student list | ⏳ |
@@ -501,4 +501,236 @@ where the students' information will live.
 
 ---
 
-> Step 4 will be added here.
+# Step 4 — The database
+
+> By the end of this step a new file appears in your project that you did not
+> create yourself — the database.
+
+## What we do
+
+Write `database.py` and create the `students` table.
+
+## Why a separate file?
+
+We could put everything in `app.py`. But:
+
+| File | Its job |
+| ---- | ------- |
+| `app.py` | The web part — pages, forms, decisions |
+| `database.py` | The data part — the table, reading, writing |
+
+**The benefit:** if one day we move from SQLite to MySQL, only one file
+changes. `app.py` is untouched.
+
+This is the same **separation of concerns** discussed in the theory lesson.
+
+---
+
+## 4.1 — Create the file `database.py`
+
+In VS Code, **New File** → name it:
+
+```
+database.py
+```
+
+It belongs beside `app.py` — directly in the project folder.
+
+## 4.2 — Type the code
+
+```python
+import os
+import sqlite3
+
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "students.db")
+
+
+def get_connection():
+    connection = sqlite3.connect(DB_PATH)
+    connection.row_factory = sqlite3.Row
+    return connection
+
+
+def init_db():
+    with get_connection() as connection:
+        connection.execute(
+            """
+            CREATE TABLE IF NOT EXISTS students (
+                id          INTEGER PRIMARY KEY AUTOINCREMENT,
+                student_id  TEXT NOT NULL UNIQUE,
+                full_name   TEXT NOT NULL,
+                department  TEXT NOT NULL,
+                gender      TEXT NOT NULL,
+                email       TEXT,
+                phone       TEXT,
+                created_at  TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
+            )
+            """
+        )
+```
+
+Save with `Ctrl + S`.
+
+## 4.3 — What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `import sqlite3` | Brings in the database — it ships with Python |
+| `DB_PATH = os.path.join(...)` | The path to the database file |
+| `os.path.dirname(os.path.abspath(__file__))` | "the same folder as this file" |
+| `sqlite3.connect(DB_PATH)` | Connects — and **creates the file if it is not there** |
+| `row_factory = sqlite3.Row` | Lets us read a column by name: `row["full_name"]` |
+| `with get_connection() as ...` | Saves the changes for us when the block ends |
+| `CREATE TABLE IF NOT EXISTS` | Creates the table — **only if it does not exist** |
+
+> **Why `os.path.dirname(...)`?**
+> Without it the database is created in whichever folder the terminal happens
+> to be in, rather than next to the code. That causes a common and confusing
+> error: there is a database, but it is empty — because it is a different file
+> with the same name.
+
+## 4.4 — The columns
+
+| Column | Type | Meaning |
+| ------ | ---- | ------- |
+| `id` | INTEGER | The internal number, assigned automatically |
+| `student_id` | TEXT | The university number — **no duplicates** |
+| `full_name` | TEXT | Full name — required |
+| `department` | TEXT | Department — required |
+| `gender` | TEXT | Gender — required |
+| `email` | TEXT | May be empty |
+| `phone` | TEXT | May be empty |
+| `created_at` | TEXT | When the row was created — filled in automatically |
+
+> **Why is the phone number `TEXT` and not `INTEGER`?**
+> Because `0770` would lose its leading zero, and some numbers contain a `+`
+> or spaces. A number you never do arithmetic with is not a number — it is
+> text.
+
+---
+
+## 4.5 — Connect it to `app.py`
+
+`database.py` does nothing on its own — nobody has called it. Add **two
+lines** to `app.py`:
+
+```python
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+import database                                    # <- new
+
+
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
+
+
+database.init_db()                                 # <- new
+server = HTTPServer(("localhost", 8000), StudentAppHandler)
+print("Server running at http://localhost:8000")
+print("Press Ctrl + C to stop.")
+server.serve_forever()
+```
+
+Save both files with `Ctrl + S`.
+
+## 4.6 — Test it
+
+```
+python app.py
+```
+
+## What you should see
+
+Look at the VS Code **Explorer**. A new file has appeared:
+
+```
+student-system/
+├── app.py
+├── database.py
+├── students.db     <- new, created for you
+├── templates/
+└── static/
+```
+
+**That is your database.** An ordinary file — you can copy it, send it, or
+delete it.
+
+Press `Ctrl + C` to stop.
+
+## 4.7 — A closer check
+
+To be sure the table really exists, type this in the terminal:
+
+```
+python -c "import database; print([r['name'] for r in database.get_connection().execute('SELECT name FROM sqlite_master')])"
+```
+
+You should see:
+
+```
+['students', 'sqlite_autoindex_students_1', 'sqlite_sequence']
+```
+
+The first one is our table. SQLite created the other two itself — one for
+`UNIQUE` and one for `AUTOINCREMENT`.
+
+---
+
+## ⚠️ Something that will confuse you later
+
+`CREATE TABLE IF NOT EXISTS` only does anything when the table is **not**
+there.
+
+If you later add or change a column and run the program again:
+
+> **Nothing changes.** The table already exists, so SQLite says "fine, it is
+> there" and moves on.
+
+**The fix:** delete `students.db` and run `python app.py` again. A new table
+is built with the new shape.
+
+> While learning this costs nothing — there is no data in it yet worth
+> keeping.
+
+---
+
+## If you get an error
+
+| Error message | Fix |
+| ------------- | --- |
+| `ModuleNotFoundError: No module named 'database'` | The file name is wrong, or it is in another folder. It must be `database.py`, beside `app.py` |
+| `sqlite3.OperationalError: near "..."` | A typo in the SQL. Check the commas between the columns |
+| `students.db` did not appear | You did not add `database.init_db()`, or did not run `python app.py` |
+| `no such table: students` | `init_db()` was not called before the table was used |
+| I changed a column and nothing changed | The table already exists. Delete `students.db` (see above) |
+| `IndentationError` | The spacing is uneven. Use 4 spaces |
+| I cannot see the file in the Explorer | `Ctrl + Shift + E`, or right-click → **Refresh Explorer** |
+
+---
+
+## ✅ This step is finished when
+
+```
+student-system/
+├── app.py          <- two new lines in it
+├── database.py     <- new
+├── students.db     <- created automatically
+├── templates/
+└── static/
+```
+
+- The `students` table exists
+- You know why the data lives in its own file
+- You know that changing the table means deleting `students.db`
+
+**We now have somewhere to keep information** — but it is still empty, and
+the page still says `Hello`. In the next step we learn how to build a real
+page.
+
+---
+
+> Step 5 will be added here.
