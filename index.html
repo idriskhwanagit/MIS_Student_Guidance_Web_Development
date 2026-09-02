@@ -531,8 +531,30 @@ body {
   * { transition: none !important; }
 }
 
+/* --- print header --------------------------------------------------------
+   Hidden on screen. In print it is fixed into the page margin, so the
+   browser repeats it at the top of every sheet.
+   ------------------------------------------------------------------------ */
+.print-header { display: none; }
+
 /* --- print --------------------------------------------------------------- */
+@page { margin: 20mm 13mm 15mm; }
+
 @media print {
+  .print-header {
+    display: block;
+    position: fixed;
+    top: -13mm;
+    inset-inline: 0;
+    padding-bottom: 3pt;
+    border-bottom: .5pt solid #b9c4cd;
+    color: #4a5a6b;
+    font-family: var(--f-ui);
+    font-size: 9pt;
+    line-height: 1.5;
+    text-align: center;
+  }
+
   .topbar, .rail, .copy, .toast { display: none !important; }
   .notice { margin-bottom: 1.25rem; border-color: #b8791f; color: #8a5a12; background: #fbf3e6; }
   .watermark { opacity: .05; color: #12303a; }
@@ -556,6 +578,7 @@ body {
 
   <div class="watermark" id="watermark" hidden aria-hidden="true"></div>
   <div class="toast" id="toast" role="status" hidden></div>
+  <div class="print-header" id="printHeader" aria-hidden="true"></div>
 
   <header class="topbar">
     <div class="brand">
@@ -774,6 +797,7 @@ body {
   var reader = document.getElementById("reader");
   var notice = document.getElementById("notice");
   var watermark = document.getElementById("watermark");
+  var printHeader = document.getElementById("printHeader");
   var toc = document.getElementById("toc");
   var app = document.querySelector(".app");
 
@@ -822,6 +846,9 @@ body {
       var w = words[el.getAttribute("data-t")];
       if (w) { el.textContent = w; }
     });
+
+    /* the printed sheets carry the document's own title */
+    printHeader.textContent = headings.length ? headings[0].text : "";
 
     /* contents */
     toc.innerHTML = "";
