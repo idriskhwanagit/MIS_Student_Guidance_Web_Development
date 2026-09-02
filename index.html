@@ -565,10 +565,16 @@ body {
     font-size: 9pt;
     font-weight: 400;
     line-height: 1.5;
-    /* Kurdish reads right to left, so "end" puts it on the left there and
-       on the right in English — the side the line finishes on. */
-    text-align: end;
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
   }
+
+  /* Kurdish reads right to left, so the title lands on the left there and
+     on the right in English — the side each script finishes on. The date
+     takes the opposite end, which is where a browser puts it too. */
+  .print-header .date { flex: none; }
+  .print-header .who { flex: 1; text-align: end; }
 
   .topbar, .rail, .copy, .toast { display: none !important; }
   .notice { margin-bottom: 1.25rem; border-color: #b8791f; color: #8a5a12; background: #fbf3e6; }
@@ -624,7 +630,7 @@ body {
     </nav>
     <table class="print-frame">
       <thead>
-        <tr><th><div class="print-header" id="printHeader"></div></th></tr>
+        <tr><th><div class="print-header" id="printHeader"><span class="date"></span><span class="who"></span></div></th></tr>
       </thead>
       <tbody>
         <tr><td><main class="reader" id="reader"></main></td></tr>
@@ -868,8 +874,12 @@ body {
       if (w) { el.textContent = w; }
     });
 
-    /* the printed sheets carry the document's own title */
-    printHeader.textContent = headings.length ? headings[0].text : "";
+    /* the printed sheets carry the document's own title and today's date,
+       so the browser's own header line can be turned off without losing
+       anything */
+    printHeader.querySelector(".who").textContent =
+      headings.length ? headings[0].text : "";
+    printHeader.querySelector(".date").textContent = today();
 
     /* contents */
     toc.innerHTML = "";
@@ -902,6 +912,17 @@ body {
     })["catch"](function () {
       reader.innerHTML = '<p class="state">' + words.failed + "</p>";
     });
+  }
+
+  /* ---- today, written the way the reader's language writes it ----------- */
+  function today() {
+    var now = new Date();
+    try {
+      return now.toLocaleDateString(state.lang === "ku" ? "ckb-IQ" : "en-GB",
+        { year: "numeric", month: "long", day: "numeric" });
+    } catch (e) {
+      return now.toISOString().slice(0, 10);
+    }
   }
 
   /* ---- which section am I in? ------------------------------------------- */
