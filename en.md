@@ -1,4 +1,4 @@
-# From Zero to a Finished Project — Student Guide
+# Student Guide (Practical Part) — Prepared by M. Idris Qadir
 
 
 ## Who is this document for?
