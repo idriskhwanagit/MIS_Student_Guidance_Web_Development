@@ -251,7 +251,9 @@ body {
 
 /* --- notice ------------------------------------------------------------- */
 .notice {
-  grid-column: 1 / -1;
+  grid-column: 2;          /* the reading column, in either direction */
+  max-width: var(--measure);
+  margin-inline: auto;
   display: flex;
   gap: .7rem;
   padding: .85rem 1.15rem;
@@ -315,6 +317,7 @@ body {
 /* --- reader -------------------------------------------------------------- */
 .reader {
   max-width: var(--measure);
+  margin-inline: auto;
   padding: 2.25rem 2.5rem 3rem;
   background: var(--surface);
   border: 1px solid var(--rule);
@@ -514,6 +517,8 @@ body {
 /* --- small screens ------------------------------------------------------- */
 @media (max-width: 60rem) {
   .shell { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; padding-top: 1.25rem; }
+  .notice { grid-column: 1; max-width: none; }
+
   .rail {
     position: static;
     max-height: 18rem;
