@@ -36,7 +36,7 @@ For a student who:
 | - | ---- | ------ |
 | 1 | Preparing the computer (Python) | ✅ |
 | 2 | The project folder and its structure | ✅ |
-| 3 | The first server — "Hello" | ⏳ |
+| 3 | The first server — "Hello" | ✅ |
 | 4 | The database (`database.py`) | ⏳ |
 | 5 | Templates and the `render()` function | ⏳ |
 | 6 | CSS — designing the pages | ⏳ |
@@ -312,4 +312,193 @@ page in the browser.
 
 ---
 
-> Step 3 will be added here.
+# Step 3 — The first server
+
+> This is the first code. By the end of this step you will see something in
+> your browser that you built yourself.
+
+## What we do
+
+Write a very small server that shows one word: **Hello**.
+
+## Why
+
+Before adding a database, forms and tables, there is **one thing** to
+understand:
+
+> A server is a program that waits, a browser asks it for something, and it
+> answers.
+
+Everything else — students, registering, searching — is only an addition on
+top of that one simple idea.
+
+---
+
+## 3.1 — Create the file `app.py`
+
+In VS Code, in the Explorer, click **New File** (the page icon with a `+`).
+
+Name it:
+
+```
+app.py
+```
+
+> ### ⚠️ Two things
+>
+> - **Do not forget the `.py`** — it tells Python this is code
+> - **Do not put it inside `templates` or `static`** — it belongs directly in
+>   the project folder
+
+## 3.2 — Type the code
+
+```python
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
+
+
+server = HTTPServer(("localhost", 8000), StudentAppHandler)
+print("Server running at http://localhost:8000")
+print("Press Ctrl + C to stop.")
+server.serve_forever()
+```
+
+**Save it:** `Ctrl + S`
+
+> ⚠️ VS Code does **not** save on its own. A white dot ● in the tab name means
+> the file is not saved yet.
+
+## 3.3 — What does this code do?
+
+| Line | What it does |
+| ---- | ------------ |
+| `from http.server import ...` | Brings in the server that ships with Python |
+| `class StudentAppHandler` | This part decides how requests are answered |
+| `def do_GET(self)` | Runs **every time** a browser asks for a page |
+| `send_response(200)` | `200` means "fine, everything worked" |
+| `send_header("Content-Type"...)` | Tells the browser: this is HTML, in UTF-8 |
+| `end_headers()` | The end of the information above the page |
+| `wfile.write(...)` | Sends the content of the page |
+| `.encode("utf-8")` | Turns text into bytes — a server sends bytes, not text |
+| `HTTPServer(("localhost", 8000), ...)` | Where and on which port to listen |
+| `serve_forever()` | Keep waiting — never stop |
+
+> **`charset=utf-8` matters.** Without it, Kurdish letters come out as `Ø¨Ø§`.
+
+---
+
+## 3.4 — Run it
+
+In the terminal:
+
+```
+python app.py
+```
+
+## What you should see
+
+In the terminal:
+
+```
+Server running at http://localhost:8000
+Press Ctrl + C to stop.
+```
+
+And then **nothing**. The terminal is stuck and you cannot type anything else.
+
+> ### ⚠️ This is not an error
+>
+> It is the most common confusion in this step. The terminal has **not
+> frozen** — the server is running and waiting for requests.
+>
+> A server never "finishes". It runs until you stop it.
+
+## 3.5 — Open it in the browser
+
+Open a browser and type:
+
+```
+http://localhost:8000
+```
+
+You should see:
+
+# Hello
+
+**Well done** — your first server works.
+
+Look at the terminal too: a new line has appeared showing the request.
+
+## 3.6 — Stop it
+
+Go back to the terminal and press `Ctrl + C`.
+
+The terminal returns to normal.
+
+---
+
+## 3.7 — An important test
+
+This test teaches something you will use constantly from now on:
+
+1. In the code, change `Hello` to your own name
+2. Save with `Ctrl + S`
+3. Go to the browser and press `F5`
+
+**Nothing changes.** Why?
+
+Because the server still has the old code in memory. You have to:
+
+1. `Ctrl + C` — stop it
+2. `python app.py` — run it again
+3. `F5` in the browser
+
+**Now you see your name.**
+
+> **The rule:** after every change to `app.py`, stop the server and start it
+> again. From this step to the last one, you will repeat this constantly.
+
+---
+
+## If you get an error
+
+| Error message | Fix |
+| ------------- | --- |
+| `can't open file 'app.py'` | You are in the wrong folder. Close the terminal and do **File → Open Folder** again |
+| `[WinError 10048]` or `address already in use` | A server is already running. Find the old terminal and press `Ctrl + C` |
+| `IndentationError` | The spacing at the start of the lines is uneven. Python is strict — use 4 spaces, not a Tab |
+| `SyntaxError` | A character or a bracket is missing. Check the line named in the message |
+| **This site can't be reached** | The server is not running. Look at the terminal |
+| Kurdish letters show as `Ø¨Ø§` | `charset=utf-8` is missing from the `Content-Type` |
+| My change does not show | You did not restart the server (see 3.7) |
+| A white dot ● in the tab | The file is not saved. `Ctrl + S` |
+
+---
+
+## ✅ This step is finished when
+
+```
+student-system/
+├── app.py          ← new
+├── templates/
+└── static/
+```
+
+- `python app.py` starts the server
+- `http://localhost:8000` shows some text
+- `Ctrl + C` stops it
+- You know that every change needs a restart
+
+**You now have a server.** In the next step we build the database — the place
+where the students' information will live.
+
+---
+
+> Step 4 will be added here.
