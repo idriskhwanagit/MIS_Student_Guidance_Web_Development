@@ -482,6 +482,35 @@ body {
   font-size: .95rem;
 }
 
+/* --- loading / failed ---------------------------------------------------- */
+.state {
+  margin: 0;
+  padding: 3rem 0;
+  color: var(--ink-faint);
+  font-family: var(--f-ui);
+  text-align: center;
+}
+
+/* --- toast --------------------------------------------------------------- */
+.toast {
+  position: fixed;
+  inset-block-end: 1.5rem;
+  inset-inline: 0;
+  z-index: 40;
+  width: max-content;
+  max-width: min(90vw, 30rem);
+  margin: 0 auto;
+  padding: .8rem 1.25rem;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--paper);
+  font-family: var(--f-ui);
+  font-size: .88rem;
+  font-weight: 500;
+  text-align: center;
+  box-shadow: 0 8px 30px -10px rgba(0, 0, 0, .5);
+}
+
 /* --- small screens ------------------------------------------------------- */
 @media (max-width: 60rem) {
   .shell { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; padding-top: 1.25rem; }
@@ -504,7 +533,7 @@ body {
 
 /* --- print --------------------------------------------------------------- */
 @media print {
-  .topbar, .rail, .copy { display: none !important; }
+  .topbar, .rail, .copy, .toast { display: none !important; }
   .notice { margin-bottom: 1.25rem; border-color: #b8791f; color: #8a5a12; background: #fbf3e6; }
   .watermark { opacity: .05; color: #12303a; }
   body { background: #fff; }
@@ -526,6 +555,7 @@ body {
 <div class="app" dir="rtl">
 
   <div class="watermark" id="watermark" hidden aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status" hidden></div>
 
   <header class="topbar">
     <div class="brand">
@@ -560,18 +590,29 @@ body {
 
 </div>
 
-<script type="application/json" id="docs-data">{"ku": "# لە سفرەوە بۆ پڕۆژەیەکی تەواو — ڕێنمایی قوتابی\n\n\n\n## ئەم بەڵگەنامەیە بۆ کێیە؟\n\nبۆ قوتابییەک کە:\n\n- **پێویستە ئەمانە فێر بێت** — HTML و CSS و Python و SQL\n- **Visual Studio Code**ـی لەسەر کۆمپیوتەرەکەیەتی\n- ویندۆزەکەی چالاکە و پێویستی بە ئەکتیڤ کردن نییە\n- ئۆفیسەکەی چالاکە و پێویستی بە ئەکتیڤ کردن نییە\n\n## چۆن بەکاری دەهێنیت\n\n١. **بە ڕیزبەندی بڕۆ.** هەنگاو مەبەزێنە — هەر هەنگاوێک لەسەر ئەوەی پێشووی بنیات نراوە.\n٢. **کۆدەکە بە دەست بنووسە**، کۆپی مەکە. مێشک بە نووسین فێر دەبێت.\n٣. **دوای هەر هەنگاوێک تاقی بکەرەوە.** هەرگیز مەچۆ بۆ هەنگاوی داهاتوو تا ئەوەی ئێستا کاری نەکردووە.\n٤. **ئەگەر هەڵەیەک دەرکەوت**، لە خشتەی خوارەوە سەیری هەڵە باوەکان بکە.\n\n## پێکهاتەی هەر هەنگاوێک\n\n| بەش | واتە |\n|-----|------|\n| **چی دەکەین** | ئەرکی ئەم هەنگاوە بە یەک ڕستە |\n| **بۆچی** | مەبەستەکەی — بەبێ ئەمە تەنها کۆپی دەکەیت |\n| **کۆدەکە** | کۆدی تەواو، نەک بەشێکی |\n| **چۆن تاقی بکەینەوە** | ڕاستەوخۆ دوای نووسینەکە |\n| **چی دەبینیت** | ئەنجامی چاوەڕوانکراو |\n| **ئەگەر هەڵە دەرکەوت** | باوترین هەڵەکان و چارەسەریان |\n\n---\n\n## ڕیزبەندی هەنگاوەکان\n\n| # | هەنگاو | دۆخ |\n|---|--------|-----|\n| ١ | ئامادەکردنی کۆمپیوتەر (Python) | ✅ |\n| ٢ | فۆڵدەری پڕۆژە و پێکهاتەکەی | ⏳ |\n| ٣ | یەکەم سێرڤەر — «Hello» | ⏳ |\n| ٤ | داتابەیس (`database.py`) | ⏳ |\n| ٥ | Templates و فەنکشنی `render()` | ⏳ |\n| ٦ | CSS — دیزاینی پەڕەکان | ⏳ |\n| ٧ | **R** — پیشاندانی لیستی قوتابیان | ⏳ |\n| ٨ | **C** — فۆڕمی تۆمارکردن + پشکنین | ⏳ |\n| ٩ | **U** — دەستکاریکردن | ⏳ |\n| ١٠ | **D** — سڕینەوە | ⏳ |\n| ١١ | گەڕان | ⏳ |\n| ١٢ | پاراستن — SQL Injection و XSS | ⏳ |\n| ١٣ | تاقیکردنەوەی کۆتایی و `run.bat` | ⏳ |\n\n> ⏳ = هێشتا نەنووسراوە. ئەم بەڵگەنامەیە هەنگاو بە هەنگاو تەواو دەبێت.\n\n---\n\n# هەنگاوی ١ — کۆمپیوتەرەکە ئامادە بکە\n\n> ئەم هەنگاوە هیچ پەیوەندییەکی بە پڕۆژەکەوە نییە. تەنها دڵنیا دەبینەوە کە\n> ئامرازەکانمان هەن. جارێک دەیکەیت و هەرگیز دووبارەی ناکەیتەوە.\n\n## چی دەکەین\n\nدڵنیا دەبینەوە **Python** لەسەر کۆمپیوتەرەکە دابەزێنراوە.\n\n## بۆچی\n\nڤیژوەڵ ستۆدیۆ کۆد تەنها **ئەدیتۆرێکە** — دەفتەرێکی نووسینە بۆ کۆد.\nناتوانێت کۆدەکەت کار پێبکات. ئەوەی کۆدی Python کار پێدەکات پڕۆگرامێکی\nجیایە بە ناوی **Python** خۆی. پێویستمان بە هەردووکیانە.\n\n---\n\n## ١.١ — تێرمیناڵ لە VS Code بکەرەوە\n\nVS Code بکەرەوە، پاشان لە مێنیوی سەرەوە:\n\n**Terminal → New Terminal**\n\n> کورتەڕێ: `Ctrl` + `` ` `` (ئەو دوگمەیەی لەژێر `Esc`ـە)\n\nپەنجەرەیەکی تاریک لە خوارەوە دەکرێتەوە. ئەمە **تێرمیناڵە** — شوێنێک کە\nفەرمان دەنووسیت، نەک کۆد.\n\n## ١.٢ — پرسیار بکە ئایا Python هەیە\n\nئەمە بنووسە و `Enter` لێبدە:\n\n```\npython --version\n```\n\n## چی دەبینیت\n\n**ئەگەر Python هەبێت** — شتێکی وەک ئەمە دەردەکەوێت:\n\n```\nPython 3.13.14\n```\n\n✅ تەواو بوویت. بڕۆ بۆ خاڵی ١.٤.\n\n**ئەگەر Python نەبێت** — یەکێک لەم دووانە ڕوودەدات:\n\n- پەیامی `'python' is not recognized...`\n- یان **Microsoft Store** خۆکارانە دەکرێتەوە\n\nلەم حاڵەتەدا بڕۆ بۆ خاڵی ١.٣.\n\n---\n\n## ١.٣ — دابەزاندنی Python (تەنها ئەگەر پێویست بوو)\n\n١. بڕۆ بۆ <https://www.python.org/downloads/>\n٢. کلیک لە دوگمە زەردەکە بکە (**Download Python 3.x**)\n٣. فایلە دابەزێنراوەکە بکەرەوە\n\n> ### ⚠️ گرنگترین خاڵی ئەم هەنگاوە\n>\n> لە یەکەم پەنجەرەی دابەزاندندا، **پێش** کلیککردن لە هیچ شتێک، لە خوارەوە\n> چوارگۆشەیەک هەیە بە ناوی:\n>\n> **☑ Add python.exe to PATH**\n>\n> **دەبێت ئەم چوارگۆشەیە نیشان بکەیت.** ئەگەر نەیکەیت، تێرمیناڵ هەرگیز\n> Python نادۆزێتەوە و دەبێت هەموو دابەزاندنەکە دووبارە بکەیتەوە.\n\n٤. پاشان کلیک لە **Install Now** بکە و چاوەڕێ بکە\n٥. **VS Code بە تەواوی دابخە و دووبارە بیکەرەوە** — بەبێ ئەمە تێرمیناڵی\n   کراوە هێشتا نازانێت Python دابەزێنراوە\n٦. تێرمیناڵێکی نوێ بکەرەوە و دووبارە `python --version` بنووسە\n\n---\n\n## ١.٤ — دڵنیابوونەوە لە داتابەیس\n\nئێستا ئەمە بنووسە:\n\n```\npython -c \"import sqlite3; print('SQLite OK')\"\n```\n\nدەبێت ئەمە دەربکەوێت:\n\n```\nSQLite OK\n```\n\n**واتای چییە؟** SQLite ئەو داتابەیسەیە کە زانیاری قوتابیانی تێدا پاشەکەوت\nدەکەین. خۆشبەختانە **لەگەڵ Python خۆیدا دێت** — پێویست ناکات هیچی تر\nدابەزێنیت. نە XAMPP، نە MySQL، نە phpMyAdmin.\n\n---\n\n## ئەگەر هەڵە دەرکەوت\n\n| پەیامی هەڵە | چارەسەر |\n|-------------|---------|\n| `'python' is not recognized` | PATH دانەنراوە. Python دووبارە دابەزێنە و ئەم جارە `Add python.exe to PATH` نیشان بکە |\n| Microsoft Store دەکرێتەوە | Windows ڕێگری دەکات. بڕۆ بۆ Settings → Apps → Advanced app settings → App execution aliases، پاشان `python.exe` بکوژێنەوە |\n| `Python 2.7.x` دەردەکەوێت | وەشانێکی زۆر کۆنە. `python3 --version` تاقی بکەرەوە |\n| هیچ ڕوونادات | دڵنیابە `Enter`ت لێداوە و لە تێرمیناڵدا نووسیوتە، نەک لە فایلێکی کۆد |\n\n---\n\n## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت\n\nئەم دوو فەرمانە کاردەکەن و ئەنجام دەدەن:\n\n```\npython --version                                →  Python 3.x.x\npython -c \"import sqlite3; print('SQLite OK')\"  →  SQLite OK\n```\n\n**هیچ فایلێکمان دروست نەکردووە، هیچ کۆدێکمان نەنووسیوە** — تەنها\nکارگەکەمان ئامادە کرد.\n\n---\n\n> هەنگاوی ٢ لێرە زیاد دەکرێت.", "en": "# From Zero to a Finished Project — Student Guide\n\n\n## Who is this document for?\n\nFor a student who:\n\n- **has all of this to learn** — HTML, CSS, Python and SQL\n- has **Visual Studio Code** installed\n- has an activated copy of Windows — nothing to activate\n- has an activated copy of Office — nothing to activate\n\n## How to use it\n\n1. **Go in order.** Do not skip a step — each one builds on the one before it.\n2. **Type the code by hand**, do not copy it. The brain learns by typing.\n3. **Test after every step.** Never move to the next step until the current one works.\n4. **If you get an error**, look in the table below for the common ones.\n\n## The shape of every step\n\n| Part | Meaning |\n| ---- | ------- |\n| **What we do** | The job of this step, in one sentence |\n| **Why** | The purpose — without this you are only copying |\n| **The code** | The complete code, not a fragment |\n| **How to test it** | Immediately after you type it |\n| **What you should see** | The expected result |\n| **If you get an error** | The most common errors and their fixes |\n\n---\n\n## The steps\n\n| # | Step | Status |\n| - | ---- | ------ |\n| 1 | Preparing the computer (Python) | ✅ |\n| 2 | The project folder and its structure | ⏳ |\n| 3 | The first server — \"Hello\" | ⏳ |\n| 4 | The database (`database.py`) | ⏳ |\n| 5 | Templates and the `render()` function | ⏳ |\n| 6 | CSS — designing the pages | ⏳ |\n| 7 | **R** — showing the student list | ⏳ |\n| 8 | **C** — the registration form + validation | ⏳ |\n| 9 | **U** — editing | ⏳ |\n| 10 | **D** — deleting | ⏳ |\n| 11 | Search | ⏳ |\n| 12 | Security — SQL Injection and XSS | ⏳ |\n| 13 | Final testing and `run.bat` | ⏳ |\n\n> ⏳ = not written yet. This document is completed step by step.\n\n---\n\n# Step 1 — Prepare the computer\n\n> This step has nothing to do with the project itself. We are only making sure\n> we have the tools. You do it once and never again.\n\n## What we do\n\nMake sure **Python** is installed on the computer.\n\n## Why\n\nVisual Studio Code is only an **editor** — a notebook for writing code.\nIt cannot run your code. The thing that runs Python code is a separate\nprogram called **Python** itself. We need both.\n\n---\n\n## 1.1 — Open a terminal in VS Code\n\nOpen VS Code, then from the top menu:\n\n**Terminal → New Terminal**\n\n> Shortcut: `Ctrl` + `` ` `` (the key below `Esc`)\n\nA dark panel opens at the bottom. This is the **terminal** — a place where\nyou type commands, not code.\n\n## 1.2 — Ask whether Python is there\n\nType this and press `Enter`:\n\n```\npython --version\n```\n\n## What you should see\n\n**If Python is installed** — something like this appears:\n\n```\nPython 3.13.14\n```\n\n✅ You are done. Go to 1.4.\n\n**If Python is not installed** — one of these two happens:\n\n- the message `'python' is not recognized...`\n- or the **Microsoft Store** opens by itself\n\nIn that case go to 1.3.\n\n---\n\n## 1.3 — Installing Python (only if you need to)\n\n1. Go to <https://www.python.org/downloads/>\n2. Click the yellow button (**Download Python 3.x**)\n3. Open the downloaded file\n\n> ### ⚠️ The most important point of this step\n>\n> On the very first installer screen, **before** you click anything, there is\n> a checkbox at the bottom:\n>\n> **☑ Add python.exe to PATH**\n>\n> **You must tick this box.** If you don't, the terminal will never find\n> Python and you will have to run the whole installation again.\n\n4. Then click **Install Now** and wait\n5. **Close VS Code completely and open it again** — without this, an already\n   open terminal still does not know that Python was installed\n6. Open a new terminal and type `python --version` again\n\n---\n\n## 1.4 — Confirm the database is there\n\nNow type this:\n\n```\npython -c \"import sqlite3; print('SQLite OK')\"\n```\n\nThis should appear:\n\n```\nSQLite OK\n```\n\n**What does that mean?** SQLite is the database in which we will store the\nstudents' data. Happily it **ships with Python itself** — you do not need to\ninstall anything else. No XAMPP, no MySQL, no phpMyAdmin.\n\n---\n\n## If you get an error\n\n| Error message | Fix |\n| ------------- | --- |\n| `'python' is not recognized` | PATH was not set. Install Python again and this time tick `Add python.exe to PATH` |\n| The Microsoft Store opens | Windows is getting in the way. Go to Settings → Apps → Advanced app settings → App execution aliases, then turn `python.exe` off |\n| It shows `Python 2.7.x` | That is a very old version. Try `python3 --version` |\n| Nothing happens | Make sure you pressed `Enter` and that you typed it in the terminal, not in a code file |\n\n---\n\n## ✅ This step is finished when\n\nThese two commands work and produce output:\n\n```\npython --version                                →  Python 3.x.x\npython -c \"import sqlite3; print('SQLite OK')\"  →  SQLite OK\n```\n\n**We have not created a single file and not written a single line of code** —\nwe have only prepared the workshop.\n\n---\n\n> Step 2 will be added here."}</script>
+<script type="application/json" id="docs-data">{}</script>
 <script>
 (function () {
   "use strict";
 
   var DOCS = JSON.parse(document.getElementById("docs-data").textContent);
 
+  /* On the hosted page the guide is not in this file — it is fetched, so a
+     saved copy of the page is an empty shell. Offline builds ship the text
+     inside DOCS and leave FETCH null. */
+  var FETCH = {"ku": "ku.md", "en": "en.md"};
+
   var UI = {
     ku: { brand: "ڕێنمایی قوتابی", langLabel: "زمان", tocLabel: "ناوەڕۆک",
-          copy: "کۆپی", copied: "کۆپی کرا" },
+          copy: "کۆپی", copied: "کۆپی کرا",
+          keep: "بۆ هێشتنەوەی کۆپییەک، Ctrl + P دابگرە و وەک PDF چاپی بکە",
+          loading: "دەقەکە دەهێنرێت…",
+          failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
     en: { brand: "Student Guide", langLabel: "Language", tocLabel: "Contents",
-          copy: "Copy", copied: "Copied" }
+          copy: "Copy", copied: "Copied",
+          keep: "To keep a copy, press Ctrl + P and print to PDF",
+          loading: "Loading the text…",
+          failed: "The text could not be loaded. Check your connection and reload the page." }
   };
 
   var STORE = "studentGuide";
@@ -737,6 +778,10 @@ body {
   var app = document.querySelector(".app");
 
   function paint() {
+    if (DOCS[state.lang] === undefined && FETCH && FETCH[state.lang]) {
+      return fetchGuide(state.lang);
+    }
+
     var md = DOCS[state.lang] || "";
     var headings = [];
     var rtl = state.lang === "ku";
@@ -794,6 +839,21 @@ body {
     });
 
     spy();
+  }
+
+  /* ---- fetching the text ------------------------------------------------ */
+  function fetchGuide(lang) {
+    var words = UI[lang];
+    reader.innerHTML = '<p class="state">' + words.loading + "</p>";
+    fetch(FETCH[lang], { cache: "no-cache" }).then(function (response) {
+      if (!response.ok) { throw new Error(response.status); }
+      return response.text();
+    }).then(function (text) {
+      DOCS[lang] = text;
+      paint();
+    })["catch"](function () {
+      reader.innerHTML = '<p class="state">' + words.failed + "</p>";
+    });
   }
 
   /* ---- which section am I in? ------------------------------------------- */
@@ -859,6 +919,33 @@ body {
       sel.addRange(range);
       done();
     }
+  });
+
+  /* ---- saving the page is not the path; printing to PDF is ---------------
+     A browser menu can still save the file — this only turns the usual
+     shortcuts towards the copy we want the student to make.              */
+  var toast = document.getElementById("toast");
+  var toastTimer = null;
+
+  function hint(text) {
+    toast.textContent = text;
+    toast.hidden = false;
+    if (toastTimer) { clearTimeout(toastTimer); }
+    toastTimer = setTimeout(function () { toast.hidden = true; }, 3200);
+  }
+
+  document.addEventListener("keydown", function (e) {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey) { return; }
+    var key = (e.key || "").toLowerCase();
+    if (key === "s" || key === "u") {
+      e.preventDefault();
+      hint(UI[state.lang].keep);
+    }
+  });
+
+  document.addEventListener("contextmenu", function (e) {
+    e.preventDefault();
+    hint(UI[state.lang].keep);
   });
 
   /* ---- copied Kurdish text carries the notice with it --------------------
