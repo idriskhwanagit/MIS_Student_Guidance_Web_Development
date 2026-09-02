@@ -532,27 +532,42 @@ body {
 }
 
 /* --- print header --------------------------------------------------------
-   Hidden on screen. In print it is fixed into the page margin, so the
-   browser repeats it at the top of every sheet.
+   A fixed box only prints on the first sheet in Chrome. A table header
+   group is reprinted at the top of every page, so the header lives in a
+   real <thead> that collapses to nothing on screen.
    ------------------------------------------------------------------------ */
 .print-header { display: none; }
 
+.print-frame,
+.print-frame > thead,
+.print-frame > tbody,
+.print-frame tr,
+.print-frame th,
+.print-frame td { display: contents; }
+
 /* --- print --------------------------------------------------------------- */
-@page { margin: 20mm 13mm 15mm; }
+@page { margin: 14mm 13mm; }
 
 @media print {
+  .print-frame { display: table; width: 100%; }
+  .print-frame > thead { display: table-header-group; }
+  .print-frame > tbody { display: table-row-group; }
+  .print-frame tr { display: table-row; }
+  .print-frame th, .print-frame td { display: table-cell; padding: 0; }
+
   .print-header {
     display: block;
-    position: fixed;
-    top: -13mm;
-    inset-inline: 0;
+    margin-bottom: 10pt;
     padding-bottom: 3pt;
     border-bottom: .5pt solid #b9c4cd;
     color: #4a5a6b;
     font-family: var(--f-ui);
     font-size: 9pt;
+    font-weight: 400;
     line-height: 1.5;
-    text-align: center;
+    /* Kurdish reads right to left, so "end" puts it on the left there and
+       on the right in English — the side the line finishes on. */
+    text-align: end;
   }
 
   .topbar, .rail, .copy, .toast { display: none !important; }
@@ -578,7 +593,6 @@ body {
 
   <div class="watermark" id="watermark" hidden aria-hidden="true"></div>
   <div class="toast" id="toast" role="status" hidden></div>
-  <div class="print-header" id="printHeader" aria-hidden="true"></div>
 
   <header class="topbar">
     <div class="brand">
@@ -608,7 +622,14 @@ body {
       <h2 data-t="tocLabel">ناوەڕۆک</h2>
       <div class="toc" id="toc"></div>
     </nav>
-    <main class="reader" id="reader"></main>
+    <table class="print-frame">
+      <thead>
+        <tr><th><div class="print-header" id="printHeader"></div></th></tr>
+      </thead>
+      <tbody>
+        <tr><td><main class="reader" id="reader"></main></td></tr>
+      </tbody>
+    </table>
   </div>
 
 </div>
