@@ -556,11 +556,7 @@ body {
   .print-frame th, .print-frame td { display: table-cell; padding: 0; }
 
   .print-header {
-    /* The browser draws its own header line and a reader cannot be asked to
-       switch it off, so ours would only be a second line saying the same
-       thing. The page title is set at print time instead — see print().
-       Change this to `block` to get our own header back. */
-    display: none;
+    display: block;
     margin-bottom: 10pt;
     padding-bottom: 3pt;
     border-bottom: .5pt solid #b9c4cd;
@@ -917,23 +913,6 @@ body {
       reader.innerHTML = '<p class="state">' + words.failed + "</p>";
     });
   }
-
-  /* ---- what the browser prints in its own header line ------------------
-     A reader cannot be asked to open More settings, so rather than adding a
-     second header we make the browser's own line carry the document title
-     and the author. The tab goes back to its short name afterwards.     */
-  var tabTitle = null;
-
-  window.addEventListener("beforeprint", function () {
-    var first = reader.querySelector("h1");
-    if (!first) { return; }
-    tabTitle = document.title;
-    document.title = first.textContent + "   —   " + today();
-  });
-
-  window.addEventListener("afterprint", function () {
-    if (tabTitle !== null) { document.title = tabTitle; tabTitle = null; }
-  });
 
   /* ---- today, written the way the reader's language writes it ----------- */
   function today() {
