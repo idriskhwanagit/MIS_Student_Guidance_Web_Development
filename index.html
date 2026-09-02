@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="ckb">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+<!-- ARTIFACT:START -->
+<title>CRUD From Zero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;700&family=Noto+Naskh+Arabic:wght@400;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* ---------------------------------------------------------------------------
+   CRUD From Zero — a bilingual classroom manual.
+   Palette: cool paper + deep teal ink, an amber reserved for warnings only.
+   Type:    Vazirmatn carries both scripts in headings and UI;
+            reading text switches face with the script (Naskh / Source Serif).
+   --------------------------------------------------------------------------- */
+
+:root {
+  --paper:      #f7f9fb;
+  --surface:    #ffffff;
+  --surface-2:  #eef2f6;
+  --ink:        #16202b;
+  --ink-soft:   #4a5a6b;
+  --ink-faint:  #7d8b99;
+  --rule:       #dde5ec;
+  --accent:     #0d6e6e;
+  --accent-ink: #0a5757;
+  --accent-wash:#e2f1f0;
+  --warn:       #9c5410;
+  --warn-wash:  #fbf1e3;
+  --code-bg:    #12303a;
+  --code-ink:   #dbe9ee;
+  --shadow:     0 1px 2px rgba(18, 40, 56, .06), 0 8px 24px -16px rgba(18, 40, 56, .35);
+
+  --wm-alpha:   .035;
+  --rail-w:     16.5rem;
+  --measure:    68ch;
+
+  --f-ui:   "Vazirmatn", "Segoe UI", Tahoma, sans-serif;
+  --f-ar:   "Noto Naskh Arabic", "Segoe UI", Tahoma, serif;
+  --f-la:   "Source Serif 4", Georgia, "Times New Roman", serif;
+  --f-mono: "JetBrains Mono", Consolas, "Courier New", monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper:      #0e141a;
+    --surface:    #151d25;
+    --surface-2:  #1c262f;
+    --ink:        #e4ecf2;
+    --ink-soft:   #a6b4c1;
+    --ink-faint:  #7d8b99;
+    --rule:       #25313c;
+    --accent:     #56c4bd;
+    --accent-ink: #7ad6cf;
+    --accent-wash:#122e30;
+    --warn:       #e0a464;
+    --warn-wash:  #2c2317;
+    --code-bg:    #0a1a20;
+    --code-ink:   #cfe2e8;
+    --shadow:     0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+    --wm-alpha:   .055;
+  }
+}
+
+:root[data-theme="dark"] {
+  --paper:      #0e141a;
+  --surface:    #151d25;
+  --surface-2:  #1c262f;
+  --ink:        #e4ecf2;
+  --ink-soft:   #a6b4c1;
+  --ink-faint:  #7d8b99;
+  --rule:       #25313c;
+  --accent:     #56c4bd;
+  --accent-ink: #7ad6cf;
+  --accent-wash:#122e30;
+  --warn:       #e0a464;
+  --warn-wash:  #2c2317;
+  --code-bg:    #0a1a20;
+  --code-ink:   #cfe2e8;
+  --shadow:     0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
+  --wm-alpha:   .055;
+}
+
+* { box-sizing: border-box; }
+
+/* an element carrying [hidden] must stay hidden even when a rule below
+   gives it a display of its own */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* --- top bar ------------------------------------------------------------- */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem 1.5rem;
+  padding: .75rem 1.5rem;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--rule);
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  margin-inline-end: auto;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+
+.brand .crud {
+  display: inline-flex;
+  gap: .18rem;
+  font-family: var(--f-mono);
+  font-size: .78rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.brand .crud span {
+  display: inline-grid;
+  place-items: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-radius: 4px;
+  background: var(--accent-wash);
+}
+
+.brand b { font-size: 1rem; }
+
+/* --- segmented switches -------------------------------------------------- */
+.switch {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+}
+
+.switch > .lbl {
+  font-size: .7rem;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.seg {
+  display: inline-flex;
+  padding: 2px;
+  background: var(--surface-2);
+  border-radius: 8px;
+}
+
+.seg button {
+  padding: .35rem .8rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--ink-soft);
+  font-family: inherit;
+  font-size: .85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.seg button:hover { color: var(--ink); }
+
+.seg button[aria-pressed="true"] {
+  background: var(--surface);
+  color: var(--accent-ink);
+  font-weight: 700;
+  box-shadow: var(--shadow);
+}
+
+.icon-btn {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink-soft);
+  font-size: .95rem;
+  cursor: pointer;
+}
+
+.icon-btn:hover { color: var(--accent-ink); border-color: var(--accent); }
+
+:where(button, a):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* --- shell --------------------------------------------------------------- */
+.shell {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  align-items: start;
+  gap: 2.5rem;
+  max-width: 74rem;
+  margin: 0 auto;
+  padding: 2rem 1.5rem 5rem;
+}
+
+/* --- watermark -----------------------------------------------------------
+   Faint, repeated, and behind everything the reader touches. It cannot be
+   selected or clicked, so it never gets in the way — it only rides along
+   into a screenshot or a printout.
+   ------------------------------------------------------------------------ */
+.watermark {
+  position: fixed;
+  inset: -30%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1.6rem;
+  overflow: hidden;
+  transform: rotate(-24deg);
+  opacity: var(--wm-alpha);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: .05em;
+  white-space: nowrap;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.watermark span { display: block; text-align: center; }
+
+/* --- notice ------------------------------------------------------------- */
+.notice {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: .7rem;
+  padding: .85rem 1.15rem;
+  border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent);
+  border-inline-start: 4px solid var(--warn);
+  border-radius: 10px;
+  background: var(--warn-wash);
+  color: var(--warn);
+  font-family: var(--f-ui);
+  font-size: .9rem;
+  font-weight: 500;
+  line-height: 1.75;
+  white-space: pre-line;
+}
+
+.notice .mark { flex: none; font-size: 1.05rem; line-height: 1.5; }
+
+/* --- rail ---------------------------------------------------------------- */
+.rail {
+  position: sticky;
+  top: 4.5rem;
+  max-height: calc(100vh - 6rem);
+  overflow-y: auto;
+  padding-inline-end: .5rem;
+}
+
+.rail h2 {
+  margin: 0 0 .75rem;
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.toc { display: flex; flex-direction: column; gap: .1rem; }
+
+.toc a {
+  display: block;
+  padding: .3rem .55rem;
+  border-inline-start: 2px solid transparent;
+  border-radius: 0 5px 5px 0;
+  color: var(--ink-soft);
+  font-size: .85rem;
+  line-height: 1.45;
+  text-decoration: none;
+}
+
+.toc a:hover { background: var(--surface-2); color: var(--ink); }
+
+.toc a.lvl-1 { font-weight: 600; color: var(--ink); margin-top: .45rem; }
+.toc a.lvl-2 { padding-inline-start: 1.1rem; }
+.toc a.lvl-3 { padding-inline-start: 1.9rem; font-size: .8rem; color: var(--ink-faint); }
+
+.toc a.here {
+  border-inline-start-color: var(--accent);
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+}
+
+/* --- reader -------------------------------------------------------------- */
+.reader {
+  max-width: var(--measure);
+  padding: 2.25rem 2.5rem 3rem;
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+[dir="rtl"] .reader { font-family: var(--f-ar); line-height: 1.95; }
+[dir="ltr"] .reader { font-family: var(--f-la); line-height: 1.7; }
+
+.reader h1, .reader h2, .reader h3 {
+  font-family: var(--f-ui);
+  text-wrap: balance;
+  scroll-margin-top: 5rem;
+}
+
+.reader h1 {
+  margin: 2.5rem 0 1rem;
+  padding-bottom: .6rem;
+  border-bottom: 2px solid var(--accent);
+  font-size: 1.7rem;
+  line-height: 1.4;
+  letter-spacing: -.01em;
+}
+
+.reader > h1:first-child { margin-top: 0; }
+
+.reader h2 {
+  margin: 2.25rem 0 .75rem;
+  font-size: 1.2rem;
+  line-height: 1.5;
+  color: var(--accent-ink);
+}
+
+.reader h3 {
+  margin: 1.75rem 0 .5rem;
+  font-size: 1rem;
+  color: var(--ink);
+}
+
+.reader p { margin: 0 0 1rem; }
+
+.reader ul, .reader ol { margin: 0 0 1rem; padding-inline-start: 1.5rem; }
+.reader li { margin-bottom: .4rem; }
+[dir="rtl"] .reader ol { list-style-type: arabic-indic; }
+
+.reader a { color: var(--accent-ink); text-underline-offset: .18em; }
+
+.reader hr {
+  margin: 2.5rem 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+.reader code {
+  padding: .12em .38em;
+  border-radius: 4px;
+  background: var(--surface-2);
+  color: var(--accent-ink);
+  font-family: var(--f-mono);
+  font-size: .85em;
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* --- code blocks --------------------------------------------------------- */
+.block {
+  position: relative;
+  margin: 0 0 1.25rem;
+  direction: ltr;
+}
+
+.block pre {
+  margin: 0;
+  padding: 1rem 1.15rem;
+  overflow-x: auto;
+  background: var(--code-bg);
+  border-radius: 10px;
+  color: var(--code-ink);
+  font-family: var(--f-mono);
+  font-size: .82rem;
+  line-height: 1.65;
+  tab-size: 4;
+}
+
+.block pre code {
+  padding: 0;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+.copy {
+  position: absolute;
+  inset-block-start: .5rem;
+  inset-inline-end: .5rem;
+  padding: .25rem .6rem;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .07);
+  color: #cfe2e8;
+  font-family: var(--f-ui);
+  font-size: .72rem;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .15s;
+}
+
+.block:hover .copy, .copy:focus-visible { opacity: 1; }
+.copy[data-done="1"] { color: #8fe3c8; border-color: #8fe3c8; }
+
+/* --- tables -------------------------------------------------------------- */
+.table-wrap { margin: 0 0 1.25rem; overflow-x: auto; }
+
+.reader table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--f-ui);
+  font-size: .88rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.reader th, .reader td {
+  padding: .55rem .8rem;
+  border-bottom: 1px solid var(--rule);
+  text-align: start;
+  vertical-align: top;
+}
+
+.reader thead th {
+  border-bottom: 2px solid var(--rule);
+  color: var(--ink-faint);
+  font-size: .72rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.reader tbody tr:last-child td { border-bottom: 0; }
+
+/* --- callouts ------------------------------------------------------------ */
+.reader blockquote {
+  margin: 0 0 1.25rem;
+  padding: .9rem 1.15rem;
+  border-inline-start: 3px solid var(--accent);
+  border-radius: 0 8px 8px 0;
+  background: var(--accent-wash);
+  color: var(--ink-soft);
+  font-size: .93em;
+}
+
+[dir="rtl"] .reader blockquote { border-radius: 8px 0 0 8px; }
+
+.reader blockquote > :last-child { margin-bottom: 0; }
+
+.reader blockquote:has(h3) {
+  border-inline-start-color: var(--warn);
+  background: var(--warn-wash);
+}
+
+.reader blockquote h3 {
+  margin-top: 0;
+  color: var(--warn);
+  font-size: .95rem;
+}
+
+/* --- small screens ------------------------------------------------------- */
+@media (max-width: 60rem) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; padding-top: 1.25rem; }
+  .rail {
+    position: static;
+    max-height: 18rem;
+    padding: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+  }
+  .reader { padding: 1.5rem 1.25rem 2rem; }
+  .topbar { gap: .6rem 1rem; padding: .6rem 1rem; }
+  .brand .crud { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+/* --- print --------------------------------------------------------------- */
+@media print {
+  .topbar, .rail, .copy { display: none !important; }
+  .notice { margin-bottom: 1.25rem; border-color: #b8791f; color: #8a5a12; background: #fbf3e6; }
+  .watermark { opacity: .05; color: #12303a; }
+  body { background: #fff; }
+  .shell { display: block; max-width: none; padding: 0; }
+  .reader {
+    max-width: none;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+    font-size: 11pt;
+  }
+  .block pre { background: #f2f4f6; color: #10202a; border: 1px solid #ccd6de; }
+  .block, .table-wrap, blockquote { break-inside: avoid; }
+  .reader h1, .reader h2, .reader h3 { break-after: avoid; }
+}
+</style>
+
+<div class="app" dir="rtl">
+
+  <div class="watermark" id="watermark" hidden aria-hidden="true"></div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="crud" aria-hidden="true"><span>C</span><span>R</span><span>U</span><span>D</span></span>
+      <b data-t="brand">ڕێنمایی قوتابی</b>
+    </div>
+
+    <div class="switch">
+      <span class="lbl" data-t="langLabel">زمان</span>
+      <div class="seg" id="langSeg" role="group">
+        <button type="button" data-lang="ku" aria-pressed="true">کوردی</button>
+        <button type="button" data-lang="en" aria-pressed="false">English</button>
+      </div>
+    </div>
+
+    <button type="button" class="icon-btn" id="themeBtn" title="Theme" aria-label="Theme">◐</button>
+    <button type="button" class="icon-btn" id="printBtn" title="Print" aria-label="Print">⎙</button>
+  </header>
+
+  <div class="shell">
+    <div class="notice" id="notice" hidden>
+      <span class="mark" aria-hidden="true">⚠️</span>
+      <span class="text"></span>
+    </div>
+
+    <nav class="rail" aria-label="Contents">
+      <h2 data-t="tocLabel">ناوەڕۆک</h2>
+      <div class="toc" id="toc"></div>
+    </nav>
+    <main class="reader" id="reader"></main>
+  </div>
+
+</div>
+
+<script type="application/json" id="docs-data">{"ku": "# لە سفرەوە بۆ پڕۆژەیەکی تەواو — ڕێنمایی قوتابی\n\n\n\n## ئەم بەڵگەنامەیە بۆ کێیە؟\n\nبۆ قوتابییەک کە:\n\n- **پێویستە ئەمانە فێر بێت** — HTML و CSS و Python و SQL\n- **Visual Studio Code**ـی لەسەر کۆمپیوتەرەکەیەتی\n- ویندۆزەکەی چالاکە و پێویستی بە ئەکتیڤ کردن نییە\n- ئۆفیسەکەی چالاکە و پێویستی بە ئەکتیڤ کردن نییە\n\n## چۆن بەکاری دەهێنیت\n\n١. **بە ڕیزبەندی بڕۆ.** هەنگاو مەبەزێنە — هەر هەنگاوێک لەسەر ئەوەی پێشووی بنیات نراوە.\n٢. **کۆدەکە بە دەست بنووسە**، کۆپی مەکە. مێشک بە نووسین فێر دەبێت.\n٣. **دوای هەر هەنگاوێک تاقی بکەرەوە.** هەرگیز مەچۆ بۆ هەنگاوی داهاتوو تا ئەوەی ئێستا کاری نەکردووە.\n٤. **ئەگەر هەڵەیەک دەرکەوت**، لە خشتەی خوارەوە سەیری هەڵە باوەکان بکە.\n\n## پێکهاتەی هەر هەنگاوێک\n\n| بەش | واتە |\n|-----|------|\n| **چی دەکەین** | ئەرکی ئەم هەنگاوە بە یەک ڕستە |\n| **بۆچی** | مەبەستەکەی — بەبێ ئەمە تەنها کۆپی دەکەیت |\n| **کۆدەکە** | کۆدی تەواو، نەک بەشێکی |\n| **چۆن تاقی بکەینەوە** | ڕاستەوخۆ دوای نووسینەکە |\n| **چی دەبینیت** | ئەنجامی چاوەڕوانکراو |\n| **ئەگەر هەڵە دەرکەوت** | باوترین هەڵەکان و چارەسەریان |\n\n---\n\n## ڕیزبەندی هەنگاوەکان\n\n| # | هەنگاو | دۆخ |\n|---|--------|-----|\n| ١ | ئامادەکردنی کۆمپیوتەر (Python) | ✅ |\n| ٢ | فۆڵدەری پڕۆژە و پێکهاتەکەی | ⏳ |\n| ٣ | یەکەم سێرڤەر — «Hello» | ⏳ |\n| ٤ | داتابەیس (`database.py`) | ⏳ |\n| ٥ | Templates و فەنکشنی `render()` | ⏳ |\n| ٦ | CSS — دیزاینی پەڕەکان | ⏳ |\n| ٧ | **R** — پیشاندانی لیستی قوتابیان | ⏳ |\n| ٨ | **C** — فۆڕمی تۆمارکردن + پشکنین | ⏳ |\n| ٩ | **U** — دەستکاریکردن | ⏳ |\n| ١٠ | **D** — سڕینەوە | ⏳ |\n| ١١ | گەڕان | ⏳ |\n| ١٢ | پاراستن — SQL Injection و XSS | ⏳ |\n| ١٣ | تاقیکردنەوەی کۆتایی و `run.bat` | ⏳ |\n\n> ⏳ = هێشتا نەنووسراوە. ئەم بەڵگەنامەیە هەنگاو بە هەنگاو تەواو دەبێت.\n\n---\n\n# هەنگاوی ١ — کۆمپیوتەرەکە ئامادە بکە\n\n> ئەم هەنگاوە هیچ پەیوەندییەکی بە پڕۆژەکەوە نییە. تەنها دڵنیا دەبینەوە کە\n> ئامرازەکانمان هەن. جارێک دەیکەیت و هەرگیز دووبارەی ناکەیتەوە.\n\n## چی دەکەین\n\nدڵنیا دەبینەوە **Python** لەسەر کۆمپیوتەرەکە دابەزێنراوە.\n\n## بۆچی\n\nڤیژوەڵ ستۆدیۆ کۆد تەنها **ئەدیتۆرێکە** — دەفتەرێکی نووسینە بۆ کۆد.\nناتوانێت کۆدەکەت کار پێبکات. ئەوەی کۆدی Python کار پێدەکات پڕۆگرامێکی\nجیایە بە ناوی **Python** خۆی. پێویستمان بە هەردووکیانە.\n\n---\n\n## ١.١ — تێرمیناڵ لە VS Code بکەرەوە\n\nVS Code بکەرەوە، پاشان لە مێنیوی سەرەوە:\n\n**Terminal → New Terminal**\n\n> کورتەڕێ: `Ctrl` + `` ` `` (ئەو دوگمەیەی لەژێر `Esc`ـە)\n\nپەنجەرەیەکی تاریک لە خوارەوە دەکرێتەوە. ئەمە **تێرمیناڵە** — شوێنێک کە\nفەرمان دەنووسیت، نەک کۆد.\n\n## ١.٢ — پرسیار بکە ئایا Python هەیە\n\nئەمە بنووسە و `Enter` لێبدە:\n\n```\npython --version\n```\n\n## چی دەبینیت\n\n**ئەگەر Python هەبێت** — شتێکی وەک ئەمە دەردەکەوێت:\n\n```\nPython 3.13.14\n```\n\n✅ تەواو بوویت. بڕۆ بۆ خاڵی ١.٤.\n\n**ئەگەر Python نەبێت** — یەکێک لەم دووانە ڕوودەدات:\n\n- پەیامی `'python' is not recognized...`\n- یان **Microsoft Store** خۆکارانە دەکرێتەوە\n\nلەم حاڵەتەدا بڕۆ بۆ خاڵی ١.٣.\n\n---\n\n## ١.٣ — دابەزاندنی Python (تەنها ئەگەر پێویست بوو)\n\n١. بڕۆ بۆ <https://www.python.org/downloads/>\n٢. کلیک لە دوگمە زەردەکە بکە (**Download Python 3.x**)\n٣. فایلە دابەزێنراوەکە بکەرەوە\n\n> ### ⚠️ گرنگترین خاڵی ئەم هەنگاوە\n>\n> لە یەکەم پەنجەرەی دابەزاندندا، **پێش** کلیککردن لە هیچ شتێک، لە خوارەوە\n> چوارگۆشەیەک هەیە بە ناوی:\n>\n> **☑ Add python.exe to PATH**\n>\n> **دەبێت ئەم چوارگۆشەیە نیشان بکەیت.** ئەگەر نەیکەیت، تێرمیناڵ هەرگیز\n> Python نادۆزێتەوە و دەبێت هەموو دابەزاندنەکە دووبارە بکەیتەوە.\n\n٤. پاشان کلیک لە **Install Now** بکە و چاوەڕێ بکە\n٥. **VS Code بە تەواوی دابخە و دووبارە بیکەرەوە** — بەبێ ئەمە تێرمیناڵی\n   کراوە هێشتا نازانێت Python دابەزێنراوە\n٦. تێرمیناڵێکی نوێ بکەرەوە و دووبارە `python --version` بنووسە\n\n---\n\n## ١.٤ — دڵنیابوونەوە لە داتابەیس\n\nئێستا ئەمە بنووسە:\n\n```\npython -c \"import sqlite3; print('SQLite OK')\"\n```\n\nدەبێت ئەمە دەربکەوێت:\n\n```\nSQLite OK\n```\n\n**واتای چییە؟** SQLite ئەو داتابەیسەیە کە زانیاری قوتابیانی تێدا پاشەکەوت\nدەکەین. خۆشبەختانە **لەگەڵ Python خۆیدا دێت** — پێویست ناکات هیچی تر\nدابەزێنیت. نە XAMPP، نە MySQL، نە phpMyAdmin.\n\n---\n\n## ئەگەر هەڵە دەرکەوت\n\n| پەیامی هەڵە | چارەسەر |\n|-------------|---------|\n| `'python' is not recognized` | PATH دانەنراوە. Python دووبارە دابەزێنە و ئەم جارە `Add python.exe to PATH` نیشان بکە |\n| Microsoft Store دەکرێتەوە | Windows ڕێگری دەکات. بڕۆ بۆ Settings → Apps → Advanced app settings → App execution aliases، پاشان `python.exe` بکوژێنەوە |\n| `Python 2.7.x` دەردەکەوێت | وەشانێکی زۆر کۆنە. `python3 --version` تاقی بکەرەوە |\n| هیچ ڕوونادات | دڵنیابە `Enter`ت لێداوە و لە تێرمیناڵدا نووسیوتە، نەک لە فایلێکی کۆد |\n\n---\n\n## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت\n\nئەم دوو فەرمانە کاردەکەن و ئەنجام دەدەن:\n\n```\npython --version                                →  Python 3.x.x\npython -c \"import sqlite3; print('SQLite OK')\"  →  SQLite OK\n```\n\n**هیچ فایلێکمان دروست نەکردووە، هیچ کۆدێکمان نەنووسیوە** — تەنها\nکارگەکەمان ئامادە کرد.\n\n---\n\n> هەنگاوی ٢ لێرە زیاد دەکرێت.", "en": "# From Zero to a Finished Project — Student Guide\n\n\n## Who is this document for?\n\nFor a student who:\n\n- **has all of this to learn** — HTML, CSS, Python and SQL\n- has **Visual Studio Code** installed\n- has an activated copy of Windows — nothing to activate\n- has an activated copy of Office — nothing to activate\n\n## How to use it\n\n1. **Go in order.** Do not skip a step — each one builds on the one before it.\n2. **Type the code by hand**, do not copy it. The brain learns by typing.\n3. **Test after every step.** Never move to the next step until the current one works.\n4. **If you get an error**, look in the table below for the common ones.\n\n## The shape of every step\n\n| Part | Meaning |\n| ---- | ------- |\n| **What we do** | The job of this step, in one sentence |\n| **Why** | The purpose — without this you are only copying |\n| **The code** | The complete code, not a fragment |\n| **How to test it** | Immediately after you type it |\n| **What you should see** | The expected result |\n| **If you get an error** | The most common errors and their fixes |\n\n---\n\n## The steps\n\n| # | Step | Status |\n| - | ---- | ------ |\n| 1 | Preparing the computer (Python) | ✅ |\n| 2 | The project folder and its structure | ⏳ |\n| 3 | The first server — \"Hello\" | ⏳ |\n| 4 | The database (`database.py`) | ⏳ |\n| 5 | Templates and the `render()` function | ⏳ |\n| 6 | CSS — designing the pages | ⏳ |\n| 7 | **R** — showing the student list | ⏳ |\n| 8 | **C** — the registration form + validation | ⏳ |\n| 9 | **U** — editing | ⏳ |\n| 10 | **D** — deleting | ⏳ |\n| 11 | Search | ⏳ |\n| 12 | Security — SQL Injection and XSS | ⏳ |\n| 13 | Final testing and `run.bat` | ⏳ |\n\n> ⏳ = not written yet. This document is completed step by step.\n\n---\n\n# Step 1 — Prepare the computer\n\n> This step has nothing to do with the project itself. We are only making sure\n> we have the tools. You do it once and never again.\n\n## What we do\n\nMake sure **Python** is installed on the computer.\n\n## Why\n\nVisual Studio Code is only an **editor** — a notebook for writing code.\nIt cannot run your code. The thing that runs Python code is a separate\nprogram called **Python** itself. We need both.\n\n---\n\n## 1.1 — Open a terminal in VS Code\n\nOpen VS Code, then from the top menu:\n\n**Terminal → New Terminal**\n\n> Shortcut: `Ctrl` + `` ` `` (the key below `Esc`)\n\nA dark panel opens at the bottom. This is the **terminal** — a place where\nyou type commands, not code.\n\n## 1.2 — Ask whether Python is there\n\nType this and press `Enter`:\n\n```\npython --version\n```\n\n## What you should see\n\n**If Python is installed** — something like this appears:\n\n```\nPython 3.13.14\n```\n\n✅ You are done. Go to 1.4.\n\n**If Python is not installed** — one of these two happens:\n\n- the message `'python' is not recognized...`\n- or the **Microsoft Store** opens by itself\n\nIn that case go to 1.3.\n\n---\n\n## 1.3 — Installing Python (only if you need to)\n\n1. Go to <https://www.python.org/downloads/>\n2. Click the yellow button (**Download Python 3.x**)\n3. Open the downloaded file\n\n> ### ⚠️ The most important point of this step\n>\n> On the very first installer screen, **before** you click anything, there is\n> a checkbox at the bottom:\n>\n> **☑ Add python.exe to PATH**\n>\n> **You must tick this box.** If you don't, the terminal will never find\n> Python and you will have to run the whole installation again.\n\n4. Then click **Install Now** and wait\n5. **Close VS Code completely and open it again** — without this, an already\n   open terminal still does not know that Python was installed\n6. Open a new terminal and type `python --version` again\n\n---\n\n## 1.4 — Confirm the database is there\n\nNow type this:\n\n```\npython -c \"import sqlite3; print('SQLite OK')\"\n```\n\nThis should appear:\n\n```\nSQLite OK\n```\n\n**What does that mean?** SQLite is the database in which we will store the\nstudents' data. Happily it **ships with Python itself** — you do not need to\ninstall anything else. No XAMPP, no MySQL, no phpMyAdmin.\n\n---\n\n## If you get an error\n\n| Error message | Fix |\n| ------------- | --- |\n| `'python' is not recognized` | PATH was not set. Install Python again and this time tick `Add python.exe to PATH` |\n| The Microsoft Store opens | Windows is getting in the way. Go to Settings → Apps → Advanced app settings → App execution aliases, then turn `python.exe` off |\n| It shows `Python 2.7.x` | That is a very old version. Try `python3 --version` |\n| Nothing happens | Make sure you pressed `Enter` and that you typed it in the terminal, not in a code file |\n\n---\n\n## ✅ This step is finished when\n\nThese two commands work and produce output:\n\n```\npython --version                                →  Python 3.x.x\npython -c \"import sqlite3; print('SQLite OK')\"  →  SQLite OK\n```\n\n**We have not created a single file and not written a single line of code** —\nwe have only prepared the workshop.\n\n---\n\n> Step 2 will be added here."}</script>
+<script>
+(function () {
+  "use strict";
+
+  var DOCS = JSON.parse(document.getElementById("docs-data").textContent);
+
+  var UI = {
+    ku: { brand: "ڕێنمایی قوتابی", langLabel: "زمان", tocLabel: "ناوەڕۆک",
+          copy: "کۆپی", copied: "کۆپی کرا" },
+    en: { brand: "Student Guide", langLabel: "Language", tocLabel: "Contents",
+          copy: "Copy", copied: "Copied" }
+  };
+
+  var STORE = "studentGuide";
+  var NOTICE_KU = "ئەم وەشانە کوردییە تەنها بۆ تێگەیشتنی خۆتە.\nتاقیکردنەوە و وەڵامدانەوە تەنها لەسەر وەشانی ئینگلیزییە.";
+  var MARK_KU = "تەنها بۆ تێگەیشتن — وەڵامدانەوە بە ئینگلیزییە";
+  var state = { lang: "ku" };
+
+  /* ---- storage is a convenience, never a requirement -------------------- */
+  function remember(key, value) {
+    try { localStorage.setItem(key, value); } catch (e) { /* ignore */ }
+  }
+  function recall(key) {
+    try { return localStorage.getItem(key); } catch (e) { return null; }
+  }
+
+  /* ---- markdown ---------------------------------------------------------
+     A small parser, written out in full so the page works with no network
+     and no library — the same rule the project itself follows.            */
+
+  function esc(s) {
+    return s.replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function inline(s) {
+    s = esc(s);
+    s = s.replace(/`([^`]+)`/g, function (m, c) { return "<code>" + c + "</code>"; });
+    s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    s = s.replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>");
+    s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (m, t, u) {
+      var ext = /^https?:/.test(u);
+      return '<a href="' + u + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + ">" + t + "</a>";
+    });
+    s = s.replace(/&lt;(https?:\/\/[^\s&]+)&gt;/g,
+      '<a href="$1" target="_blank" rel="noopener">$1</a>');
+    return s;
+  }
+
+  var LIST_ORDERED = /^[0-9٠-٩۰-۹]+[.)]\s+/;
+  var LIST_BULLET = /^[-*]\s+/;
+
+  function render(md, headings) {
+    var lines = md.replace(/\r\n/g, "\n").split("\n");
+    var out = [];
+    var i = 0;
+    var para = [];
+
+    function flushPara() {
+      if (para.length) {
+        out.push("<p>" + inline(para.join(" ")) + "</p>");
+        para = [];
+      }
+    }
+
+    while (i < lines.length) {
+      var line = lines[i];
+
+      /* fenced code */
+      if (/^```/.test(line)) {
+        flushPara();
+        var lang = line.slice(3).trim();
+        var code = [];
+        i++;
+        while (i < lines.length && !/^```/.test(lines[i])) { code.push(lines[i]); i++; }
+        i++;
+        out.push('<div class="block"><button type="button" class="copy">' + UI[state.lang].copy +
+          '</button><pre><code data-lang="' + esc(lang) + '">' + esc(code.join("\n")) + "</code></pre></div>");
+        continue;
+      }
+
+      /* table */
+      if (/^\s*\|/.test(line) && i + 1 < lines.length && /^\s*\|[\s:|-]+\|\s*$/.test(lines[i + 1])) {
+        flushPara();
+        var cells = function (row) {
+          return row.trim().replace(/^\||\|$/g, "").split("|").map(function (c) { return c.trim(); });
+        };
+        var head = cells(line);
+        i += 2;
+        var body = [];
+        while (i < lines.length && /^\s*\|/.test(lines[i])) { body.push(cells(lines[i])); i++; }
+        var t = "<div class='table-wrap'><table><thead><tr>";
+        head.forEach(function (c) { t += "<th>" + inline(c) + "</th>"; });
+        t += "</tr></thead><tbody>";
+        body.forEach(function (row) {
+          t += "<tr>";
+          row.forEach(function (c) { t += "<td>" + inline(c) + "</td>"; });
+          t += "</tr>";
+        });
+        out.push(t + "</tbody></table></div>");
+        continue;
+      }
+
+      /* heading */
+      var h = /^(#{1,6})\s+(.*)$/.exec(line);
+      if (h) {
+        flushPara();
+        var level = h[1].length;
+        var id = "h" + headings.length;
+        headings.push({ id: id, level: level, text: h[2].replace(/[*`]/g, "") });
+        out.push("<h" + level + ' id="' + id + '">' + inline(h[2]) + "</h" + level + ">");
+        i++;
+        continue;
+      }
+
+      /* horizontal rule */
+      if (/^\s*(---|\*\*\*)\s*$/.test(line)) {
+        flushPara();
+        out.push("<hr>");
+        i++;
+        continue;
+      }
+
+      /* blockquote — collected, then parsed as a document of its own */
+      if (/^\s*>/.test(line)) {
+        flushPara();
+        var quoted = [];
+        while (i < lines.length && /^\s*>/.test(lines[i])) {
+          quoted.push(lines[i].replace(/^\s*>\s?/, ""));
+          i++;
+        }
+        out.push("<blockquote>" + render(quoted.join("\n"), headings) + "</blockquote>");
+        continue;
+      }
+
+      /* lists */
+      if (LIST_BULLET.test(line) || LIST_ORDERED.test(line)) {
+        flushPara();
+        var ordered = LIST_ORDERED.test(line);
+        var items = [];
+        while (i < lines.length && (LIST_BULLET.test(lines[i]) || LIST_ORDERED.test(lines[i]))) {
+          items.push(lines[i].replace(ordered ? LIST_ORDERED : LIST_BULLET, ""));
+          i++;
+          /* a wrapped continuation line belongs to the item above it */
+          while (i < lines.length && /^\s{2,}\S/.test(lines[i]) &&
+                 !LIST_BULLET.test(lines[i].trim()) && !LIST_ORDERED.test(lines[i].trim())) {
+            items[items.length - 1] += " " + lines[i].trim();
+            i++;
+          }
+        }
+        var tag = ordered ? "ol" : "ul";
+        out.push("<" + tag + ">" + items.map(function (it) {
+          return "<li>" + inline(it) + "</li>";
+        }).join("") + "</" + tag + ">");
+        continue;
+      }
+
+      if (!line.trim()) { flushPara(); i++; continue; }
+
+      para.push(line.trim());
+      i++;
+    }
+
+    flushPara();
+    return out.join("\n");
+  }
+
+  /* ---- painting ---------------------------------------------------------- */
+  var reader = document.getElementById("reader");
+  var notice = document.getElementById("notice");
+  var watermark = document.getElementById("watermark");
+  var toc = document.getElementById("toc");
+  var app = document.querySelector(".app");
+
+  function paint() {
+    var md = DOCS[state.lang] || "";
+    var headings = [];
+    var rtl = state.lang === "ku";
+
+    app.setAttribute("dir", rtl ? "rtl" : "ltr");
+    document.documentElement.lang = rtl ? "ckb" : "en";
+
+    /* the Kurdish text is a translation to read alongside, not the one
+       the student is examined on — say so, and only while it is showing */
+    if (NOTICE_KU && state.lang === "ku") {
+      notice.querySelector(".text").textContent = NOTICE_KU;
+      notice.hidden = false;
+    } else {
+      notice.hidden = true;
+    }
+
+    if (MARK_KU && state.lang === "ku") {
+      if (!watermark.childNodes.length) {
+        var row = new Array(8).join(MARK_KU + "   ·   ");
+        for (var r = 0; r < 30; r++) {
+          var line = document.createElement("span");
+          line.textContent = row;
+          watermark.appendChild(line);
+        }
+      }
+      watermark.hidden = false;
+    } else {
+      watermark.hidden = true;
+    }
+
+    reader.innerHTML = render(md, headings);
+    reader.scrollIntoView({ block: "start" });
+    window.scrollTo(0, 0);
+
+    /* labels follow the reading language */
+    var words = UI[state.lang];
+    document.querySelectorAll("[data-t]").forEach(function (el) {
+      var w = words[el.getAttribute("data-t")];
+      if (w) { el.textContent = w; }
+    });
+
+    /* contents */
+    toc.innerHTML = "";
+    headings.filter(function (h) { return h.level <= 3; }).forEach(function (h) {
+      var a = document.createElement("a");
+      a.href = "#" + h.id;
+      a.className = "lvl-" + h.level;
+      a.textContent = h.text;
+      toc.appendChild(a);
+    });
+
+    /* switch states */
+    document.querySelectorAll("#langSeg button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.lang === state.lang));
+    });
+
+    spy();
+  }
+
+  /* ---- which section am I in? ------------------------------------------- */
+  var spyTimer = null;
+  function spy() {
+    var links = toc.querySelectorAll("a");
+    var current = null;
+    reader.querySelectorAll("h1, h2, h3").forEach(function (h) {
+      if (h.getBoundingClientRect().top < 120) { current = h.id; }
+    });
+    links.forEach(function (a) {
+      a.classList.toggle("here", a.getAttribute("href") === "#" + current);
+    });
+  }
+
+  window.addEventListener("scroll", function () {
+    if (spyTimer) { return; }
+    spyTimer = setTimeout(function () { spyTimer = null; spy(); }, 120);
+  }, { passive: true });
+
+  /* ---- controls ---------------------------------------------------------- */
+  document.getElementById("langSeg").addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) { return; }
+    state.lang = b.dataset.lang;
+    remember(STORE + ".lang", state.lang);
+    paint();
+  });
+
+  document.getElementById("themeBtn").addEventListener("click", function () {
+    var now = document.documentElement.getAttribute("data-theme");
+    var dark = now
+      ? now === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    remember("guide.theme", next);
+  });
+
+  document.getElementById("printBtn").addEventListener("click", function () {
+    window.print();
+  });
+
+  reader.addEventListener("click", function (e) {
+    var btn = e.target.closest(".copy");
+    if (!btn) { return; }
+    var code = btn.parentElement.querySelector("code");
+    var done = function () {
+      btn.textContent = UI[state.lang].copied;
+      btn.dataset.done = "1";
+      setTimeout(function () {
+        btn.textContent = UI[state.lang].copy;
+        btn.dataset.done = "";
+      }, 1400);
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code.textContent).then(done, function () { /* ignore */ });
+    } else {
+      var sel = window.getSelection();
+      var range = document.createRange();
+      range.selectNodeContents(code);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      done();
+    }
+  });
+
+  /* ---- copied Kurdish text carries the notice with it --------------------
+     Code is left alone: a notice pasted into a .py file would break it.   */
+  document.addEventListener("copy", function (e) {
+    if (!NOTICE_KU || state.lang !== "ku" || !e.clipboardData) { return; }
+
+    var sel = window.getSelection();
+    var text = sel ? String(sel) : "";
+    if (!text.trim()) { return; }
+
+    var node = sel.anchorNode;
+    if (node && node.nodeType === 3) { node = node.parentNode; }
+    if (node && node.closest && node.closest("pre")) { return; }
+
+    var rule = new Array(34).join("─");
+    e.clipboardData.setData("text/plain",
+      text + "\n\n" + rule + "\n" + NOTICE_KU);
+    e.preventDefault();
+  });
+
+  /* ---- start ------------------------------------------------------------- */
+  var savedTheme = recall("guide.theme");
+  if (savedTheme) { document.documentElement.setAttribute("data-theme", savedTheme); }
+  var savedLang = recall(STORE + ".lang");
+  if (savedLang === "ku" || savedLang === "en") { state.lang = savedLang; }
+
+  paint();
+})();
+</script>
+<!-- ARTIFACT:END -->
+</body>
+</html>
