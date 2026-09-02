@@ -35,7 +35,7 @@ For a student who:
 | # | Step | Status |
 | - | ---- | ------ |
 | 1 | Preparing the computer (Python) | ✅ |
-| 2 | The project folder and its structure | ⏳ |
+| 2 | The project folder and its structure | ✅ |
 | 3 | The first server — "Hello" | ⏳ |
 | 4 | The database (`database.py`) | ⏳ |
 | 5 | Templates and the `render()` function | ⏳ |
@@ -175,4 +175,141 @@ we have only prepared the workshop.
 
 ---
 
-> Step 2 will be added here.
+# Step 2 — The project folder
+
+> Still no code. We are only preparing the place the code will live in.
+
+## What we do
+
+Create a folder for the project and open it in VS Code.
+
+## Why
+
+A project really is just a **folder** — nothing more. All the files stay
+together in one place, so you can copy or send the whole project at once.
+
+VS Code also works on a **folder**, not on a single file. When you open the
+folder, the terminal opens inside that folder automatically — which matters a
+great deal in Step 3.
+
+---
+
+## 2.1 — Create the folder
+
+In **File Explorer**, pick a place you will find again easily — your
+`Documents` folder, for example.
+
+Right-click an empty spot → **New** → **Folder**
+
+Name it:
+
+```
+student-system
+```
+
+> ### ⚠️ About the folder name
+>
+> Two rules, and both of them matter:
+>
+> - **Use English letters** — not Kurdish ones
+> - **No spaces** — `student system` ❌ , `student-system` ✅
+>
+> Python and the terminal run into trouble with Kurdish letters and spaces in
+> a path, and that kind of trouble is very hard for a beginner to track down.
+
+## 2.2 — Open it in VS Code
+
+Open VS Code, then:
+
+**File → Open Folder…** → select the folder → **Select Folder**
+
+If it asks *"Do you trust the authors of the files in this folder?"*, click
+**Yes, I trust the authors**.
+
+> ⚠️ Do not use **Open File**. It has to be **Open Folder** — this is an
+> important difference, not a detail.
+
+## 2.3 — Create two folders inside
+
+On the left of VS Code (this panel is called the **Explorer**) you can see the
+project name: `STUDENT-SYSTEM`. Hover over it and a few icons appear.
+
+Click **New Folder** (the folder icon with a `+`) and create two folders:
+
+```
+templates
+static
+```
+
+**Why two separate folders?**
+
+| Folder | What goes in it | Which step |
+| ------ | --------------- | ---------- |
+| `templates` | HTML files — the shape of the pages | Step 5 |
+| `static` | The CSS file — colours and design | Step 6 |
+
+They are empty for now. We fill them in the steps ahead.
+
+---
+
+## 2.4 — Test it
+
+Open a terminal (**Terminal → New Terminal**) and type:
+
+```
+dir
+```
+
+## What you should see
+
+```
+    Directory: C:\Users\...\Documents\student-system
+
+Mode      Name
+----      ----
+d-----    static
+d-----    templates
+```
+
+Check two things:
+
+1. **Both folders are listed** — `static` and `templates`
+2. **The start of the terminal line** shows `student-system` — meaning you are
+   standing in the right place
+
+The second one matters more than it looks. In Step 3 we type a command that
+only works inside this folder.
+
+---
+
+## If you get an error
+
+| Problem | Fix |
+| ------- | --- |
+| The terminal shows a different folder name | You opened a file, not a folder. Do **File → Open Folder** again |
+| I see nothing on the left | Press `Ctrl + Shift + E` to open the Explorer |
+| `dir` returns nothing | The folders were not created. Go back to 2.3 |
+| `templates` ended up inside `static` | Right-click → **Delete**, then create them again. Before clicking **New Folder**, make sure no other folder is selected |
+| The folder name is in Kurdish letters | Right-click → **Rename** → make it `student-system` |
+
+---
+
+## ✅ This step is finished when
+
+Your structure looks like this:
+
+```
+student-system/
+├── templates/
+└── static/
+```
+
+Two empty folders inside the project folder.
+
+**We still have not written a single line of code** — but now there is a place
+to write it. In the next step we write the first Python file and see our first
+page in the browser.
+
+---
+
+> Step 3 will be added here.
