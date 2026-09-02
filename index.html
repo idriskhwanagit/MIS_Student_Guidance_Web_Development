@@ -556,7 +556,11 @@ body {
   .print-frame th, .print-frame td { display: table-cell; padding: 0; }
 
   .print-header {
-    display: block;
+    /* The browser prints the document title at the top of every sheet and a
+       reader cannot be asked to switch that off, so the title carries the
+       header instead — see paint(). Set this to `block` to add our own
+       line as well. */
+    display: none;
     margin-bottom: 10pt;
     padding-bottom: 3pt;
     border-bottom: .5pt solid #b9c4cd;
@@ -874,9 +878,11 @@ body {
       if (w) { el.textContent = w; }
     });
 
-    /* the printed sheets carry the document's own title and today's date,
-       so the browser's own header line can be turned off without losing
-       anything */
+    /* The tab, and the header the browser prints on every sheet, both come
+       from the document title — so it follows the guide and its language. */
+    document.title = headings.length ? headings[0].text : document.title;
+
+    /* kept for the build that turns .print-header back on */
     printHeader.querySelector(".who").textContent =
       headings.length ? headings[0].text : "";
     printHeader.querySelector(".date").textContent = today();
