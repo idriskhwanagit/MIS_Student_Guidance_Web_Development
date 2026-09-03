@@ -782,6 +782,16 @@ body {
   box-shadow: 0 0 0 1px #2563eb;
 }
 
+/* inside the editor, .name marks the line that was just added, in the same
+   green the guide uses for added lines in its diffs */
+.editor .name {
+  padding: 1px 3px;
+  border-radius: 3px;
+  background: rgba(22, 163, 74, 0.15);
+  box-shadow: inset 2px 0 0 #16a34a;
+  color: #14532d;
+}
+
 /* --- the drawn walkthrough ------------------------------------------------
    A silent, drawn stand-in for a screen recording: mock windows, a cursor
    that moves and clicks, one caption per scene. Nothing is recorded and
@@ -1733,7 +1743,7 @@ body {
      once this one has been seen in class.                              */
   /* which steps get a code replay — the walkthrough covers step 1 */
   var PLAYER_STEPS = [];
-  var STAGE_STEPS = [1, 2, 3];
+  var STAGE_STEPS = [1, 2, 3, 4, 5, 6];
 
   var player = document.getElementById("player");
   var playerWhere = player.querySelector(".where");
@@ -1912,11 +1922,23 @@ body {
     if (e.key === "ArrowLeft") { setPlaying(false); goTo(reel.at - 1); }
   });
 
+  /* The step number is read from the heading itself, not counted.
+     Step 3 shows the browser's own <h1>Hello</h1> as a real heading, and
+     counting would treat that as a step and shift every later one. */
+  function stepNumberOf(heading) {
+    var match = heading.textContent.match(
+      /^\s*(?:هەنگاوی|Step)\s*([0-9٠-٩]+)/);
+    if (!match) { return 0; }
+    var digits = match[1].replace(/[٠-٩]/g, function (d) {
+      return String(d.charCodeAt(0) - 1632);
+    });
+    return parseInt(digits, 10) || 0;
+  }
+
   function addShowMeButtons() {
-    var step = 0;
     reader.querySelectorAll("h1").forEach(function (heading) {
-      if (!framesFor(heading).length) { return; }
-      step += 1;
+      var step = stepNumberOf(heading);
+      if (!step) { return; }
       var drawn = STAGE_STEPS.indexOf(step) !== -1;
       if (!drawn && PLAYER_STEPS.indexOf(step) === -1) { return; }
       var button = document.createElement("button");
@@ -2357,6 +2379,303 @@ body {
       },
       hold: 2600 }
   ];
+
+  /* ---- shared pieces for the walkthroughs that follow -------------------- */
+
+  function term(title, body) {
+    return '<div class="win term"><div class="win-bar term-bar">' + WIN +
+      '<span>' + title + '</span></div>' +
+      '<div class="term-body">' + body + '</div></div>';
+  }
+
+  function esc2(text) {
+    return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+
+  function fileWindow(name, code, saved) {
+    return '<div class="win vs"><div class="win-bar vs-bar">' + WIN +
+      '<span>' + name + ' — student-system</span></div>' +
+      '<div class="vs-body"><div class="vs-main pad0">' +
+      '<div class="tabs"><span class="tab' + (saved ? ' saved' : '') +
+      '"><span class="dot"></span>' + name + '</span></div>' +
+      '<div class="editor">' + code + '</div></div></div></div>';
+  }
+
+  function typingWindow(name, code) {
+    return '<div class="win vs"><div class="win-bar vs-bar">' + WIN +
+      '<span>' + name + ' — student-system</span></div>' +
+      '<div class="vs-body"><div class="vs-main pad0">' +
+      '<div class="tabs"><span class="tab"><span class="dot"></span>' + name +
+      '</span></div><div class="editor"><span data-type="' +
+      code.replace(/"/g, "&quot;") + '"></span></div></div></div></div>';
+  }
+
+  /* ---- step 4: the database ---------------------------------------------- */
+
+  var DB_CODE =
+    "import os" + NL + "import sqlite3" + NL + NL +
+    'DB_PATH = os.path.join(os.path.dirname(' + NL +
+    '    os.path.abspath(__file__)), "students.db")' + NL + NL + NL +
+    "def get_connection():" + NL +
+    "    connection = sqlite3.connect(DB_PATH)" + NL +
+    "    connection.row_factory = sqlite3.Row" + NL +
+    "    return connection" + NL + NL + NL +
+    "def init_db():" + NL +
+    "    with get_connection() as connection:" + NL +
+    "        connection.execute(...)";
+
+  var TREE3 = '<div class="vs-row">STUDENT-SYSTEM</div>' +
+    '<div class="vs-row">📁 templates</div>' +
+    '<div class="vs-row">📁 static</div>' +
+    '<div class="vs-row">📄 app.py</div>';
+
+  WALKS[4] = [
+    { ku: "New File — ئەم جارە database.py",
+      en: "New File — this time database.py",
+      screen: function () {
+        return vscode(tree(TREE3 + '<div class="vs-row">📄 ' +
+          '<span class="name" data-type="database.py"></span></div>', false), "");
+      },
+      type: true },
+
+    { ku: "کۆدی داتابەیس بنووسە",
+      en: "Type the database code",
+      screen: function () { return typingWindow("database.py", DB_CODE); },
+      type: true, hold: 1200 },
+
+    { ku: "ئێستا app.py بکەرەوە — دوو دێڕ زیاد بکە",
+      en: "Now open app.py — add two lines",
+      screen: function () {
+        return fileWindow("app.py", esc2(
+          "from http.server import BaseHTTPRequestHandler, HTTPServer" + NL + NL) +
+          '<span class="name">import database</span>' + esc2(NL + NL + NL +
+          "class StudentAppHandler(BaseHTTPRequestHandler):" + NL +
+          "    ..." + NL + NL + NL) +
+          '<span class="name">database.init_db()</span>' + esc2(NL +
+          'server = HTTPServer(("localhost", 8000), StudentAppHandler)'), false) +
+          keys("Ctrl + S");
+      },
+      hold: 2600 },
+
+    { ku: "python app.py",
+      en: "python app.py",
+      screen: function () {
+        return term("Terminal", "&gt; <span data-type='python app.py'></span>" +
+          '<span class="ans" data-after="' + NL + 'Server running at http://localhost:8000"></span>');
+      },
+      type: true, hold: 1400 },
+
+    { ku: "سەیری Explorer بکە — فایلێکی نوێ خۆی دروست بوو",
+      en: "Look at the Explorer — a new file appeared on its own",
+      screen: function () {
+        return vscode(tree(TREE3 + '<div class="vs-row">📄 database.py</div>' +
+          '<div class="vs-row">🗄 <span class="name">students.db</span></div>', false), "");
+      },
+      hold: 2600 },
+
+    { ku: "Ctrl + C، پاشان بپشکنە کە خشتەکە دروست بووە",
+      en: "Ctrl + C, then check that the table was made",
+      screen: function () {
+        return term("Terminal",
+          "&gt; <span data-type=\"python -c &quot;import database; print(...)&quot;\"></span>" +
+          '<span class="ans" data-after="' + NL +
+          "['students', 'sqlite_sequence']\"></span>");
+      },
+      type: true, hold: 2000 },
+
+    { ku: "خشتەکە بەتاڵە — سفر واتە هێشتا هیچ قوتابییەک نییە",
+      en: "The table is empty — zero means no students yet",
+      screen: function () {
+        return term("Terminal",
+          "&gt; <span data-type=\"python -c &quot;... COUNT(*) ...&quot;\"></span>" +
+          '<span class="ans" data-after="' + NL + '0"></span>');
+      },
+      type: true, hold: 2400 }
+  ];
+
+  /* ---- step 5: templates -------------------------------------------------- */
+
+  var LAYOUT_CODE =
+    "<!DOCTYPE html>" + NL + '<html lang="en">' + NL + "<head>" + NL +
+    '  <meta charset="UTF-8">' + NL + "  <title>{{ title }}</title>" + NL +
+    "</head>" + NL + "<body>" + NL + "  <h1>{{ title }}</h1>" + NL +
+    "  {{ content }}" + NL + "</body>" + NL + "</html>";
+
+  var RENDER_CODE =
+    "def render(template_name, **values):" + NL +
+    "    path = os.path.join(TEMPLATE_DIR, template_name)" + NL +
+    '    with open(path, encoding="utf-8") as file:' + NL +
+    "        page = file.read()" + NL + NL +
+    "    def replace(match):" + NL +
+    '        return str(values.get(match.group(1), ""))' + NL + NL +
+    '    return re.sub(r"\\{\\{\\s*(\\w+)\\s*\\}\\}", replace, page)';
+
+  WALKS[5] = [
+    { ku: "لەناو فۆڵدەری templates: فایلی layout.html",
+      en: "Inside the templates folder: layout.html",
+      screen: function () {
+        return vscode(tree(TREE3 + '<div class="vs-row">📄 database.py</div>', false),
+          "templates → New File");
+      },
+      hold: 1400 },
+
+    { ku: "چوارچێوەی هەموو پەڕەکان بنووسە",
+      en: "Type the frame every page shares",
+      screen: function () { return typingWindow("layout.html", LAYOUT_CODE); },
+      type: true, hold: 1200 },
+
+    { ku: "فایلێکی دووەم: home.html — ناوەڕۆکی پەڕەی سەرەکی",
+      en: "A second file: home.html — the home page content",
+      screen: function () {
+        return typingWindow("home.html",
+          "<p>Welcome to the Student Registration System.</p>" + NL +
+          "<p>Students registered: {{ total }}</p>");
+      },
+      type: true, hold: 1400 },
+
+    { ku: "لە app.py: فەنکشنی render() — شوێنە بەتاڵەکان پڕ دەکاتەوە",
+      en: "In app.py: the render() function — it fills the blanks",
+      screen: function () { return typingWindow("app.py", RENDER_CODE); },
+      type: true, hold: 1400 },
+
+    { ku: "سێرڤەر دووبارە بکەرەوە — ئێستا پەڕەیەکی ڕاستەقینە",
+      en: "Restart the server — now a real page",
+      screen: function () {
+        return '<div class="win browser"><div class="win-bar">' + WIN +
+          '<span class="addr">localhost:8000</span></div>' +
+          '<div class="plain"><h1>Students</h1>' +
+          '<p style="margin:10px 0 0;font-size:13px">Welcome to the Student ' +
+          'Registration System.</p>' +
+          '<p style="margin:6px 0 0;font-size:13px">Students registered: 0</p>' +
+          '</div></div>';
+      },
+      hold: 2400 },
+
+    { ku: "شتێکی خۆش: home.html بگۆڕە — بەبێ وەستاندنی سێرڤەر",
+      en: "Something pleasant: change home.html — without stopping the server",
+      screen: function () {
+        return fileWindow("home.html", esc2("<p>") +
+          '<span class="name">Hello from my own page!</span>' +
+          esc2("</p>" + NL + "<p>Students registered: {{ total }}</p>"), true) +
+          keys("Ctrl + S");
+      },
+      hold: 2000 },
+
+    { ku: "تەنها F5 — گۆڕانکارییەکە دەردەکەوێت. Template دووبارەکردنەوەی ناوێت",
+      en: "Just F5 — the change shows. A template needs no restart",
+      screen: function () {
+        return '<div class="win browser"><div class="win-bar">' + WIN +
+          '<span class="addr">localhost:8000</span></div>' +
+          '<div class="plain"><h1>Students</h1>' +
+          '<p style="margin:10px 0 0;font-size:13px">Hello from my own page!</p>' +
+          '<p style="margin:6px 0 0;font-size:13px">Students registered: 0</p>' +
+          '</div></div>' + keys("F5");
+      },
+      hold: 2600 }
+  ];
+
+  /* ---- step 6: CSS -------------------------------------------------------- */
+
+  var CSS_CODE =
+    ":root {" + NL + "  --brand: #2563eb;" + NL + "  --text: #1f2937;" + NL +
+    "  --border: #e5e7eb;" + NL + "  --background: #f4f6fb;" + NL +
+    "  --surface: #ffffff;" + NL + "}" + NL + NL +
+    "body {" + NL + "  margin: 0;" + NL + "  padding: 24px;" + NL +
+    "  background: var(--background);" + NL + "}";
+
+  function styledPage() {
+    return '<div class="win browser"><div class="win-bar">' + WIN +
+      '<span class="addr">localhost:8000</span></div>' +
+      '<div style="padding:20px;background:#f4f6fb;height:100%">' +
+      '<h1 style="margin:0 0 14px;color:#2563eb;font-size:22px">Students</h1>' +
+      '<div data-spot="card" style="max-width:22rem;padding:16px;background:#fff;' +
+      'border:1px solid #e5e7eb;border-radius:10px;font-size:12.5px">' +
+      'Welcome to the Student Registration System.<br>Students registered: 0' +
+      '</div></div></div>';
+  }
+
+  WALKS[6] = [
+    { ku: "لەناو فۆڵدەری static: فایلی style.css",
+      en: "Inside the static folder: style.css",
+      screen: function () { return typingWindow("style.css", CSS_CODE); },
+      type: true, hold: 1200 },
+
+    { ku: "لە layout.html: دێڕی <link> زیاد بکە",
+      en: "In layout.html: add the <link> line",
+      screen: function () {
+        return fileWindow("layout.html", esc2("<head>" + NL +
+          '  <meta charset="UTF-8">' + NL + "  <title>{{ title }}</title>" + NL + "  ") +
+          '<span class="name">' + esc2('<link rel="stylesheet" href="/static/style.css">') +
+          '</span>' + esc2(NL + "</head>"), true) + keys("Ctrl + S");
+      },
+      hold: 2400 },
+
+    { ku: "سێرڤەر دووبارە بکەرەوە و F5 — هێشتا ناشیرینە!",
+      en: "Restart and press F5 — still ugly!",
+      screen: function () {
+        return '<div class="win browser"><div class="win-bar">' + WIN +
+          '<span class="addr">localhost:8000</span></div>' +
+          '<div class="plain"><h1>Students</h1>' +
+          '<p style="margin:10px 0 0;font-size:13px">Welcome…</p></div></div>' +
+          keys("F5");
+      },
+      hold: 2400 },
+
+    { ku: "هۆکارەکەی: do_GET پرسیار ناکات چی داوا کراوە",
+      en: "The reason: do_GET never asks what was requested",
+      screen: function () {
+        return fileWindow("app.py", esc2("    def do_GET(self):" + NL +
+          "        # هەر داواکارییەک بێت، هەمان پەڕە" + NL +
+          "        body = render(...)"), true);
+      },
+      hold: 2200 },
+
+    { ku: "ڕێنیشاندەرەکە بنووسە — ئێستا سێرڤەر دەزانێت چی داوا کراوە",
+      en: "Write the router — now the server knows what was asked for",
+      screen: function () {
+        return typingWindow("app.py",
+          "    def do_GET(self):" + NL +
+          "        url = urllib.parse.urlparse(self.path)" + NL + NL +
+          '        if url.path == "/":' + NL +
+          "            self.page_home()" + NL +
+          '        elif url.path.startswith("/static/"):' + NL +
+          '            self.send_static(url.path[len("/static/"):])' + NL +
+          "        else:" + NL + "            self.send_response(404)");
+      },
+      type: true, hold: 1400 },
+
+    { ku: "Ctrl + Shift + R — دیزاینەکە کاری کرد",
+      en: "Ctrl + Shift + R — the design works",
+      screen: function () { return styledPage() + keys("Ctrl + Shift + R"); },
+      hold: 2400 },
+
+    { ku: "CSSەکە ڕاستەوخۆ ببینە: /static/style.css",
+      en: "See the CSS itself: /static/style.css",
+      screen: function () {
+        return '<div class="win browser"><div class="win-bar">' + WIN +
+          '<span class="addr">localhost:8000/static/style.css</span></div>' +
+          '<div class="editor" style="height:auto;padding:14px">' +
+          esc2(":root {" + NL + "  --brand: #2563eb;" + NL + "  --text: #1f2937;" +
+            NL + "}") + '</div></div>';
+      },
+      hold: 2200 },
+
+    { ku: "پەڕەیەکی نەبوو داوا بکە: /nothing",
+      en: "Ask for a page that does not exist: /nothing",
+      screen: function () {
+        return '<div class="win browser"><div class="win-bar">' + WIN +
+          '<span class="addr">localhost:8000/nothing</span></div>' +
+          '<div class="plain"><h1 style="color:#dc2626">404</h1></div></div>';
+      },
+      hold: 2000 },
+
+    { ku: "کۆتایی: کلیکی ڕاست لەسەر سندوقەکە → Inspect",
+      en: "Finally: right-click the box → Inspect",
+      screen: function () { return styledPage(); },
+      spot: "card", hold: 2400 }
+  ];
+
+
 
   var stage = document.getElementById("stage");
   var stageCap = stage.querySelector(".stage-caption span:last-child");
