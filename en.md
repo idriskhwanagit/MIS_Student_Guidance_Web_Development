@@ -874,19 +874,19 @@ def render(template_name, **values):
 
 ## 5.4 — Use it
 
-Delete the `StudentAppHandler` class **completely** — from the `class`
-line to the end — and put this in its place:
+In the `StudentAppHandler` class, change `do_GET` like this:
 
-```python app.py
-class StudentAppHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        body = render("home.html", total=0)
-        page = render("layout.html", title="Students", content=body)
-
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(page.encode("utf-8"))
+```diff app.py
+ class StudentAppHandler(BaseHTTPRequestHandler):
+     def do_GET(self):
++        body = render("home.html", total=0)
++        page = render("layout.html", title="Students", content=body)
++
+         self.send_response(200)
+         self.send_header("Content-Type", "text/html; charset=utf-8")
+         self.end_headers()
+-        self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
++        self.wfile.write(page.encode("utf-8"))
 ```
 
 **We call it twice:**
@@ -1453,10 +1453,11 @@ A new file in the `templates` folder:
 
 ## 7.4 — Change `templates/home.html`
 
-```html templates/home.html
-<p>Welcome to the Student Registration System.</p>
-
-{{ table }}
+```diff templates/home.html
+ <p>Welcome to the Student Registration System.</p>
+-<p>Students registered: {{ total }}</p>
++
++{{ table }}
 ```
 
 ## 7.5 — Two functions for `app.py`
@@ -1504,26 +1505,27 @@ def build_table_rows(students):
 
 ## 7.6 — Change `page_home`
 
-Delete the `page_home` function **completely** and put this in its place:
+Change the `page_home` function like this:
 
-```python app.py
-    def page_home(self):
-        students = database.get_all_students()
-
-        if students:
-            table = render("list.html",
-                           rows=build_table_rows(students),
-                           total=len(students))
-        else:
-            table = "<p>No student is registered yet.</p>"
-
-        body = render("home.html", table=table)
-        page = render("layout.html", title="Students", content=body)
-
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(page.encode("utf-8"))
+```diff app.py
+     def page_home(self):
+-        body = render("home.html", total=0)
++        students = database.get_all_students()
++
++        if students:
++            table = render("list.html",
++                           rows=build_table_rows(students),
++                           total=len(students))
++        else:
++            table = "<p>No student is registered yet.</p>"
++
++        body = render("home.html", table=table)
+         page = render("layout.html", title="Students", content=body)
+ 
+         self.send_response(200)
+         self.send_header("Content-Type", "text/html; charset=utf-8")
+         self.end_headers()
+         self.wfile.write(page.encode("utf-8"))
 ```
 
 > **That `if` matters.** When there are no students, do not show an empty
@@ -1953,31 +1955,30 @@ Add these as well:
 
 ## 8.6 — The routes
 
-Delete the `do_GET` function **completely**, then put these two functions
-in its place:
+Change `do_GET`, and add the new `do_POST` below it:
 
-```python app.py
-    def do_GET(self):
-        url = urllib.parse.urlparse(self.path)
-
-        if url.path == "/":
-            self.page_home()
-        elif url.path == "/add":
-            self.page_form()
-        elif url.path.startswith("/static/"):
-            self.send_static(url.path[len("/static/"):])
-        else:
-            self.send_response(404)
-            self.end_headers()
-
-    def do_POST(self):
-        url = urllib.parse.urlparse(self.path)
-
-        if url.path == "/add":
-            self.save_student()
-        else:
-            self.send_response(404)
-            self.end_headers()
+```diff app.py
+     def do_GET(self):
+         url = urllib.parse.urlparse(self.path)
+ 
+         if url.path == "/":
+             self.page_home()
++        elif url.path == "/add":
++            self.page_form()
+         elif url.path.startswith("/static/"):
+             self.send_static(url.path[len("/static/"):])
+         else:
+             self.send_response(404)
+             self.end_headers()
++
++    def do_POST(self):
++        url = urllib.parse.urlparse(self.path)
++
++        if url.path == "/add":
++            self.save_student()
++        else:
++            self.send_response(404)
++            self.end_headers()
 ```
 
 > **`/add` appears twice — but they are two different things:**
@@ -1991,12 +1992,13 @@ in its place:
 
 ## 8.7 — A link to the form
 
-Delete everything in `templates/home.html` and put this in its place:
+Add one line at the top of `templates/home.html`:
 
-```html templates/home.html
-<p><a href="/add">+ Register a new student</a></p>
-
-{{ table }}
+```diff templates/home.html
+-<p>Welcome to the Student Registration System.</p>
++<p><a href="/add">+ Register a new student</a></p>
+ 
+ {{ table }}
 ```
 
 ## 8.8 — Style the form
@@ -2251,21 +2253,25 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 ## 9.2 — Change `student_id_exists`
 
-Delete the old function and put this in its place:
+Change the function like this:
 
-```python database.py
-def student_id_exists(student_id, ignore_row_id=None):
-    with get_connection() as connection:
-        if ignore_row_id is None:
-            row = connection.execute(
-                "SELECT id FROM students WHERE student_id = ?", (student_id,)
-            ).fetchone()
-        else:
-            row = connection.execute(
-                "SELECT id FROM students WHERE student_id = ? AND id <> ?",
-                (student_id, ignore_row_id),
-            ).fetchone()
-        return row is not None
+```diff database.py
+-def student_id_exists(student_id):
++def student_id_exists(student_id, ignore_row_id=None):
+     with get_connection() as connection:
+-        row = connection.execute(
+-            "SELECT id FROM students WHERE student_id = ?", (student_id,)
+-        ).fetchone()
++        if ignore_row_id is None:
++            row = connection.execute(
++                "SELECT id FROM students WHERE student_id = ?", (student_id,)
++            ).fetchone()
++        else:
++            row = connection.execute(
++                "SELECT id FROM students WHERE student_id = ? AND id <> ?",
++                (student_id, ignore_row_id),
++            ).fetchone()
+         return row is not None
 ```
 
 > ### 🤔 Why `ignore_row_id`?
@@ -2356,7 +2362,7 @@ Delete everything in it and put this in its place. Three changes: a hidden field
 
 ## 9.4 — Change `page_form`
 
-Delete the old function and put this in:
+Change the function like this:
 
 ```python app.py
     def page_form(self, row_id="", errors="", values=None):
@@ -2493,33 +2499,32 @@ In `do_POST`, after `/add`:
 
 ## 9.7 — An edit button in the table
 
-Delete `build_table_rows` **completely** and put this in its place — it has
-one more column:
+Change `build_table_rows` like this — one more column:
 
-```python app.py
-def build_table_rows(students):
-    rows = []
-    for number, student in enumerate(students, start=1):
-        rows.append(
-            """
-            <tr>
-              <td>{number}</td>
-              <td>{student_id}</td>
-              <td>{full_name}</td>
-              <td>{department}</td>
-              <td>{created_at}</td>
-              <td><a href="/edit?id={row_id}">Edit</a></td>
-            </tr>
-            """.format(
-                number=number,
-                row_id=student["id"],
-                student_id=esc(student["student_id"]),
-                full_name=esc(student["full_name"]),
-                department=esc(student["department"]),
-                created_at=esc(student["created_at"]),
-            )
-        )
-    return "".join(rows)
+```diff app.py
+ def build_table_rows(students):
+     rows = []
+     for number, student in enumerate(students, start=1):
+         rows.append(
+             """
+             <tr>
+               <td>{number}</td>
+               <td>{student_id}</td>
+               <td>{full_name}</td>
+               <td>{department}</td>
+               <td>{created_at}</td>
++              <td><a href="/edit?id={row_id}">Edit</a></td>
+             </tr>
+             """.format(
+                 number=number,
++                row_id=student["id"],
+                 student_id=esc(student["student_id"]),
+                 full_name=esc(student["full_name"]),
+                 department=esc(student["department"]),
+                 created_at=esc(student["created_at"]),
+             )
+         )
+     return "".join(rows)
 ```
 
 And in `templates/list.html`, a new heading:
@@ -2650,40 +2655,40 @@ def delete_student(row_id):
 
 ## 10.2 — The button in the table
 
-Delete `build_table_rows` **completely** again and put this in its place —
-the `Actions` column now holds two things:
+Change `build_table_rows` again — the `Actions` column now holds two things:
 
-```python app.py
-def build_table_rows(students):
-    rows = []
-    for number, student in enumerate(students, start=1):
-        rows.append(
-            """
-            <tr>
-              <td>{number}</td>
-              <td>{student_id}</td>
-              <td>{full_name}</td>
-              <td>{department}</td>
-              <td>{created_at}</td>
-              <td class="actions">
-                <a href="/edit?id={row_id}">Edit</a>
-                <form method="POST" action="/delete" class="inline"
-                      onsubmit="return confirm('Delete this student?');">
-                  <input type="hidden" name="id" value="{row_id}">
-                  <button type="submit" class="danger">Delete</button>
-                </form>
-              </td>
-            </tr>
-            """.format(
-                number=number,
-                row_id=student["id"],
-                student_id=esc(student["student_id"]),
-                full_name=esc(student["full_name"]),
-                department=esc(student["department"]),
-                created_at=esc(student["created_at"]),
-            )
-        )
-    return "".join(rows)
+```diff app.py
+ def build_table_rows(students):
+     rows = []
+     for number, student in enumerate(students, start=1):
+         rows.append(
+             """
+             <tr>
+               <td>{number}</td>
+               <td>{student_id}</td>
+               <td>{full_name}</td>
+               <td>{department}</td>
+               <td>{created_at}</td>
+-              <td><a href="/edit?id={row_id}">Edit</a></td>
++              <td class="actions">
++                <a href="/edit?id={row_id}">Edit</a>
++                <form method="POST" action="/delete" class="inline"
++                      onsubmit="return confirm('Delete this student?');">
++                  <input type="hidden" name="id" value="{row_id}">
++                  <button type="submit" class="danger">Delete</button>
++                </form>
++              </td>
+             </tr>
+             """.format(
+                 number=number,
+                 row_id=student["id"],
+                 student_id=esc(student["student_id"]),
+                 full_name=esc(student["full_name"]),
+                 department=esc(student["department"]),
+                 created_at=esc(student["created_at"]),
+             )
+         )
+     return "".join(rows)
 ```
 
 <!-- collapse -->
@@ -2856,25 +2861,26 @@ program.
 
 Delete the old function and put this in:
 
-```python database.py
-def get_all_students(search=""):
-    with get_connection() as connection:
-        if search:
-            pattern = "%" + search + "%"
-            return connection.execute(
-                """
-                SELECT * FROM students
-                WHERE full_name  LIKE ?
-                   OR student_id LIKE ?
-                   OR department LIKE ?
-                ORDER BY id DESC
-                """,
-                (pattern, pattern, pattern),
-            ).fetchall()
-
-        return connection.execute(
-            "SELECT * FROM students ORDER BY id DESC"
-        ).fetchall()
+```diff database.py
+-def get_all_students():
++def get_all_students(search=""):
+     with get_connection() as connection:
++        if search:
++            pattern = "%" + search + "%"
++            return connection.execute(
++                """
++                SELECT * FROM students
++                WHERE full_name  LIKE ?
++                   OR student_id LIKE ?
++                   OR department LIKE ?
++                ORDER BY id DESC
++                """,
++                (pattern, pattern, pattern),
++            ).fetchall()
++
+         return connection.execute(
+             "SELECT * FROM students ORDER BY id DESC"
+         ).fetchall()
 ```
 
 <!-- collapse -->
@@ -2913,19 +2919,19 @@ def get_all_students(search=""):
 
 ## 11.2 — Change `templates/home.html`
 
-Delete everything in it and put this in its place:
+Add the search form between the link and the table:
 
-```html templates/home.html
-<p><a href="/add">+ Register a new student</a></p>
-
-<form class="search" method="GET" action="/">
-  <input type="text" name="q" value="{{ search }}"
-         placeholder="Search by name, student ID or department...">
-  <button type="submit">Search</button>
-  <a href="/">Reset</a>
-</form>
-
-{{ table }}
+```diff templates/home.html
+ <p><a href="/add">+ Register a new student</a></p>
+ 
++<form class="search" method="GET" action="/">
++  <input type="text" name="q" value="{{ search }}"
++         placeholder="Search by name, student ID or department...">
++  <button type="submit">Search</button>
++  <a href="/">Reset</a>
++</form>
++
+ {{ table }}
 ```
 
 <!-- collapse -->
@@ -2952,23 +2958,32 @@ Delete everything in it and put this in its place:
 
 ## 11.3 — Change `page_home`
 
-Delete `page_home` **completely** again and put this in its place:
+Change `page_home` again, like this:
 
-```python app.py
-    def page_home(self, search=""):
-        students = database.get_all_students(search)
-
-        if students:
-            table = render("list.html",
-                           rows=build_table_rows(students),
-                           total=len(students))
-        elif search:
-            table = "<p>No student matches &quot;" + esc(search) + "&quot;.</p>"
-        else:
-            table = "<p>No student is registered yet.</p>"
-
-        body = render("home.html", search=esc(search), table=table)
-        self.send_html(render("layout.html", title="Students", content=body))
+```diff app.py
+-    def page_home(self):
+-        students = database.get_all_students()
++    def page_home(self, search=""):
++        students = database.get_all_students(search)
+ 
+         if students:
+             table = render("list.html",
+                            rows=build_table_rows(students),
+                            total=len(students))
++        elif search:
++            table = "<p>No student matches &quot;" + esc(search) + "&quot;.</p>"
+         else:
+             table = "<p>No student is registered yet.</p>"
+ 
+-        body = render("home.html", table=table)
+-        page = render("layout.html", title="Students", content=body)
+-
+-        self.send_response(200)
+-        self.send_header("Content-Type", "text/html; charset=utf-8")
+-        self.end_headers()
+-        self.wfile.write(page.encode("utf-8"))
++        body = render("home.html", search=esc(search), table=table)
++        self.send_html(render("layout.html", title="Students", content=body))
 ```
 
 <!-- collapse -->

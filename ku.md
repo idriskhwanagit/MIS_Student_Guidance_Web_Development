@@ -872,19 +872,19 @@ def render(template_name, **values):
 
 ## ٥.٤ — بەکارهێنانی
 
-کلاسی `StudentAppHandler` **بە تەواوی** بسڕەوە — لە دێڕی `class`ـەوە تا
-کۆتایی — و ئەمە لە شوێنی دابنێ:
+لە کلاسی `StudentAppHandler`، `do_GET` بەم شێوەیە بگۆڕە:
 
-```python app.py
-class StudentAppHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        body = render("home.html", total=0)
-        page = render("layout.html", title="Students", content=body)
-
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(page.encode("utf-8"))
+```diff app.py
+ class StudentAppHandler(BaseHTTPRequestHandler):
+     def do_GET(self):
++        body = render("home.html", total=0)
++        page = render("layout.html", title="Students", content=body)
++
+         self.send_response(200)
+         self.send_header("Content-Type", "text/html; charset=utf-8")
+         self.end_headers()
+-        self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
++        self.wfile.write(page.encode("utf-8"))
 ```
 
 **دوو جار بانگی دەکەین:**
@@ -1449,10 +1449,11 @@ python -c "import database; database.add_student(student_id='MIS-2025-002', full
 
 ## ٧.٤ — `templates/home.html` بگۆڕە
 
-```html templates/home.html
-<p>Welcome to the Student Registration System.</p>
-
-{{ table }}
+```diff templates/home.html
+ <p>Welcome to the Student Registration System.</p>
+-<p>Students registered: {{ total }}</p>
++
++{{ table }}
 ```
 
 ## ٧.٥ — دوو فەنکشن بۆ `app.py`
@@ -1501,26 +1502,27 @@ def build_table_rows(students):
 
 ## ٧.٦ — `page_home` بگۆڕە
 
-فەنکشنی `page_home` **بە تەواوی** بسڕەوە و ئەمە لە شوێنی دابنێ:
+فەنکشنی `page_home` بەم شێوەیە بگۆڕە:
 
-```python app.py
-    def page_home(self):
-        students = database.get_all_students()
-
-        if students:
-            table = render("list.html",
-                           rows=build_table_rows(students),
-                           total=len(students))
-        else:
-            table = "<p>No student is registered yet.</p>"
-
-        body = render("home.html", table=table)
-        page = render("layout.html", title="Students", content=body)
-
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(page.encode("utf-8"))
+```diff app.py
+     def page_home(self):
+-        body = render("home.html", total=0)
++        students = database.get_all_students()
++
++        if students:
++            table = render("list.html",
++                           rows=build_table_rows(students),
++                           total=len(students))
++        else:
++            table = "<p>No student is registered yet.</p>"
++
++        body = render("home.html", table=table)
+         page = render("layout.html", title="Students", content=body)
+ 
+         self.send_response(200)
+         self.send_header("Content-Type", "text/html; charset=utf-8")
+         self.end_headers()
+         self.wfile.write(page.encode("utf-8"))
 ```
 
 > **ئەو `if`ـە بەشێکی گرنگە.** ئەگەر هیچ قوتابییەک نەبێت، خشتەیەکی بەتاڵ
@@ -1948,31 +1950,30 @@ def build_department_options(selected):
 
 ## ٨.٦ — ڕێڕەوەکان
 
-فەنکشنی `do_GET` **بە تەواوی** بسڕەوە، پاشان ئەم دوو فەنکشنە لە شوێنی
-دابنێ:
+`do_GET` بگۆڕە و `do_POST`ی نوێ لەژێری زیاد بکە:
 
-```python app.py
-    def do_GET(self):
-        url = urllib.parse.urlparse(self.path)
-
-        if url.path == "/":
-            self.page_home()
-        elif url.path == "/add":
-            self.page_form()
-        elif url.path.startswith("/static/"):
-            self.send_static(url.path[len("/static/"):])
-        else:
-            self.send_response(404)
-            self.end_headers()
-
-    def do_POST(self):
-        url = urllib.parse.urlparse(self.path)
-
-        if url.path == "/add":
-            self.save_student()
-        else:
-            self.send_response(404)
-            self.end_headers()
+```diff app.py
+     def do_GET(self):
+         url = urllib.parse.urlparse(self.path)
+ 
+         if url.path == "/":
+             self.page_home()
++        elif url.path == "/add":
++            self.page_form()
+         elif url.path.startswith("/static/"):
+             self.send_static(url.path[len("/static/"):])
+         else:
+             self.send_response(404)
+             self.end_headers()
++
++    def do_POST(self):
++        url = urllib.parse.urlparse(self.path)
++
++        if url.path == "/add":
++            self.save_student()
++        else:
++            self.send_response(404)
++            self.end_headers()
 ```
 
 > **`/add` دوو جار هاتووە — بەڵام دوو شتی جیاوازن:**
@@ -1986,12 +1987,13 @@ def build_department_options(selected):
 
 ## ٨.٧ — لینکێک بۆ فۆڕمەکە
 
-هەموو ناوەڕۆکی `templates/home.html` بسڕەوە و ئەمە لە شوێنی دابنێ:
+دێڕێکی نوێ لە سەرەوەی `templates/home.html` زیاد بکە:
 
-```html templates/home.html
-<p><a href="/add">+ Register a new student</a></p>
-
-{{ table }}
+```diff templates/home.html
+-<p>Welcome to the Student Registration System.</p>
++<p><a href="/add">+ Register a new student</a></p>
+ 
+ {{ table }}
 ```
 
 ## ٨.٨ — دیزاینی فۆڕمەکە
@@ -2246,21 +2248,25 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 ## ٩.٢ — `student_id_exists` بگۆڕە
 
-فەنکشنە کۆنەکە بسڕەوە و ئەمە لە شوێنی دابنێ:
+فەنکشنەکە بەم شێوەیە بگۆڕە:
 
-```python database.py
-def student_id_exists(student_id, ignore_row_id=None):
-    with get_connection() as connection:
-        if ignore_row_id is None:
-            row = connection.execute(
-                "SELECT id FROM students WHERE student_id = ?", (student_id,)
-            ).fetchone()
-        else:
-            row = connection.execute(
-                "SELECT id FROM students WHERE student_id = ? AND id <> ?",
-                (student_id, ignore_row_id),
-            ).fetchone()
-        return row is not None
+```diff database.py
+-def student_id_exists(student_id):
++def student_id_exists(student_id, ignore_row_id=None):
+     with get_connection() as connection:
+-        row = connection.execute(
+-            "SELECT id FROM students WHERE student_id = ?", (student_id,)
+-        ).fetchone()
++        if ignore_row_id is None:
++            row = connection.execute(
++                "SELECT id FROM students WHERE student_id = ?", (student_id,)
++            ).fetchone()
++        else:
++            row = connection.execute(
++                "SELECT id FROM students WHERE student_id = ? AND id <> ?",
++                (student_id, ignore_row_id),
++            ).fetchone()
+         return row is not None
 ```
 
 > ### 🤔 بۆچی `ignore_row_id`؟
@@ -2351,7 +2357,7 @@ def student_id_exists(student_id, ignore_row_id=None):
 
 ## ٩.٤ — `page_form` بگۆڕە
 
-فەنکشنە کۆنەکە بسڕەوە و ئەمە دابنێ:
+فەنکشنەکە بەم شێوەیە بگۆڕە:
 
 ```python app.py
     def page_form(self, row_id="", errors="", values=None):
@@ -2488,33 +2494,32 @@ def student_id_exists(student_id, ignore_row_id=None):
 
 ## ٩.٧ — دوگمەی دەستکاری لە خشتەکەدا
 
-فەنکشنی `build_table_rows` **بە تەواوی** بسڕەوە و ئەمە لە شوێنی دابنێ —
-ستوونێکی نوێی تێدایە:
+`build_table_rows` بەم شێوەیە بگۆڕە — ستوونێکی نوێ:
 
-```python app.py
-def build_table_rows(students):
-    rows = []
-    for number, student in enumerate(students, start=1):
-        rows.append(
-            """
-            <tr>
-              <td>{number}</td>
-              <td>{student_id}</td>
-              <td>{full_name}</td>
-              <td>{department}</td>
-              <td>{created_at}</td>
-              <td><a href="/edit?id={row_id}">Edit</a></td>
-            </tr>
-            """.format(
-                number=number,
-                row_id=student["id"],
-                student_id=esc(student["student_id"]),
-                full_name=esc(student["full_name"]),
-                department=esc(student["department"]),
-                created_at=esc(student["created_at"]),
-            )
-        )
-    return "".join(rows)
+```diff app.py
+ def build_table_rows(students):
+     rows = []
+     for number, student in enumerate(students, start=1):
+         rows.append(
+             """
+             <tr>
+               <td>{number}</td>
+               <td>{student_id}</td>
+               <td>{full_name}</td>
+               <td>{department}</td>
+               <td>{created_at}</td>
++              <td><a href="/edit?id={row_id}">Edit</a></td>
+             </tr>
+             """.format(
+                 number=number,
++                row_id=student["id"],
+                 student_id=esc(student["student_id"]),
+                 full_name=esc(student["full_name"]),
+                 department=esc(student["department"]),
+                 created_at=esc(student["created_at"]),
+             )
+         )
+     return "".join(rows)
 ```
 
 و لە `templates/list.html`، سەردێڕێکی نوێ:
@@ -2643,40 +2648,40 @@ def delete_student(row_id):
 
 ## ١٠.٢ — دوگمەکە لە خشتەکەدا
 
-دیسان `build_table_rows` **بە تەواوی** بسڕەوە و ئەمە لە شوێنی دابنێ —
-ستوونی `Actions` ئێستا دوو شتی تێدایە:
+دیسان `build_table_rows` بگۆڕە — ستوونی `Actions` ئێستا دوو شتی تێدایە:
 
-```python app.py
-def build_table_rows(students):
-    rows = []
-    for number, student in enumerate(students, start=1):
-        rows.append(
-            """
-            <tr>
-              <td>{number}</td>
-              <td>{student_id}</td>
-              <td>{full_name}</td>
-              <td>{department}</td>
-              <td>{created_at}</td>
-              <td class="actions">
-                <a href="/edit?id={row_id}">Edit</a>
-                <form method="POST" action="/delete" class="inline"
-                      onsubmit="return confirm('Delete this student?');">
-                  <input type="hidden" name="id" value="{row_id}">
-                  <button type="submit" class="danger">Delete</button>
-                </form>
-              </td>
-            </tr>
-            """.format(
-                number=number,
-                row_id=student["id"],
-                student_id=esc(student["student_id"]),
-                full_name=esc(student["full_name"]),
-                department=esc(student["department"]),
-                created_at=esc(student["created_at"]),
-            )
-        )
-    return "".join(rows)
+```diff app.py
+ def build_table_rows(students):
+     rows = []
+     for number, student in enumerate(students, start=1):
+         rows.append(
+             """
+             <tr>
+               <td>{number}</td>
+               <td>{student_id}</td>
+               <td>{full_name}</td>
+               <td>{department}</td>
+               <td>{created_at}</td>
+-              <td><a href="/edit?id={row_id}">Edit</a></td>
++              <td class="actions">
++                <a href="/edit?id={row_id}">Edit</a>
++                <form method="POST" action="/delete" class="inline"
++                      onsubmit="return confirm('Delete this student?');">
++                  <input type="hidden" name="id" value="{row_id}">
++                  <button type="submit" class="danger">Delete</button>
++                </form>
++              </td>
+             </tr>
+             """.format(
+                 number=number,
+                 row_id=student["id"],
+                 student_id=esc(student["student_id"]),
+                 full_name=esc(student["full_name"]),
+                 department=esc(student["department"]),
+                 created_at=esc(student["created_at"]),
+             )
+         )
+     return "".join(rows)
 ```
 
 <!-- collapse -->
@@ -2848,25 +2853,26 @@ http://localhost:8000/delete?id=1
 
 فەنکشنە کۆنەکە بسڕەوە و ئەمە دابنێ:
 
-```python database.py
-def get_all_students(search=""):
-    with get_connection() as connection:
-        if search:
-            pattern = "%" + search + "%"
-            return connection.execute(
-                """
-                SELECT * FROM students
-                WHERE full_name  LIKE ?
-                   OR student_id LIKE ?
-                   OR department LIKE ?
-                ORDER BY id DESC
-                """,
-                (pattern, pattern, pattern),
-            ).fetchall()
-
-        return connection.execute(
-            "SELECT * FROM students ORDER BY id DESC"
-        ).fetchall()
+```diff database.py
+-def get_all_students():
++def get_all_students(search=""):
+     with get_connection() as connection:
++        if search:
++            pattern = "%" + search + "%"
++            return connection.execute(
++                """
++                SELECT * FROM students
++                WHERE full_name  LIKE ?
++                   OR student_id LIKE ?
++                   OR department LIKE ?
++                ORDER BY id DESC
++                """,
++                (pattern, pattern, pattern),
++            ).fetchall()
++
+         return connection.execute(
+             "SELECT * FROM students ORDER BY id DESC"
+         ).fetchall()
 ```
 
 <!-- collapse -->
@@ -2905,19 +2911,19 @@ def get_all_students(search=""):
 
 ## ١١.٢ — `templates/home.html` بگۆڕە
 
-هەموو ناوەڕۆکەکەی بسڕەوە و ئەمە لە شوێنی دابنێ:
+فۆڕمی گەڕان لە نێوان لینکەکە و خشتەکەدا زیاد بکە:
 
-```html templates/home.html
-<p><a href="/add">+ Register a new student</a></p>
-
-<form class="search" method="GET" action="/">
-  <input type="text" name="q" value="{{ search }}"
-         placeholder="Search by name, student ID or department...">
-  <button type="submit">Search</button>
-  <a href="/">Reset</a>
-</form>
-
-{{ table }}
+```diff templates/home.html
+ <p><a href="/add">+ Register a new student</a></p>
+ 
++<form class="search" method="GET" action="/">
++  <input type="text" name="q" value="{{ search }}"
++         placeholder="Search by name, student ID or department...">
++  <button type="submit">Search</button>
++  <a href="/">Reset</a>
++</form>
++
+ {{ table }}
 ```
 
 <!-- collapse -->
@@ -2945,23 +2951,32 @@ def get_all_students(search=""):
 
 ## ١١.٣ — `page_home` بگۆڕە
 
-دیسان `page_home` **بە تەواوی** بسڕەوە و ئەمە لە شوێنی دابنێ:
+دیسان `page_home` بەم شێوەیە بگۆڕە:
 
-```python app.py
-    def page_home(self, search=""):
-        students = database.get_all_students(search)
-
-        if students:
-            table = render("list.html",
-                           rows=build_table_rows(students),
-                           total=len(students))
-        elif search:
-            table = "<p>No student matches &quot;" + esc(search) + "&quot;.</p>"
-        else:
-            table = "<p>No student is registered yet.</p>"
-
-        body = render("home.html", search=esc(search), table=table)
-        self.send_html(render("layout.html", title="Students", content=body))
+```diff app.py
+-    def page_home(self):
+-        students = database.get_all_students()
++    def page_home(self, search=""):
++        students = database.get_all_students(search)
+ 
+         if students:
+             table = render("list.html",
+                            rows=build_table_rows(students),
+                            total=len(students))
++        elif search:
++            table = "<p>No student matches &quot;" + esc(search) + "&quot;.</p>"
+         else:
+             table = "<p>No student is registered yet.</p>"
+ 
+-        body = render("home.html", table=table)
+-        page = render("layout.html", title="Students", content=body)
+-
+-        self.send_response(200)
+-        self.send_header("Content-Type", "text/html; charset=utf-8")
+-        self.end_headers()
+-        self.wfile.write(page.encode("utf-8"))
++        body = render("home.html", search=esc(search), table=table)
++        self.send_html(render("layout.html", title="Students", content=body))
 ```
 
 <!-- collapse -->

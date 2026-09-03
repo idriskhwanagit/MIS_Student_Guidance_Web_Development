@@ -425,6 +425,8 @@ body {
 /* --- where a block of code goes ----------------------------------------- */
 .block > .where {
   display: flex;
+  justify-content: space-between;
+  gap: 1rem;
   padding: .45rem .95rem;
   border-radius: 10px 10px 0 0;
   background: #0b232c;
@@ -435,6 +437,26 @@ body {
 }
 
 .block > .where + pre { border-radius: 0 0 10px 10px; }
+
+.block > .where .hint { color: #6f96a2; font-style: italic; }
+
+/* --- a change, shown as a change -----------------------------------------
+   Removed lines are struck through, added lines are marked. The copy
+   button hands over the result, not the diff.
+   ------------------------------------------------------------------------ */
+.block pre code span { display: block; }
+
+.block pre code .add {
+  background: rgba(87, 197, 148, .16);
+  color: #a9e9c8;
+}
+
+.block pre code .del {
+  background: rgba(226, 106, 106, .14);
+  color: #e7aaaa;
+  text-decoration: line-through;
+  text-decoration-color: rgba(231, 170, 170, .6);
+}
 
 /* --- code blocks --------------------------------------------------------- */
 .block {
@@ -670,12 +692,14 @@ body {
           copy: "کۆپی", copied: "کۆپی کرا",
           keep: "بۆ هێشتنەوەی کۆپییەک، Ctrl + P دابگرە و وەک PDF چاپی بکە",
           terminal: "تێرمیناڵ",
+          copyNew: "کۆپی = تەنها کۆدی نوێ",
           loading: "دەقەکە دەهێنرێت…",
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
     en: { brand: "Student Guide", langLabel: "Language", tocLabel: "Contents",
           copy: "Copy", copied: "Copied",
           keep: "To keep a copy, press Ctrl + P and print to PDF",
           terminal: "Terminal",
+          copyNew: "copy = the new code only",
           loading: "Loading the text…",
           failed: "The text could not be loaded. Check your connection and reload the page." }
   };
@@ -747,11 +771,27 @@ body {
         i++;
         while (i < lines.length && !/^```/.test(lines[i])) { code.push(lines[i]); i++; }
         i++;
+        var inner, clean = code.join('\n');
+        if (lang === "diff") {
+          inner = code.map(function (row) {
+            var mark = row.charAt(0);
+            var kind = mark === '+' ? 'add' : (mark === '-' ? 'del' : 'same');
+            return '<span class="' + kind + '">' + esc(row) + '</span>';
+          }).join('');
+          clean = code.filter(function (row) { return row.charAt(0) !== '-'; })
+                      .map(function (row) { return row.replace(/^[+ ]/, ''); })
+                      .join('\n');
+        } else {
+          inner = esc(clean);
+        }
+
         out.push('<div class="block"><button type="button" class="copy">' +
           UI[state.lang].copy + '</button>' +
-          (where ? '<div class="where"><span>' + esc(where) + '</span></div>' : '') +
-          '<pre><code data-lang="' + esc(lang) + '">' + esc(code.join('\n')) +
-          '</code></pre></div>');
+          (where ? '<div class="where"><span>' + esc(where) + '</span>' +
+            (lang === "diff" ? '<span class="hint">' +
+              esc(UI[state.lang].copyNew) + '</span>' : '') + '</div>' : '') +
+          '<pre><code data-lang="' + esc(lang) + '" data-copy="' +
+          esc(clean) + '">' + inner + '</code></pre></div>');
         continue;
       }
 
@@ -1025,6 +1065,7 @@ body {
     var btn = e.target.closest(".copy");
     if (!btn) { return; }
     var code = btn.parentElement.querySelector("code");
+    var text = code.getAttribute("data-copy") || code.textContent;
     var done = function () {
       btn.textContent = UI[state.lang].copied;
       btn.dataset.done = "1";
@@ -1034,7 +1075,7 @@ body {
       }, 1400);
     };
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(code.textContent).then(done, function () { /* ignore */ });
+      navigator.clipboard.writeText(text).then(done, function () { /* ignore */ });
     } else {
       var sel = window.getSelection();
       var range = document.createRange();
