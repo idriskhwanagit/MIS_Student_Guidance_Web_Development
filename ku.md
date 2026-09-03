@@ -39,7 +39,7 @@
 | ٢ | فۆڵدەری پڕۆژە و پێکهاتەکەی | ✅ |
 | ٣ | یەکەم سێرڤەر — «Hello» | ✅ |
 | ٤ | داتابەیس (`database.py`) | ✅ |
-| ٥ | Templates و فەنکشنی `render()` | ⏳ |
+| ٥ | Templates و فەنکشنی `render()` | ✅ |
 | ٦ | CSS — دیزاینی پەڕەکان | ⏳ |
 | ٧ | **R** — پیشاندانی لیستی قوتابیان | ⏳ |
 | ٨ | **C** — فۆڕمی تۆمارکردن + پشکنین | ⏳ |
@@ -731,4 +731,240 @@ student-system/
 
 ---
 
-> هەنگاوی ٥ لێرە زیاد دەکرێت.
+# هەنگاوی ٥ — Templates
+
+> لەم هەنگاوەدا HTML لە کۆدی Python دەردەهێنین. ئەمە یەکێکە لە گرنگترین
+> بیرۆکەکانی وێب.
+
+## چی دەکەین
+
+فایلی HTML جیا دەنووسین، و فەنکشنێک دەنووسین کە پڕیان دەکاتەوە.
+
+## بۆچی
+
+ئێستا HTMLـەکەمان لەناو Pythonـدایە:
+
+```python
+self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
+```
+
+بۆ یەک دێڕ باشە. بەڵام پەڕەیەکی ڕاستەقینە ١٠٠ دێڕی HTMLـە. بیربکەرەوە:
+
+- دیزاینەر ناتوانێت کاری تێدا بکات — کۆدی Pythonـە
+- گۆڕینی ڕەنگێک واتە دەستکاریکردنی فایلی لۆژیک
+- هیچ ئامرازێک ناتوانێت HTMLـەکەت بپشکنێت
+
+**چارەسەرەکە:** HTML لە فایلی خۆیدا بمێنێتەوە، و شوێنی گۆڕاوەکان بە
+`{{ ناو }}` نیشان بکەین.
+
+---
+
+## ٥.١ — `templates/layout.html`
+
+لە VS Code، کلیک لەسەر فۆڵدەری `templates` بکە، پاشان **New File**:
+
+```
+layout.html
+```
+
+ئەمە بنووسە:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  {{ content }}
+</body>
+</html>
+```
+
+**ئەمە چوارچێوەیە.** هەموو پەڕەکان هەمان سەرەوە و خوارەوەیان هەیە — تەنها
+ناوەڕۆکەکەیان دەگۆڕێت.
+
+> `<meta charset="UTF-8">` هەمان ئەرکی `charset=utf-8`ی هەنگاوی ٣ دەبینێت،
+> بەڵام ئەم جارە لەناو خودی HTMLەکەدا.
+
+## ٥.٢ — `templates/home.html`
+
+فایلێکی تر لە هەمان فۆڵدەردا:
+
+```html
+<p>Welcome to the Student Registration System.</p>
+<p>Students registered: {{ total }}</p>
+```
+
+**ئەمە ناوەڕۆکی پەڕەی سەرەکییە** — بەبێ `<html>` و `<body>`، چونکە ئەوانە
+لە `layout.html`دان.
+
+## ٥.٣ — فەنکشنی `render()`
+
+لە `app.py`دا، ئەمانە زیاد بکە. سەرەتا لە سەرەوە:
+
+```python
+import os
+import re
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+import database
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+
+
+def render(template_name, **values):
+    path = os.path.join(TEMPLATE_DIR, template_name)
+    with open(path, encoding="utf-8") as file:
+        page = file.read()
+
+    def replace(match):
+        return str(values.get(match.group(1), ""))
+
+    return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
+```
+
+## ٥.٤ — بەکارهێنانی
+
+`do_GET` بگۆڕە بۆ ئەمە:
+
+```python
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        body = render("home.html", total=0)
+        page = render("layout.html", title="Students", content=body)
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(page.encode("utf-8"))
+```
+
+**دوو جار بانگی دەکەین:**
+
+١. `home.html` پڕ دەکەینەوە → دەبێتە ناوەڕۆک
+٢. ئەو ناوەڕۆکە دەخەینە ناو `layout.html`ـەوە → دەبێتە پەڕەی تەواو
+
+## ٥.٥ — ئەم کۆدە چۆن کاردەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `**values` | ڕێگە دەدات چەند نرخێک بنێریت: `render("home.html", total=0)` |
+| `open(path, encoding="utf-8")` | فایلەکە دەخوێنێتەوە |
+| `re.sub(pattern, replace, page)` | بەدوای هەموو `{{ ناو }}`ـێکدا دەگەڕێت و دەیگۆڕێت |
+| `\{\{\s*(\w+)\s*\}\}` | ئەم شێوەیە دەدۆزێتەوە: دوو کەوانە، ناوێک، دوو کەوانە |
+| `\s*` | ڕێگە دەدات بۆشایی هەبێت: `{{title}}` و `{{ title }}` هەردووکیان کاردەکەن |
+| `match.group(1)` | ئەو ناوەی نێوان کەوانەکان — بۆ نموونە `title` |
+| `values.get(name, "")` | نرخەکەی دەدۆزێتەوە. ئەگەر نەبوو، بۆشایی دادەنێت |
+
+> **`\w+` واتای چییە؟** یەک یان زیاتر پیت، ژمارە، یان `_`. بۆیە
+> `{{ full_name }}` کاردەکات، بەڵام `{{ full name }}` نا.
+
+---
+
+## ٥.٦ — تاقیکردنەوە
+
+```
+python app.py
+```
+
+پاشان `http://localhost:8000`
+
+## چی دەبینیت
+
+# Students
+
+Welcome to the Student Registration System.
+
+Students registered: 0
+
+> بۆ ئەوەی بزانیت بەڕاستی HTMLـە، کلیکی ڕاست بکە → **View page source**.
+> دەبێت هەموو ئەو `<html>` و `<head>`ـە ببینیت کە لە `layout.html`دا
+> نووسیوتە، بەڵام `{{ title }}` بووە بە `Students`.
+
+---
+
+## ٥.٧ — شتێکی خۆش
+
+سێرڤەرەکە **مەوەستێنە**. `home.html` بکەرەوە و دەقەکەی بگۆڕە:
+
+```html
+<p>Hello from my own page!</p>
+<p>Students registered: {{ total }}</p>
+```
+
+پاشەکەوتی بکە و لە وێبگەڕدا تەنها `F5` لێبدە.
+
+**گۆڕانکارییەکە دەردەکەوێت** — بەبێ ئەوەی سێرڤەرەکە دووبارە بکەیتەوە.
+
+**بۆچی؟** چونکە `render()` فایلەکە **لە هەر داواکارییەکدا** دەخوێنێتەوە.
+بەڵام کۆدی Python تەنها یەک جار دەخوێنرێتەوە، لە کاتی هەڵسانی سێرڤەرەکەدا.
+
+| چی دەگۆڕیت | پێویستە سێرڤەر دووبارە بکەیتەوە؟ |
+|-------------|----------------------------------|
+| `templates/*.html` | **نەخێر** — تەنها `F5` |
+| `app.py` یان `database.py` | **بەڵێ** |
+
+---
+
+## ⚠️ هەڵەیەک کە بەڕاستی ڕوویدا
+
+کاتێک ئەم پڕۆژەیە دروست دەکرا، لەناو `layout.html`دا کۆمێنتێک نووسرابوو:
+
+```html
+<!-- The changing part goes where {{ content }} is -->
+```
+
+**ئەنجام:** هەموو پەڕەکە **دوو جار** پیشان درا.
+
+**بۆچی؟** `render()` جیاوازی نێوان کۆمێنت و کۆدی HTML **نازانێت**. تەنها
+بەدوای `{{ }}`دا دەگەڕێت. بۆیە ئەوەی ناو کۆمێنتەکەشی گۆڕی.
+
+> **یاسا:** لە کۆمێنتەکاندا هەرگیز `{{ }}` مەنووسە.
+>
+> ئەمە لە PHP و Django و Laravelیشدا هەمان شێوەیە — پرۆسێسەری template بە
+> **دەقەکە** دەڕوانێت، نەک بە مانای HTML.
+
+---
+
+## ئەگەر هەڵە دەرکەوت
+
+| پەیامی هەڵە | چارەسەر |
+|-------------|---------|
+| `FileNotFoundError: ...templates/home.html` | فایلەکە لە فۆڵدەری `templates`دا نییە، یان ناوەکەی هەڵەیە |
+| لە پەڕەکەدا `{{ total }}` وەک خۆی دەردەکەوێت | ناوەکە یەک ناگرێتەوە. `render(..., total=0)` بپشکنە |
+| پەڕەکە دوو جار دەردەکەوێت | `{{ }}`ت لە کۆمێنتێکدا نووسیوە (بڕوانە سەرەوە) |
+| پیتی کوردی وەک `Ø¨Ø§` | `encoding="utf-8"` لە `open()`دا نییە |
+| `NameError: name 're' is not defined` | `import re`ت لەبیر چووە |
+| گۆڕانکاری `app.py` دیار نییە | سێرڤەرەکە دووبارە بکەرەوە |
+| پەڕەکە بەتاڵە | `layout.html` بەتاڵە، یان `{{ content }}`ی تێدا نییە |
+
+---
+
+## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
+
+```
+student-system/
+├── app.py
+├── database.py
+├── students.db
+├── templates/
+│   ├── layout.html     ← نوێ
+│   └── home.html       ← نوێ
+└── static/
+```
+
+- HTML لە فایلی خۆیدایە، نەک لەناو Pythonـدا
+- `render()` شوێنە بەتاڵەکان پڕ دەکاتەوە
+- دەزانیت template دەگۆڕێت بەبێ دووبارەکردنەوەی سێرڤەر
+- دەزانیت بۆچی `{{ }}` لە کۆمێنتدا مەترسیدارە
+
+**ئێستا دەتوانین پەڕەی ڕاستەقینە دروست بکەین** — بەڵام هێشتا ناشیرینن.
+لە هەنگاوی داهاتوودا CSS زیاد دەکەین.
+
+---
+
+> هەنگاوی ٦ لێرە زیاد دەکرێت.

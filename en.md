@@ -38,7 +38,7 @@ For a student who:
 | 2 | The project folder and its structure | ✅ |
 | 3 | The first server — "Hello" | ✅ |
 | 4 | The database (`database.py`) | ✅ |
-| 5 | Templates and the `render()` function | ⏳ |
+| 5 | Templates and the `render()` function | ✅ |
 | 6 | CSS — designing the pages | ⏳ |
 | 7 | **R** — showing the student list | ⏳ |
 | 8 | **C** — the registration form + validation | ⏳ |
@@ -733,4 +733,241 @@ page.
 
 ---
 
-> Step 5 will be added here.
+# Step 5 — Templates
+
+> In this step we take the HTML out of the Python code. It is one of the most
+> important ideas in web work.
+
+## What we do
+
+Write the HTML in its own files, and write a function that fills them in.
+
+## Why
+
+Right now our HTML lives inside Python:
+
+```python
+self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
+```
+
+Fine for one line. But a real page is a hundred lines of HTML. Think about it:
+
+- A designer cannot work in it — it is Python code
+- Changing a colour means editing the file that holds the logic
+- No tool can check your HTML for you
+
+**The fix:** let the HTML live in its own file, and mark the changing parts
+with `{{ name }}`.
+
+---
+
+## 5.1 — `templates/layout.html`
+
+In VS Code click the `templates` folder, then **New File**:
+
+```
+layout.html
+```
+
+Type this:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  {{ content }}
+</body>
+</html>
+```
+
+**This is the frame.** Every page shares the same top and bottom — only the
+content changes.
+
+> `<meta charset="UTF-8">` does the same job as the `charset=utf-8` from
+> Step 3, but this time inside the HTML itself.
+
+## 5.2 — `templates/home.html`
+
+Another file in the same folder:
+
+```html
+<p>Welcome to the Student Registration System.</p>
+<p>Students registered: {{ total }}</p>
+```
+
+**This is the content of the home page** — no `<html>` or `<body>`, because
+those are in `layout.html`.
+
+## 5.3 — The `render()` function
+
+Add this to `app.py`. First at the top:
+
+```python
+import os
+import re
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+import database
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+
+
+def render(template_name, **values):
+    path = os.path.join(TEMPLATE_DIR, template_name)
+    with open(path, encoding="utf-8") as file:
+        page = file.read()
+
+    def replace(match):
+        return str(values.get(match.group(1), ""))
+
+    return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
+```
+
+## 5.4 — Use it
+
+Change `do_GET` to this:
+
+```python
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        body = render("home.html", total=0)
+        page = render("layout.html", title="Students", content=body)
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(page.encode("utf-8"))
+```
+
+**We call it twice:**
+
+1. Fill in `home.html` → that becomes the content
+2. Put that content into `layout.html` → that becomes the whole page
+
+## 5.5 — How does this code work?
+
+| Part | What it does |
+| ---- | ------------ |
+| `**values` | Lets you pass any number of values: `render("home.html", total=0)` |
+| `open(path, encoding="utf-8")` | Reads the file |
+| `re.sub(pattern, replace, page)` | Finds every `{{ name }}` and replaces it |
+| `\{\{\s*(\w+)\s*\}\}` | Matches: two braces, a name, two braces |
+| `\s*` | Allows spaces, so `{{title}}` and `{{ title }}` both work |
+| `match.group(1)` | The name between the braces — `title`, for example |
+| `values.get(name, "")` | Looks the value up. If there is none, puts nothing |
+
+> **What does `\w+` mean?** One or more letters, digits or `_`. So
+> `{{ full_name }}` works, but `{{ full name }}` does not.
+
+---
+
+## 5.6 — Test it
+
+```
+python app.py
+```
+
+then `http://localhost:8000`
+
+## What you should see
+
+# Students
+
+Welcome to the Student Registration System.
+
+Students registered: 0
+
+> To see that it really is HTML, right-click → **View page source**. You will
+> find all the `<html>` and `<head>` you wrote in `layout.html`, with
+> `{{ title }}` replaced by `Students`.
+
+---
+
+## 5.7 — Something pleasant
+
+Leave the server **running**. Open `home.html` and change the text:
+
+```html
+<p>Hello from my own page!</p>
+<p>Students registered: {{ total }}</p>
+```
+
+Save it and just press `F5` in the browser.
+
+**The change is there** — without restarting the server.
+
+**Why?** Because `render()` reads the file **on every request**. Python code,
+on the other hand, is read once, when the server starts.
+
+| What you change | Restart needed? |
+| --------------- | --------------- |
+| `templates/*.html` | **No** — just `F5` |
+| `app.py` or `database.py` | **Yes** |
+
+---
+
+## ⚠️ A bug that really happened
+
+While this project was being built, `layout.html` contained a comment:
+
+```html
+<!-- The changing part goes where {{ content }} is -->
+```
+
+**The result:** the whole page appeared **twice**.
+
+**Why?** `render()` does **not** know the difference between a comment and
+real HTML. It only looks for `{{ }}`. So it replaced the one inside the
+comment too.
+
+> **The rule:** never write `{{ }}` inside a comment.
+>
+> The same is true in PHP, Django and Laravel — a template processor looks at
+> the **text**, not at the meaning of the HTML.
+
+---
+
+## If you get an error
+
+| Error message | Fix |
+| ------------- | --- |
+| `FileNotFoundError: ...templates/home.html` | The file is not in the `templates` folder, or the name is wrong |
+| The page shows `{{ total }}` as it is | The names do not match. Check `render(..., total=0)` |
+| The page appears twice | You wrote `{{ }}` inside a comment (see above) |
+| Kurdish letters show as `Ø¨Ø§` | `encoding="utf-8"` is missing from `open()` |
+| `NameError: name 're' is not defined` | You forgot `import re` |
+| A change to `app.py` does not show | Restart the server |
+| The page is empty | `layout.html` is empty, or has no `{{ content }}` |
+
+---
+
+## ✅ This step is finished when
+
+```
+student-system/
+├── app.py
+├── database.py
+├── students.db
+├── templates/
+│   ├── layout.html     <- new
+│   └── home.html       <- new
+└── static/
+```
+
+- The HTML lives in its own files, not inside Python
+- `render()` fills in the blanks
+- You know a template changes without restarting the server
+- You know why `{{ }}` in a comment is dangerous
+
+**We can now build real pages** — they are just ugly. In the next step we add
+CSS.
+
+---
+
+> Step 6 will be added here.
