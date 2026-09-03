@@ -643,6 +643,8 @@ body {
   text-align: left;
 }
 
+.player-code .answer { color: #8fe3c8; }
+
 .player-code .caret {
   display: inline-block;
   width: .5em;
@@ -1153,7 +1155,12 @@ body {
   /* ---- the step player ---------------------------------------------------
      Replays one step: every block of code in it, typed out in order, with
      the file it belongs in named above. The frames are read out of the page
-     itself, so the replay always matches what the step says.            */
+     itself, so the replay always matches what the step says.
+
+     Only the steps listed in PLAYER_STEPS get a button — the rest follow
+     once this one has been seen in class.                              */
+  var PLAYER_STEPS = [1];
+
   var player = document.getElementById("player");
   var playerWhere = player.querySelector(".where");
   var playerCount = player.querySelector(".count");
@@ -1162,27 +1169,47 @@ body {
   var playerToggle = player.querySelector('[data-act="toggle"]');
   var playerSpeed = player.querySelector('[data-act="speed"]');
 
-  var reel = { frames: [], at: 0, typed: 0, timer: null, playing: false, rate: 1 };
+  var reel = { frames: [], at: 0, typed: 0, shown: false,
+               timer: null, playing: false, rate: 1 };
   var SPEEDS = [1, 2, 0.5];
   var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-  /* every code block between one step heading and the next */
   function framesFor(heading) {
-    var frames = [];
+    var raw = [];
     var node = heading.nextElementSibling;
     while (node && node.tagName !== "H1") {
       var blocks = node.classList && node.classList.contains("block")
-        ? [node] : node.querySelectorAll ? node.querySelectorAll(".block") : [];
+        ? [node]
+        : (node.querySelectorAll ? node.querySelectorAll(".block") : []);
       Array.prototype.forEach.call(blocks, function (block) {
-        var label = block.querySelector(".where span");
         var code = block.querySelector("code");
         if (!code) { return; }
-        frames.push({
+        var label = block.querySelector(".where span");
+        raw.push({
           where: label ? label.textContent : "",
+          lang: code.getAttribute("data-lang") || "",
           code: code.getAttribute("data-copy") || code.textContent
         });
       });
       node = node.nextElementSibling;
+    }
+
+    /* A command and the output printed under it belong together — the
+       output block carries no label, which is how it is recognised. An
+       unlabelled block on its own is an illustration, not a step. */
+    var frames = [];
+    for (var i = 0; i < raw.length; i += 1) {
+      if (!raw[i].where) { continue; }
+      var frame = { where: raw[i].where, text: raw[i].code, out: "" };
+      if (raw[i].lang === "bash" && raw[i + 1] && !raw[i + 1].where) {
+        frame.out = raw[i + 1].code;
+        i += 1;
+      }
+      /* the summary at the end of a step repeats its commands — show
+         each one once */
+      if (!frames.some(function (had) { return had.text === frame.text; })) {
+        frames.push(frame);
+      }
     }
     return frames;
   }
@@ -1198,17 +1225,35 @@ body {
 
   function drawFrame() {
     var frame = reel.frames[reel.at];
-    playerWhere.textContent = frame.where || UI[state.lang].terminal;
+    playerWhere.textContent = frame.where;
     playerCount.textContent = (reel.at + 1) + " / " + reel.frames.length;
-    playerCode.textContent = frame.code.slice(0, reel.typed);
-    if (reel.typed < frame.code.length) {
+
+    playerCode.textContent = frame.text.slice(0, reel.typed);
+    if (reel.typed < frame.text.length) {
       playerCode.appendChild(document.createElement("span")).className = "caret";
+    } else if (frame.out && reel.shown) {
+      var answer = document.createElement("span");
+      answer.className = "answer";
+      answer.textContent = "\n\n" + frame.out;
+      playerCode.appendChild(answer);
     }
     drawDots();
+    playerCode.scrollTop = playerCode.scrollHeight;
   }
 
   function stopTimer() {
     if (reel.timer) { clearInterval(reel.timer); reel.timer = null; }
+  }
+
+  function nextFrame() {
+    if (reel.at + 1 >= reel.frames.length) {
+      setPlaying(false);
+      return;
+    }
+    reel.at += 1;
+    reel.typed = 0;
+    reel.shown = false;
+    setPlaying(true);
   }
 
   function setPlaying(on) {
@@ -1219,30 +1264,34 @@ body {
 
     reel.timer = setInterval(function () {
       var frame = reel.frames[reel.at];
-      if (reel.typed < frame.code.length) {
-        reel.typed = Math.min(frame.code.length, reel.typed + Math.ceil(3 * reel.rate));
+
+      if (reel.typed < frame.text.length) {
+        reel.typed = Math.min(frame.text.length,
+                              reel.typed + Math.ceil(3 * reel.rate));
         drawFrame();
-        playerCode.scrollTop = playerCode.scrollHeight;
         return;
       }
-      /* the frame is fully typed — hold it, then move on */
+
       stopTimer();
-      if (reel.at + 1 >= reel.frames.length) {
-        setPlaying(false);
+      if (frame.out && !reel.shown) {
+        setTimeout(function () {
+          if (!reel.playing) { return; }
+          reel.shown = true;
+          drawFrame();
+          setTimeout(function () { if (reel.playing) { nextFrame(); } },
+                     1400 / reel.rate);
+        }, 450 / reel.rate);
         return;
       }
-      setTimeout(function () {
-        if (!reel.playing) { return; }
-        reel.at += 1;
-        reel.typed = 0;
-        setPlaying(true);
-      }, 900 / reel.rate);
+      setTimeout(function () { if (reel.playing) { nextFrame(); } },
+                 900 / reel.rate);
     }, 16);
   }
 
   function goTo(index) {
     reel.at = Math.max(0, Math.min(reel.frames.length - 1, index));
-    reel.typed = calm ? reel.frames[reel.at].code.length : 0;
+    reel.typed = calm ? reel.frames[reel.at].text.length : 0;
+    reel.shown = calm;
     drawFrame();
   }
 
@@ -1288,10 +1337,12 @@ body {
     if (e.key === "ArrowLeft") { setPlaying(false); goTo(reel.at - 1); }
   });
 
-  /* one button under every step heading that has code in it */
   function addShowMeButtons() {
+    var step = 0;
     reader.querySelectorAll("h1").forEach(function (heading) {
       if (!framesFor(heading).length) { return; }
+      step += 1;
+      if (PLAYER_STEPS.indexOf(step) === -1) { return; }
       var button = document.createElement("button");
       button.type = "button";
       button.className = "show-me";
