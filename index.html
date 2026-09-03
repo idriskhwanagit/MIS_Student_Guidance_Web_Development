@@ -2292,11 +2292,14 @@ body {
       if (here) { active = a; }
     });
 
-    /* the rail scrolls on its own once the guide is long, so bring the
-       current entry into view instead of leaving the reader to hunt */
-    if (active && active !== shown) {
+    /* The rail scrolls on its own once the guide is long, so bring the
+       current entry into view. On a phone the rail is hidden — and
+       scrolling a hidden element throws the page back to the top, so
+       nothing is done unless the rail is really laid out. */
+    var rail = toc.parentElement;
+    if (active && active !== shown && rail.clientHeight > 0) {
       shown = active;
-      var box = toc.parentElement.getBoundingClientRect();
+      var box = rail.getBoundingClientRect();
       var link = active.getBoundingClientRect();
       if (link.top < box.top + 8 || link.bottom > box.bottom - 8) {
         active.scrollIntoView({ block: "nearest" });
