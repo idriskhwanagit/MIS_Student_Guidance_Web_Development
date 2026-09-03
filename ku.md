@@ -40,7 +40,7 @@
 | ٣ | یەکەم سێرڤەر — «Hello» | ✅ |
 | ٤ | داتابەیس (`database.py`) | ✅ |
 | ٥ | Templates و فەنکشنی `render()` | ✅ |
-| ٦ | CSS — دیزاینی پەڕەکان | ⏳ |
+| ٦ | CSS — دیزاینی پەڕەکان | ✅ |
 | ٧ | **R** — پیشاندانی لیستی قوتابیان | ⏳ |
 | ٨ | **C** — فۆڕمی تۆمارکردن + پشکنین | ⏳ |
 | ٩ | **U** — دەستکاریکردن | ⏳ |
@@ -967,4 +967,297 @@ student-system/
 
 ---
 
-> هەنگاوی ٦ لێرە زیاد دەکرێت.
+# هەنگاوی ٦ — CSS
+
+> پەڕەکەمان کاردەکات، بەڵام ناشیرینە. لەم هەنگاوەدا دیزاینی پێدەدەین — و
+> فێری شتێکی نوێ دەبین: سێرڤەرەکەمان دەبێت **فایلی جیا** بنێرێت.
+
+## چی دەکەین
+
+فایلی CSS دەنووسین، و فێری سێرڤەرەکە دەکەین کە بینێرێت.
+
+## بۆچی دوو کار؟
+
+لە HTMLـدا دەتوانیت CSS ڕاستەوخۆ بنووسیت. بەڵام لە فایلێکی جیادا:
+
+- **یەک فایل بۆ هەموو پەڕەکان** — گۆڕینی ڕەنگێک لە یەک شوێندا
+- **وێبگەڕ کاشی دەکات** — پەڕەکان خێراتر دەبنەوە
+- **HTML پاک دەمێنێتەوە** — پێکهاتە لە دیزاین جیا دەبێتەوە
+
+بەڵام مەرجێکی هەیە: وێبگەڕ فایلی CSS بە **داواکارییەکی جیا** دەخوازێت. تا
+ئێستا سێرڤەرەکەمان تەنها یەک شت دەزانێت — هەمان پەڕە بۆ هەموو داواکارییەک.
+
+---
+
+## ٦.١ — `static/style.css`
+
+کلیک لەسەر فۆڵدەری `static` بکە، پاشان **New File**:
+
+```
+style.css
+```
+
+```css
+:root {
+  --brand: #2563eb;
+  --text: #1f2937;
+  --border: #e5e7eb;
+  --background: #f4f6fb;
+  --surface: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background: var(--background);
+  color: var(--text);
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+h1 {
+  margin: 0 0 16px;
+  color: var(--brand);
+  font-size: 24px;
+}
+
+.card {
+  max-width: 700px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+```
+
+> **`:root` چییە؟** شوێنێک بۆ دانانی ڕەنگەکان بە ناوەوە. پاشان بە
+> `var(--brand)` بەکاریان دەهێنیت. ئەگەر ڕۆژێک بتەوێت ڕەنگی سەرەکی بگۆڕیت،
+> **یەک دێڕ** دەگۆڕیت لەبری بیست دێڕ.
+
+## ٦.٢ — بەستنەوەی بە `layout.html`
+
+`templates/layout.html` بکەرەوە و دوو گۆڕانکاری بکە:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  <div class="card">
+    {{ content }}
+  </div>
+</body>
+</html>
+```
+
+**دوو شت زیاد بوون:** دێڕی `<link>`، و `<div class="card">` بەدەوری
+ناوەڕۆکەکەدا.
+
+## ٦.٣ — تاقیکردنەوەیەکی خێرا (کە سەرکەوتوو نابێت)
+
+سێرڤەرەکە دووبارە بکەرەوە و `F5` لێبدە.
+
+**هیچ ناگۆڕێت.** پەڕەکە هەر ناشیرینە.
+
+بۆچی؟ کلیکی ڕاست بکە → **Inspect** → تابی **Network**. دەبینیت
+`style.css` هەیە بەڵام **هیچ CSSـێکی تێدا نییە** — سێرڤەرەکە هەمان پەڕەی
+HTML بۆ ناردووەتەوە.
+
+> **هۆکارەکەی:** `do_GET`ی ئێمە **پرسیار ناکات چی داوا کراوە**. هەر
+> داواکارییەک بێت، هەمان پەڕە دەنێرێتەوە.
+
+ئێستا ئەوە چارەسەر دەکەین.
+
+---
+
+## ٦.٤ — ڕێنیشاندەر (router)
+
+`app.py` بگۆڕە. سەرەتا لە سەرەوە:
+
+```python
+import os
+import re
+import urllib.parse
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+import database
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+```
+
+پاشان کلاسەکە:
+
+```python
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        url = urllib.parse.urlparse(self.path)
+
+        if url.path == "/":
+            self.page_home()
+        elif url.path.startswith("/static/"):
+            self.send_static(url.path[len("/static/"):])
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def page_home(self):
+        body = render("home.html", total=0)
+        page = render("layout.html", title="Students", content=body)
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(page.encode("utf-8"))
+
+    def send_static(self, filename):
+        safe_name = os.path.basename(filename)
+        path = os.path.join(STATIC_DIR, safe_name)
+
+        if not os.path.isfile(path):
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        with open(path, "rb") as file:
+            body = file.read()
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/css; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(body)
+```
+
+## ٦.٥ — ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `urllib.parse.urlparse(self.path)` | لینکەکە دەکاتە پارچە: ڕێڕەو، پارامەتەرەکان، … |
+| `if url.path == "/"` | داوای پەڕەی سەرەکی کراوە |
+| `elif url.path.startswith("/static/")` | داوای فایلێکی `static` کراوە |
+| `else: 404` | ئەم پەڕەیە بوونی نییە |
+| `os.path.basename(filename)` | تەنها ناوی فایلەکە دەهێڵێتەوە |
+| `open(path, "rb")` | بە **بایت** دەیخوێنێتەوە، نەک دەق |
+| `Content-Type: text/css` | بە وێبگەڕ دەڵێت: ئەمە CSSـە |
+
+> ### ⚠️ `os.path.basename` پاراستنە، نەک ڕێکخستن
+>
+> بەبێ ئەو، کەسێک دەیتوانی ئەمە داوا بکات:
+>
+> ```
+> /static/../database.py
+> ```
+>
+> و کۆدی داتابەیسەکەت بخوێنێتەوە. `basename` هەموو ئەو `../`ـانە لادەبات
+> و تەنها `database.py` دەهێڵێتەوە — کە لە فۆڵدەری `static`دا نییە، بۆیە
+> وەڵامەکە `404`ـە.
+>
+> ئەمە بە **Path Traversal** ناسراوە، و یەکێکە لە باوترین هەڵەکانی
+> سێرڤەرەکان.
+
+> **بۆچی `"rb"`؟** CSS وەک خۆی دەنێردرێت، بەبێ هیچ گۆڕانکارییەک. دواتر
+> ئەگەر وێنەش بنێریت، هەمان کۆد کاردەکات — چونکە وێنە دەق نییە، بایتە.
+
+---
+
+## ٦.٦ — تاقیکردنەوە
+
+سێرڤەرەکە دووبارە بکەرەوە:
+
+```
+python app.py
+```
+
+پاشان `http://localhost:8000` — و ئەم جارە `Ctrl + Shift + R` لێبدە.
+
+## چی دەبینیت
+
+- پاشبنەمایەکی کاڵی شین-خۆڵەمێشی
+- ناونیشانێکی شین
+- سندوقێکی سپی بە کەنارەیەکی نەرمەوە
+
+**دیزاینەکە کاری کرد.**
+
+## ٦.٧ — دوو تاقیکردنەوەی زیاتر
+
+**١. CSSەکە ڕاستەوخۆ ببینە:**
+
+```
+http://localhost:8000/static/style.css
+```
+
+دەبێت خودی کۆدی CSSەکە ببینیت. ئەمە هەمان ئەو شتەیە کە وێبگەڕ وەریدەگرێت.
+
+**٢. پەڕەیەکی نەبوو داوا بکە:**
+
+```
+http://localhost:8000/nothing
+```
+
+دەبێت `404` ببینیت. ئێستا سێرڤەرەکەت **دەزانێت** چی داوا کراوە.
+
+---
+
+## ⚠️ کاشی وێبگەڕ
+
+ئەگەر CSSەکە گۆڕی و گۆڕانکارییەکە دەرنەکەوت:
+
+وێبگەڕ فایلی CSS **کاش دەکات** — واتە لە بیریدا دەیهێڵێتەوە تاکو خێراتر
+بێت. `F5` بەس نییە.
+
+**`Ctrl + Shift + R`** بەکاربهێنە — ئەمە کاشەکە ڕەت دەکاتەوە.
+
+> ئەمە جیاوازە لە یاسای هەنگاوی ٥. CSS بەبێ دووبارەکردنەوەی سێرڤەر
+> دەگۆڕێت، بەڵام پێویستی بە `Ctrl + Shift + R` هەیە.
+
+---
+
+## ئەگەر هەڵە دەرکەوت
+
+| کێشە | چارەسەر |
+|------|---------|
+| دیزاینەکە کارناکات | `Ctrl + Shift + R` — کاشی وێبگەڕ |
+| `style.css` وەڵامی `404` دەداتەوە | فایلەکە لە فۆڵدەری `static`دا نییە، یان ناوی هەڵەیە |
+| CSSەکە دەبینم بەڵام کار ناکات | `Content-Type`ەکە `text/css` نییە |
+| `TypeError: a bytes-like object is required` | `open(path, "rb")`ت بەکارنەهێناوە |
+| هەموو پەڕەکان `404` دەدەنەوە | لە `do_GET`دا `if url.path == "/"` بپشکنە |
+| `NameError: urllib is not defined` | `import urllib.parse`ت لەبیر چووە |
+| پەڕەکە بەتاڵە | `{{ content }}` لە `layout.html`دا نەماوە |
+
+---
+
+## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
+
+```
+student-system/
+├── app.py              ← ڕێنیشاندەری تێدایە
+├── database.py
+├── students.db
+├── templates/
+│   ├── layout.html     ← <link>ی تێدایە
+│   └── home.html
+└── static/
+    └── style.css       ← نوێ
+```
+
+- پەڕەکە دیزاینی هەیە
+- سێرڤەرەکە دەزانێت جیاوازی نێوان پەڕە و فایل
+- دەزانیت `404` چییە و کەی ڕوودەدات
+- دەزانیت بۆچی `basename` پاراستنە
+
+**ئێستا هەموو ئامرازەکانمان هەن.** لە هەنگاوی داهاتوودا یەکەم پیتی
+CRUD دەست پێدەکەین: **R** — پیشاندانی لیستی قوتابیان لە داتابەیسەوە.
+
+---
+
+> هەنگاوی ٧ لێرە زیاد دەکرێت.

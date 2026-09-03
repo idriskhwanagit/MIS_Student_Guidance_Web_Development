@@ -39,7 +39,7 @@ For a student who:
 | 3 | The first server — "Hello" | ✅ |
 | 4 | The database (`database.py`) | ✅ |
 | 5 | Templates and the `render()` function | ✅ |
-| 6 | CSS — designing the pages | ⏳ |
+| 6 | CSS — designing the pages | ✅ |
 | 7 | **R** — showing the student list | ⏳ |
 | 8 | **C** — the registration form + validation | ⏳ |
 | 9 | **U** — editing | ⏳ |
@@ -970,4 +970,298 @@ CSS.
 
 ---
 
-> Step 6 will be added here.
+# Step 6 — CSS
+
+> The page works, but it is ugly. In this step we give it a design — and
+> learn something new: our server has to send a **separate file**.
+
+## What we do
+
+Write a CSS file, and teach the server to send it.
+
+## Why two jobs?
+
+You can write CSS directly inside the HTML. But in its own file:
+
+- **One file for every page** — change a colour in one place
+- **The browser caches it** — pages load faster
+- **The HTML stays clean** — structure separated from design
+
+There is a catch, though: the browser asks for the CSS file in a **separate
+request**. So far our server only knows one thing — send the same page to
+every request.
+
+---
+
+## 6.1 — `static/style.css`
+
+Click the `static` folder, then **New File**:
+
+```
+style.css
+```
+
+```css
+:root {
+  --brand: #2563eb;
+  --text: #1f2937;
+  --border: #e5e7eb;
+  --background: #f4f6fb;
+  --surface: #ffffff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 24px;
+  background: var(--background);
+  color: var(--text);
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  line-height: 1.6;
+}
+
+h1 {
+  margin: 0 0 16px;
+  color: var(--brand);
+  font-size: 24px;
+}
+
+.card {
+  max-width: 700px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+```
+
+> **What is `:root`?** A place to give colours names. You then use them with
+> `var(--brand)`. If one day you want to change the main colour, you change
+> **one line** instead of twenty.
+
+## 6.2 — Link it from `layout.html`
+
+Open `templates/layout.html` and make two changes:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title }}</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <h1>{{ title }}</h1>
+  <div class="card">
+    {{ content }}
+  </div>
+</body>
+</html>
+```
+
+**Two additions:** the `<link>` line, and `<div class="card">` around the
+content.
+
+## 6.3 — A quick test (that will fail)
+
+Restart the server and press `F5`.
+
+**Nothing changes.** The page is still ugly.
+
+Why? Right-click → **Inspect** → the **Network** tab. You will see
+`style.css` there, but with **no CSS in it** — the server sent back the same
+HTML page.
+
+> **The reason:** our `do_GET` **never asks what was requested**. Whatever
+> comes in, it sends the same page back.
+
+That is what we fix now.
+
+---
+
+## 6.4 — The router
+
+Change `app.py`. First at the top:
+
+```python
+import os
+import re
+import urllib.parse
+from http.server import BaseHTTPRequestHandler, HTTPServer
+
+import database
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+```
+
+Then the class:
+
+```python
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        url = urllib.parse.urlparse(self.path)
+
+        if url.path == "/":
+            self.page_home()
+        elif url.path.startswith("/static/"):
+            self.send_static(url.path[len("/static/"):])
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def page_home(self):
+        body = render("home.html", total=0)
+        page = render("layout.html", title="Students", content=body)
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(page.encode("utf-8"))
+
+    def send_static(self, filename):
+        safe_name = os.path.basename(filename)
+        path = os.path.join(STATIC_DIR, safe_name)
+
+        if not os.path.isfile(path):
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        with open(path, "rb") as file:
+            body = file.read()
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/css; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(body)
+```
+
+## 6.5 — What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `urllib.parse.urlparse(self.path)` | Splits the URL into pieces: path, parameters, … |
+| `if url.path == "/"` | The home page was asked for |
+| `elif url.path.startswith("/static/")` | A file from `static` was asked for |
+| `else: 404` | This page does not exist |
+| `os.path.basename(filename)` | Keeps only the file name |
+| `open(path, "rb")` | Reads it as **bytes**, not text |
+| `Content-Type: text/css` | Tells the browser: this is CSS |
+
+> ### ⚠️ `os.path.basename` is protection, not tidiness
+>
+> Without it, somebody could ask for this:
+>
+> ```
+> /static/../database.py
+> ```
+>
+> and read your database code. `basename` strips all those `../` and leaves
+> only `database.py` — which is not in the `static` folder, so the answer is
+> `404`.
+>
+> This is known as **path traversal**, and it is one of the most common
+> server mistakes.
+
+> **Why `"rb"`?** CSS is sent exactly as it is, unchanged. Later, if you send
+> images, the same code works — because an image is not text, it is bytes.
+
+---
+
+## 6.6 — Test it
+
+Restart the server:
+
+```
+python app.py
+```
+
+then `http://localhost:8000` — and this time press `Ctrl + Shift + R`.
+
+## What you should see
+
+- A pale blue-grey background
+- A blue heading
+- A white box with a soft border
+
+**The design works.**
+
+## 6.7 — Two more checks
+
+**1. Look at the CSS directly:**
+
+```
+http://localhost:8000/static/style.css
+```
+
+You should see the CSS itself. That is exactly what the browser receives.
+
+**2. Ask for a page that does not exist:**
+
+```
+http://localhost:8000/nothing
+```
+
+You should get a `404`. Your server now **knows** what was asked for.
+
+---
+
+## ⚠️ The browser cache
+
+If you change the CSS and the change does not appear:
+
+The browser **caches** the CSS file — it keeps it in memory to be faster.
+`F5` is not enough.
+
+Use **`Ctrl + Shift + R`** — that ignores the cache.
+
+> This differs from the rule in Step 5. CSS changes without restarting the
+> server, but it does need `Ctrl + Shift + R`.
+
+---
+
+## If you get an error
+
+| Problem | Fix |
+| ------- | --- |
+| The design does not apply | `Ctrl + Shift + R` — the browser cache |
+| `style.css` returns `404` | The file is not in `static`, or the name is wrong |
+| I can see the CSS but it does nothing | The `Content-Type` is not `text/css` |
+| `TypeError: a bytes-like object is required` | You did not use `open(path, "rb")` |
+| Every page returns `404` | Check `if url.path == "/"` in `do_GET` |
+| `NameError: urllib is not defined` | You forgot `import urllib.parse` |
+| The page is empty | `{{ content }}` is missing from `layout.html` |
+
+---
+
+## ✅ This step is finished when
+
+```
+student-system/
+├── app.py              <- has the router
+├── database.py
+├── students.db
+├── templates/
+│   ├── layout.html     <- has the <link>
+│   └── home.html
+└── static/
+    └── style.css       <- new
+```
+
+- The page has a design
+- The server knows the difference between a page and a file
+- You know what a `404` is and when it happens
+- You know why `basename` is protection
+
+**We now have all the tools.** In the next step we start the first letter of
+CRUD: **R** — showing the list of students from the database.
+
+---
+
+> Step 7 will be added here.
