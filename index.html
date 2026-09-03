@@ -456,7 +456,6 @@ body {
 
 .block > .where + pre { border-radius: 0 0 10px 10px; }
 
-.block > .where .hint { color: #6f96a2; font-style: italic; }
 
 /* --- a change, shown as a change -----------------------------------------
    Removed lines are struck through, added lines are marked. The copy
@@ -1412,7 +1411,6 @@ body {
           copy: "کۆپی", copied: "کۆپی کرا",
           keep: "بۆ هێشتنەوەی کۆپییەک، Ctrl + P دابگرە و وەک PDF چاپی بکە",
           terminal: "تێرمیناڵ",
-          copyNew: "کۆپی = بەشەکە دوای گۆڕانکاری",
           showMe: "ئەم هەنگاوە پیشانم بدە",
           loading: "دەقەکە دەهێنرێت…",
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
@@ -1420,7 +1418,6 @@ body {
           copy: "Copy", copied: "Copied",
           keep: "To keep a copy, press Ctrl + P and print to PDF",
           terminal: "Terminal",
-          copyNew: "copy = this block after the change",
           showMe: "Show me this step",
           loading: "Loading the text…",
           failed: "The text could not be loaded. Check your connection and reload the page." }
@@ -1515,9 +1512,7 @@ body {
 
         out.push('<div class="block"><button type="button" class="copy">' +
           UI[state.lang].copy + '</button>' +
-          (where ? '<div class="where"><span>' + esc(where) + '</span>' +
-            (lang === "diff" ? '<span class="hint">' +
-              esc(UI[state.lang].copyNew) + '</span>' : '') + '</div>' : '') +
+          (where ? '<div class="where"><span>' + esc(where) + '</span></div>' : '') +
           '<pre><code data-lang="' + esc(lang) + '" data-copy="' +
           esc(clean) + '">' + inner + '</code></pre></div>');
         continue;
