@@ -45,7 +45,7 @@ For a student who:
 | 9 | **U** — editing | ✅ |
 | 10 | **D** — deleting | ✅ |
 | 11 | Search | ✅ |
-| 12 | Security — SQL Injection and XSS | ⏳ |
+| 12 | Security — SQL Injection and XSS | ✅ |
 | 13 | Final testing and `run.bat` | ⏳ |
 
 > ⏳ = not written yet. This document is completed step by step.
@@ -3054,4 +3054,265 @@ instead we **try to break what we built**.
 
 ---
 
-> Step 12 will be added here.
+# Step 12 — Security: break your own project
+
+> In this step we add **no new features**. We take the defences out, watch
+> what happens, and put them back.
+
+## What we do
+
+Break the project deliberately, so we can see what those two lines
+**actually** do.
+
+## Why this way?
+
+We have said "use `?`" and "use `esc()`". A student does as they are told —
+but does **not believe it** until they have seen the damage with their own
+eyes.
+
+> ⚠️ **Do this on your own project.** This is learning, not attacking. Never
+> try any of it against somebody else's system.
+
+---
+
+## 12.1 — First attack: SQL Injection
+
+### Take the defence out
+
+In `database.py`, find `get_all_students`. Change **the search part** to this
+**dangerous** version:
+
+```python database.py
+        if search:
+            # ❌ dangerous — for this test only
+            sql = ("SELECT * FROM students WHERE full_name LIKE '%"
+                   + search + "%' ORDER BY id DESC")
+            return connection.execute(sql).fetchall()
+```
+
+Restart the server.
+
+### Now attack it
+
+Type this into the search box:
+
+```
+' OR '1'='1
+```
+
+### What you should see
+
+**Every student appears** — although none of them has that name.
+
+<!-- collapse -->
+### Why? Because the statement becomes this
+
+```sql
+SELECT * FROM students WHERE full_name LIKE '%' OR '1'='1%' ORDER BY id DESC
+```
+
+`'1'='1'` is **always true**, so the `OR` makes every row come back.
+
+The user did not type data — they typed **part of the statement**.
+
+> In a real system this is used to:
+>
+> - read every user's details
+> - log in without a password
+> - drop tables
+>
+> It is one of the oldest and most common attacks on the web.
+
+### Put the defence back
+
+Delete the dangerous code and restore the version from Step 11:
+
+```python database.py
+        if search:
+            pattern = "%" + search + "%"
+            return connection.execute(
+                """
+                SELECT * FROM students
+                WHERE full_name  LIKE ?
+                   OR student_id LIKE ?
+                   OR department LIKE ?
+                ORDER BY id DESC
+                """,
+                (pattern, pattern, pattern),
+            ).fetchall()
+```
+
+Restart the server and search for the same text again.
+
+**Now nothing is found** — because SQLite is looking for a student whose name
+is `' OR '1'='1`. Nobody is called that.
+
+> **The difference:** with `?`, the text **never enters the statement**.
+> SQLite parses the statement first, and puts the value in afterwards.
+
+---
+
+## 12.2 — Second attack: XSS
+
+### Take the defence out
+
+In `app.py`, find `esc` and change it to this:
+
+```python app.py
+def esc(value):
+    # ❌ dangerous — for this test only
+    return "" if value is None else str(value)
+```
+
+Restart the server.
+
+### Now attack it
+
+Register a new student, and in the **Full name** field type:
+
+```
+<script>alert('XSS')</script>
+```
+
+### What you should see
+
+When you come back to the list, **an alert box appears**.
+
+That code now lives in the database. **Anybody** who opens that page runs it
+too.
+
+<!-- collapse -->
+### Why is this dangerous?
+
+`alert()` is harmless. But the same place could hold:
+
+| What the code does | The result |
+| ------------------ | ---------- |
+| Sends `document.cookie` away | The user's session is stolen |
+| Draws a fake login form | Passwords are stolen |
+| Records the clicks | Surveillance |
+| Sends requests as the user | Data changed without them knowing |
+
+> **The key point:** the attacker types it **once**. After that it runs for
+> **everyone** who opens the page — the teacher, the administrator, all of
+> them.
+>
+> That is why it is called **stored XSS** — it is saved in the database.
+
+### Put the defence back
+
+```python app.py
+def esc(value):
+    return html.escape("" if value is None else str(value))
+```
+
+Restart the server.
+
+**Now the name appears as text:**
+
+```
+<script>alert('XSS')</script>
+```
+
+<!-- collapse -->
+### What does `html.escape` do?
+
+| Character | Becomes |
+| --------- | ------- |
+| `<` | `&lt;` |
+| `>` | `&gt;` |
+| `&` | `&amp;` |
+| `"` | `&quot;` |
+
+The browser shows `&lt;` as **the character `<`**, but does not read it as
+**the start of a tag**. So the code never runs.
+
+> **The rule:** escape when **showing**, not when **saving**.
+>
+> Why? Because the same data may later go somewhere else — into a CSV, or an
+> email — with different rules. Keep the data **clean**, and make it safe on
+> the way out.
+
+Then delete that student with the *Delete* button.
+
+---
+
+## 12.3 — Third attack: path traversal
+
+This one has been **protected since Step 6**. Let us test it.
+
+Open this in the browser:
+
+```
+http://localhost:8000/static/../database.py
+```
+
+**You should get a `404`.**
+
+<!-- collapse -->
+### Why does it not work?
+
+In `send_static` we wrote this line:
+
+```python
+safe_name = os.path.basename(filename)
+```
+
+`basename` keeps only **the file name**:
+
+| Asked for | After `basename` | Result |
+| --------- | ---------------- | ------ |
+| `style.css` | `style.css` | ✅ sent |
+| `../database.py` | `database.py` | not in `static` → `404` |
+| `../../../etc/passwd` | `passwd` | not in `static` → `404` |
+
+> Without that line anybody could read your server's code — which in a real
+> project might hold passwords and keys.
+
+---
+
+## 12.4 — The list of defences
+
+You now know where every defence is and what it does:
+
+| Attack | Defence | Where it lives |
+| ------ | ------- | -------------- |
+| SQL Injection | `?` in place of values | Every `execute()` in `database.py` |
+| XSS | `esc()` before showing | `build_table_rows`, `page_form`, `page_home` |
+| Path traversal | `os.path.basename` | `send_static` in `app.py` |
+| Duplicate registration | `UNIQUE` + `student_id_exists` | `database.py` |
+| Deleting by accident | `POST` + `confirm()` | `build_table_rows` |
+| `F5` registering twice | `redirect` (PRG) | `save_student` |
+
+## 12.5 — What this project does **not** do
+
+For honesty, know these too. A real system needs them; this one has none:
+
+| Missing | Why it matters |
+| ------- | -------------- |
+| Login | Anybody can change everything |
+| A CSRF token | Another page could submit your forms |
+| HTTPS | The data travels unencrypted |
+| Rate limiting | Somebody could register a thousand students |
+
+> This is a **teaching project**, not a university system. Knowing the
+> difference is the point.
+
+---
+
+## ✅ This step is finished when
+
+- You have seen SQL Injection with your own eyes, and fixed it
+- You have seen XSS with your own eyes, and fixed it
+- You have tested path traversal
+- **Both defences are back in place**
+
+> ⚠️ **Make sure:** the `?` are in `database.py`, and `html.escape` is in
+> `esc()`. If you forgot, your project is unsafe.
+
+**One step left** — the final testing, and getting the project ready to hand
+in.
+
+---
+
+> Step 13 will be added here.
