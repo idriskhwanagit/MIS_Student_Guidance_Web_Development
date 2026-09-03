@@ -44,7 +44,7 @@ For a student who:
 | 8 | **C** — the registration form + validation | ✅ |
 | 9 | **U** — editing | ✅ |
 | 10 | **D** — deleting | ✅ |
-| 11 | Search | ⏳ |
+| 11 | Search | ✅ |
 | 12 | Security — SQL Injection and XSS | ⏳ |
 | 13 | Final testing and `run.bat` | ⏳ |
 
@@ -2799,4 +2799,259 @@ time in your own code.
 
 ---
 
-> Step 11 will be added here.
+# Step 11 — Search
+
+> CRUD is done. Now we add something every real system has.
+
+## What we do
+
+Add a search box that looks by name, number or department.
+
+## Why search matters
+
+With ten students the list is enough. With **five hundred** it is unusable
+without search. It is the difference between a class exercise and a real
+program.
+
+---
+
+## 11.1 — Change `get_all_students`
+
+Delete the old function and put this in:
+
+```python database.py
+def get_all_students(search=""):
+    with get_connection() as connection:
+        if search:
+            pattern = "%" + search + "%"
+            return connection.execute(
+                """
+                SELECT * FROM students
+                WHERE full_name  LIKE ?
+                   OR student_id LIKE ?
+                   OR department LIKE ?
+                ORDER BY id DESC
+                """,
+                (pattern, pattern, pattern),
+            ).fetchall()
+
+        return connection.execute(
+            "SELECT * FROM students ORDER BY id DESC"
+        ).fetchall()
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `search=""` | With nothing passed in, return everyone |
+| `LIKE` | "contains", rather than "equals" |
+| `%` | "anything here" — like `*` when searching for files |
+| `"%" + search + "%"` | `Ahmad` becomes `%Ahmad%` |
+| `OR` three times | Look in the name, the number and the department |
+| `(pattern, pattern, pattern)` | Three `?`, so three values |
+
+> ### How `LIKE` and `%` work
+>
+> | Example | What it matches |
+> | ------- | --------------- |
+> | `LIKE 'Ahmad'` | Only exactly `Ahmad` |
+> | `LIKE 'Ahmad%'` | Anything **starting with** `Ahmad` |
+> | `LIKE '%Ahmad'` | Anything **ending with** `Ahmad` |
+> | `LIKE '%Ahmad%'` | Anything **containing** `Ahmad`, anywhere |
+>
+> We want the third one, so we put a `%` on both sides.
+
+> ### ⚠️ We are still using `?`
+>
+> This is **text the user typed** — the most dangerous place for SQL
+> Injection there is.
+>
+> Look at where the `%` are added: in **Python**, and then the whole string
+> is sent as a `?`. That way SQLite knows it is a value, not a command.
+>
+> Had we written `"... LIKE '%" + search + "%'"`, somebody could drop the
+> table by typing the right thing into the search box.
+
+## 11.2 — Change `templates/home.html`
+
+```html templates/home.html
+<p><a href="/add">+ Register a new student</a></p>
+
+<form class="search" method="GET" action="/">
+  <input type="text" name="q" value="{{ search }}"
+         placeholder="Search by name, student ID or department...">
+  <button type="submit">Search</button>
+  <a href="/">Reset</a>
+</form>
+
+{{ table }}
+```
+
+<!-- collapse -->
+### What does this HTML do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `method="GET"` | **Search is a `GET`** — it changes nothing |
+| `action="/"` | Back to the same home page |
+| `name="q"` | The name of the parameter — `q` for *query* |
+| `value="{{ search }}"` | After searching, the text stays in the box |
+| `placeholder` | Faint guidance while the box is empty |
+| `<a href="/">Reset</a>` | Back to the whole list |
+
+> **Why `GET` and not `POST`?** Because search **changes nothing**. The
+> benefit: the search text goes into the link:
+>
+> ```
+> http://localhost:8000/?q=Ahmad
+> ```
+>
+> So you can **send that link to somebody**, or bookmark it. It is the same
+> rule as Step 10, seen from the other side.
+
+## 11.3 — Change `page_home`
+
+```python app.py
+    def page_home(self, search=""):
+        students = database.get_all_students(search)
+
+        if students:
+            table = render("list.html",
+                           rows=build_table_rows(students),
+                           total=len(students))
+        elif search:
+            table = "<p>No student matches &quot;" + esc(search) + "&quot;.</p>"
+        else:
+            table = "<p>No student is registered yet.</p>"
+
+        body = render("home.html", search=esc(search), table=table)
+        self.send_html(render("layout.html", title="Students", content=body))
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `search=""` | With nothing passed in, everyone |
+| `if students` | There are results → the table |
+| `elif search` | A search was made, and found nothing |
+| `else` | The database is empty |
+| `esc(search)` | Text from the user — it **must** be escaped |
+
+> **Three different states, three different messages.** This is the detail
+> that separates a good program from a poor one:
+>
+> - "No student is registered yet" → **register one**
+> - "No student matches *Ahmad*" → **change the text**
+>
+> If both said the same thing, the user would not know what to do.
+
+## 11.4 — Change the route
+
+In `do_GET`:
+
+```python app.py
+        if url.path == "/":
+            query = urllib.parse.parse_qs(url.query)
+            self.page_home(query.get("q", [""])[0])
+```
+
+> The same shape as `/edit?id=...` in Step 9 — with `q` this time.
+
+## 11.5 — Styling
+
+```css static/style.css
+.search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.search input {
+  flex: 1;
+  max-width: 380px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+```
+
+<!-- collapse -->
+### What does this CSS do?
+
+| Rule | What it does |
+| ---- | ------------ |
+| `display: flex` | The box and the button side by side |
+| `flex: 1` | The search box fills the space |
+| `max-width: 380px` | But never gets too long |
+
+---
+
+## 11.6 — Test it
+
+Restart the server. Add a few students through the form first, then:
+
+**1. Search by name** — type part of a name, `Ah` for example.
+Only those should appear.
+
+**2. Look at the link:**
+
+```
+http://localhost:8000/?q=Ah
+```
+
+The search text is in it.
+
+**3. Search by department** — type `Account`. The accounting students appear.
+
+**4. Search for something that is not there** — type `zzz`.
+The message *No student matches "zzz".*
+
+**5. Press `Reset`** — back to the whole list.
+
+**6. A security test** — type this into the search box:
+
+```
+' OR '1'='1
+```
+
+**Nothing** should be found — because it went through a `?`, so SQLite looks
+for a student whose name is that text.
+
+> Without the `?`, that text would have returned every row — because
+> `'1'='1'` is always true. That is **SQL Injection**.
+
+---
+
+## If you get an error
+
+| Problem | Fix |
+| ------- | --- |
+| Searching changes nothing | Check `page_home(query.get("q", [""])[0])` |
+| The text does not stay in the box | `value="{{ search }}"` is missing, or `search=esc(search)` |
+| It always returns everyone | `if search:` is missing from `get_all_students` |
+| `Incorrect number of bindings` | Three `?` but not three values passed |
+| The wrong message appears | Check the order of `if / elif / else` |
+| The button changes the page | Check `action="/"` |
+
+---
+
+## ✅ This step is finished when
+
+- Search works by name, number and department
+- The search text is in the link and can be shared
+- A search with no results gets its own message
+- `Reset` brings back everyone
+
+**The project is complete.** In the next step we add no features at all —
+instead we **try to break what we built**.
+
+---
+
+> Step 12 will be added here.
