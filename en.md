@@ -679,6 +679,20 @@ You should see:
 The first one is our table. SQLite created the other two itself — one for
 `UNIQUE` and one for `AUTOINCREMENT`.
 
+<!-- collapse -->
+### What does this command do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `python -c "..."` | Runs one line of Python without making a file |
+| `import database` | Brings in our own `database.py` |
+| `get_connection()` | Connects to the database |
+| `SELECT name FROM sqlite_master` | Returns the name of everything SQLite is holding |
+| `sqlite_master` | An internal table: the list of all the tables |
+| `[r['name'] for r in ...]` | Pulls out only the `name` column, rather than the whole row |
+
+---
+
 ### The table is empty — how do we know?
 
 The table exists, but there is no student in it yet. Type this:
@@ -708,20 +722,6 @@ we put data in and this number changes.
 
 > This one is worth keeping. Whenever you are unsure whether something was
 > saved, this command answers it.
-
-<!-- collapse -->
-### What does this command do?
-
-| Part | What it does |
-| ---- | ------------ |
-| `python -c "..."` | Runs one line of Python without making a file |
-| `import database` | Brings in our own `database.py` |
-| `get_connection()` | Connects to the database |
-| `SELECT name FROM sqlite_master` | Returns the name of everything SQLite is holding |
-| `sqlite_master` | An internal table: the list of all the tables |
-| `[r['name'] for r in ...]` | Pulls out only the `name` column, rather than the whole row |
-
----
 
 ## ⚠️ Something that will confuse you later
 
