@@ -456,6 +456,13 @@ body {
 
 .block > .where + pre { border-radius: 0 0 10px 10px; }
 
+/* A result is not code to take away — it is what the screen should show.
+   No copy button, and a label that says so. */
+.block.out > .where {
+  background: #10333d;
+  color: #7fd4c1;
+}
+
 
 /* --- a change, shown as a change -----------------------------------------
    Removed lines are struck through, added lines are marked. The copy
@@ -1411,6 +1418,7 @@ body {
           copy: "کۆپی", copied: "کۆپی کرا",
           keep: "بۆ هێشتنەوەی کۆپییەک، Ctrl + P دابگرە و وەک PDF چاپی بکە",
           terminal: "تێرمیناڵ",
+          output: "ئەنجام",
           showMe: "ئەم هەنگاوە پیشانم بدە",
           loading: "دەقەکە دەهێنرێت…",
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
@@ -1418,6 +1426,7 @@ body {
           copy: "Copy", copied: "Copied",
           keep: "To keep a copy, press Ctrl + P and print to PDF",
           terminal: "Terminal",
+          output: "Output",
           showMe: "Show me this step",
           loading: "Loading the text…",
           failed: "The text could not be loaded. Check your connection and reload the page." }
@@ -1484,8 +1493,10 @@ body {
         flushPara();
         var fence = line.slice(3).trim().split(/\s+/);
         var lang = fence[0] || "";
+        var isOut = lang === "out";
         var where = fence.slice(1).join(" ") ||
-          (lang === "bash" ? UI[state.lang].terminal : "");
+          (lang === "bash" ? UI[state.lang].terminal :
+           (isOut ? UI[state.lang].output : ""));
         var code = [];
         i++;
         while (i < lines.length && !/^```/.test(lines[i])) { code.push(lines[i]); i++; }
@@ -1510,8 +1521,9 @@ body {
           inner = esc(clean);
         }
 
-        out.push('<div class="block"><button type="button" class="copy">' +
-          UI[state.lang].copy + '</button>' +
+        out.push('<div class="block' + (isOut ? ' out' : '') + '">' +
+          (isOut ? '' : '<button type="button" class="copy">' +
+            UI[state.lang].copy + '</button>') +
           (where ? '<div class="where"><span>' + esc(where) + '</span></div>' : '') +
           '<pre><code data-lang="' + esc(lang) + '" data-copy="' +
           esc(clean) + '">' + inner + '</code></pre></div>');

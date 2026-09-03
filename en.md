@@ -104,7 +104,7 @@ python --version
 
 **If Python is installed** — something like this appears:
 
-```
+```out
 Python 3.13.14
 ```
 
@@ -152,7 +152,7 @@ python -c "import sqlite3; print('SQLite OK')"
 
 This should appear:
 
-```
+```out
 SQLite OK
 ```
 
@@ -181,7 +181,7 @@ These two commands work and produce output.
 python --version
 ```
 
-```
+```out
 Python 3.x.x
 ```
 
@@ -189,7 +189,7 @@ Python 3.x.x
 python -c "import sqlite3; print('SQLite OK')"
 ```
 
-```
+```out
 SQLite OK
 ```
 
@@ -285,7 +285,7 @@ dir
 
 ## What you should see
 
-```
+```out
     Directory: C:\Users\...\Documents\student-system
 
 Mode      Name
@@ -321,7 +321,7 @@ only works inside this folder.
 
 Your structure looks like this:
 
-```
+```out
 student-system/
 ├── templates/
 └── static/
@@ -430,7 +430,7 @@ python app.py
 
 In the terminal:
 
-```
+```out
 Server running at http://localhost:8000
 Press Ctrl + C to stop.
 ```
@@ -464,7 +464,7 @@ You do not have to stop the server to run another command.
 
 Click **`+`** at the top of the terminal panel:
 
-```
+```out
 Terminal 1:  python app.py      <- the server, leave it running
 Terminal 2:  anything else
 ```
@@ -574,7 +574,7 @@ Then `python app.py` again.
 
 ## ✅ This step is finished when
 
-```
+```out
 student-system/
 ├── app.py          ← new
 ├── templates/
@@ -739,7 +739,7 @@ python app.py
 
 Look at the VS Code **Explorer**. A new file has appeared:
 
-```
+```out
 student-system/
 ├── app.py
 ├── database.py
@@ -763,7 +763,7 @@ python -c "import database; print([r['name'] for r in database.get_connection().
 
 You should see:
 
-```
+```out
 ['students', 'sqlite_autoindex_students_1', 'sqlite_sequence']
 ```
 
@@ -794,7 +794,7 @@ python -c "import database; print(database.get_connection().execute('SELECT COUN
 
 You should see:
 
-```
+```out
 0
 ```
 
@@ -848,7 +848,7 @@ is built with the new shape.
 
 ## ✅ This step is finished when
 
-```
+```out
 student-system/
 ├── app.py          <- two new lines in it
 ├── database.py     <- new
@@ -1077,7 +1077,7 @@ rule from 5.7.)
 
 ### What you should see
 
-```
+```out
 Hello from my own page!
 Students registered: 0
 -->                              <- this should not be there!
@@ -1101,7 +1101,7 @@ because `home.html` now has a comment.
 That `-->` **closed the comment early**. Everything after it was no longer
 hidden — so it showed.
 
-```
+```out
 <!-- the content goes here: <!-- the home page --> <p>Hello...</p> -->
                                                  ^
                                      the comment ends here
@@ -1140,7 +1140,7 @@ Put it back as it was:
 
 `F5` → the page is right again:
 
-```
+```out
 Welcome to the Student Registration System.
 Students registered: 0
 ```
@@ -1172,7 +1172,7 @@ Students registered: 0
 
 ## ✅ This step is finished when
 
-```
+```out
 student-system/
 ├── app.py
 ├── database.py
@@ -1448,7 +1448,7 @@ Not on an empty part of the page — on the box. Then **Inspect**.
 
 A new panel opens with tabs along its top:
 
-```
+```out
 Elements   Console   Sources   Network   ...
 ```
 
@@ -1463,7 +1463,7 @@ two parts:
 In **Elements** this line is **highlighted** — because you right-clicked
 that box:
 
-```
+```out
 <div class="card">
 ```
 
@@ -1471,7 +1471,7 @@ that box:
 
 **What you see is the very code you wrote:**
 
-```
+```out
 Styles
 ──────────────────────────────────────────
 .card {                      style.css:34
@@ -1574,7 +1574,7 @@ You now have three cases — here is the whole table:
 
 ## ✅ This step is finished when
 
-```
+```out
 student-system/
 ├── app.py              <- has the router
 ├── database.py
@@ -1717,7 +1717,7 @@ python -c "import database; rows = database.get_all_students(); print(len(rows),
 
 ## What you should see
 
-```
+```out
 2 students
 ['Sara Ali', 'Ahmad Karim']
 ```
@@ -1785,7 +1785,7 @@ The line **Students registered: 0** is **gone** — the one that has been
 on the page since 5.6, and was still there at the end of Step 6. Only
 this is left:
 
-```
+```out
 Welcome to the Student Registration System.
 ```
 
@@ -1879,7 +1879,7 @@ Press `Ctrl + S`, then restart the server:
 python app.py
 ```
 
-```
+```out
 Server running at http://localhost:8000
 ```
 
@@ -1978,7 +1978,7 @@ Restart the server and press `Ctrl + Shift + R`.
 
 ## What you should see
 
-```
+```out
 2 student(s)
 
 #   STUDENT ID     FULL NAME     DEPARTMENT   REGISTERED AT
@@ -2010,7 +2010,7 @@ Press `F5`.
 
 **You should see the name as text**, like this:
 
-```
+```out
 <script>alert(1)</script>
 ```
 
@@ -2062,7 +2062,7 @@ python -c "import database; database.get_connection().execute('DELETE FROM stude
 
 ## ✅ This step is finished when
 
-```
+```out
 student-system/
 ├── app.py              <- esc() and build_table_rows()
 ├── database.py         <- add_student() and get_all_students()
@@ -2551,7 +2551,7 @@ So the page in front of you is a `GET /`, not a `POST /add`.
 
 ## ✅ This step is finished when
 
-```
+```out
 student-system/
 ├── app.py              <- do_POST, validation, redirect
 ├── database.py         <- student_id_exists()
@@ -3498,7 +3498,7 @@ Only those should appear.
 
 **2. Look at the link:**
 
-```
+```out
 http://localhost:8000/?q=Ah
 ```
 
@@ -3722,7 +3722,7 @@ Restart the server.
 
 **Now the name appears as text:**
 
-```
+```out
 <script>alert('XSS')</script>
 ```
 
@@ -3930,7 +3930,7 @@ appear.
 
 ## 13.4 — The finished structure
 
-```
+```out
 student-system/
 ├── app.py              the server, the routes, validation
 ├── database.py         the table and the CRUD operations

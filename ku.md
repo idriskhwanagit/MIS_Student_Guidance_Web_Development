@@ -105,7 +105,7 @@ python --version
 
 **ئەگەر Python هەبێت** — شتێکی وەک ئەمە دەردەکەوێت:
 
-```
+```out
 Python 3.13.14
 ```
 
@@ -153,7 +153,7 @@ python -c "import sqlite3; print('SQLite OK')"
 
 دەبێت ئەمە دەربکەوێت:
 
-```
+```out
 SQLite OK
 ```
 
@@ -182,7 +182,7 @@ SQLite OK
 python --version
 ```
 
-```
+```out
 Python 3.x.x
 ```
 
@@ -190,7 +190,7 @@ Python 3.x.x
 python -c "import sqlite3; print('SQLite OK')"
 ```
 
-```
+```out
 SQLite OK
 ```
 
@@ -287,7 +287,7 @@ dir
 
 ## چی دەبینیت
 
-```
+```out
     Directory: C:\Users\...\Documents\student-system
 
 Mode      Name
@@ -323,7 +323,7 @@ d-----    templates
 
 پێکهاتەکەت وا دەبێت:
 
-```
+```out
 student-system/
 ├── templates/
 └── static/
@@ -431,7 +431,7 @@ python app.py
 
 لە تێرمیناڵدا:
 
-```
+```out
 Server running at http://localhost:8000
 Press Ctrl + C to stop.
 ```
@@ -466,7 +466,7 @@ Press Ctrl + C to stop.
 
 کلیک لە **`+`** بکە لە سەرەوەی پانێڵی تێرمیناڵ:
 
-```
+```out
 تێرمیناڵ ١:  python app.py      ← سێرڤەرەکە، وا بیهێڵەوە
 تێرمیناڵ ٢:  هەر فەرمانێکی تر
 ```
@@ -577,7 +577,7 @@ taskkill /IM python.exe /F
 
 ## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
 
-```
+```out
 student-system/
 ├── app.py          ← نوێ
 ├── templates/
@@ -740,7 +740,7 @@ python app.py
 
 سەیری **Explorer**ی VS Code بکە. فایلێکی نوێ دەردەکەوێت:
 
-```
+```out
 student-system/
 ├── app.py
 ├── database.py
@@ -764,7 +764,7 @@ python -c "import database; print([r['name'] for r in database.get_connection().
 
 دەبێت ئەمە دەربکەوێت:
 
-```
+```out
 ['students', 'sqlite_autoindex_students_1', 'sqlite_sequence']
 ```
 
@@ -795,7 +795,7 @@ python -c "import database; print(database.get_connection().execute('SELECT COUN
 
 دەبێت ئەمە دەربکەوێت:
 
-```
+```out
 0
 ```
 
@@ -847,7 +847,7 @@ python -c "import database; print(database.get_connection().execute('SELECT COUN
 
 ## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
 
-```
+```out
 student-system/
 ├── app.py          ← دوو دێڕی نوێی تێدایە
 ├── database.py     ← نوێ
@@ -1076,7 +1076,7 @@ Students registered: 0
 
 ### چی دەبینیت
 
-```
+```out
 Hello from my own page!
 Students registered: 0
 -->                              ← ئەمە زیادە و دەبێت لابچێت
@@ -1100,7 +1100,7 @@ Students registered: 0
 ئەو `-->`ـە **کۆمێنتەکەی بە زوویی داخست**. هەرچی دوای ئەو بوو، ئیتر
 شاردراوە نەبوو — دەرکەوت.
 
-```
+```out
 <!-- the content goes here: <!-- the home page --> <p>Hello...</p> -->
                                                  ↑
                                     لێرە کۆمێنتەکە کۆتایی هات
@@ -1139,7 +1139,7 @@ Students registered: 0
 
 `F5` → پەڕەکە دیسان ڕێکە:
 
-```
+```out
 Welcome to the Student Registration System.
 Students registered: 0
 ```
@@ -1171,7 +1171,7 @@ Students registered: 0
 
 ## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
 
-```
+```out
 student-system/
 ├── app.py
 ├── database.py
@@ -1447,7 +1447,7 @@ python app.py
 
 پەنجەرەیەکی نوێ دەکرێتەوە کە لە سەرەوەی خۆیدا چەند تابێکی هەیە:
 
-```
+```out
 Elements   Console   Sources   Network   ...
 ```
 
@@ -1462,7 +1462,7 @@ Elements   Console   Sources   Network   ...
 لە **Elements**دا ئەم دێڕە **بە ڕەنگ هەڵبژێردراوە** — چونکە کلیکی ڕاستت
 لەسەر ئەو سندوقە کرد:
 
-```
+```out
 <div class="card">
 ```
 
@@ -1470,7 +1470,7 @@ Elements   Console   Sources   Network   ...
 
 **ئەوەی دەبینیت، هەمان ئەو کۆدەیە کە خۆت نووسیوتە:**
 
-```
+```out
 Styles
 ──────────────────────────────────────────
 .card {                      style.css:34
@@ -1571,7 +1571,7 @@ http://localhost:8000/nothing
 
 ## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
 
-```
+```out
 student-system/
 ├── app.py              ← ڕێنیشاندەری تێدایە
 ├── database.py
@@ -1714,7 +1714,7 @@ python -c "import database; rows = database.get_all_students(); print(len(rows),
 
 ## چی دەبینیت
 
-```
+```out
 2 students
 ['Sara Ali', 'Ahmad Karim']
 ```
@@ -1782,7 +1782,7 @@ python -c "import database; rows = database.get_all_students(); print(len(rows),
 لەسەر پەڕەکە بوو و لە کۆتایی هەنگاوی ٦یشدا دەتبینی. تەنها ئەمە
 دەمێنێتەوە:
 
-```
+```out
 Welcome to the Student Registration System.
 ```
 
@@ -1876,7 +1876,7 @@ Welcome to the Student Registration System.
 python app.py
 ```
 
-```
+```out
 Server running at http://localhost:8000
 ```
 
@@ -1975,7 +1975,7 @@ tbody tr:last-child td {
 
 ## چی دەبینیت
 
-```
+```out
 2 student(s)
 
 #   STUDENT ID     FULL NAME     DEPARTMENT   REGISTERED AT
@@ -2006,7 +2006,7 @@ python -c "import database; database.add_student(student_id='MIS-2025-003', full
 
 **دەبێت ناوەکە وەک دەق ببینیت**، بەم شێوەیە:
 
-```
+```out
 <script>alert(1)</script>
 ```
 
@@ -2058,7 +2058,7 @@ python -c "import database; database.get_connection().execute('DELETE FROM stude
 
 ## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
 
-```
+```out
 student-system/
 ├── app.py              ← esc() و build_table_rows()
 ├── database.py         ← add_student() و get_all_students()
@@ -2546,7 +2546,7 @@ self.redirect("/")
 
 ## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
 
-```
+```out
 student-system/
 ├── app.py              ← do_POST، پشکنین، redirect
 ├── database.py         ← student_id_exists()
@@ -3492,7 +3492,7 @@ http://localhost:8000/delete?id=1
 
 **٢. سەیری لینکەکە بکە:**
 
-```
+```out
 http://localhost:8000/?q=Ah
 ```
 
@@ -3715,7 +3715,7 @@ def esc(value):
 
 **ئێستا ناوەکە وەک دەق دەردەکەوێت:**
 
-```
+```out
 <script>alert('XSS')</script>
 ```
 
@@ -3926,7 +3926,7 @@ pause
 
 ## ١٣.٤ — پێکهاتەی کۆتایی
 
-```
+```out
 student-system/
 ├── app.py              سێرڤەر، ڕێڕەوەکان، پشکنین
 ├── database.py         خشتەکە و کردارەکانی CRUD
