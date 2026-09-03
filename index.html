@@ -782,6 +782,9 @@ body {
         while (i < lines.length) {
           var ahead = /^(#{1,6})\s+/.exec(lines[i]);
           if (ahead && ahead[1].length <= depth) { break; }
+          /* a marker always opens a section of its own — without this it
+             would be swallowed by the box above it */
+          if (/^<!--\s*collapse\s*-->\s*$/.test(lines[i])) { break; }
           inside.push(lines[i]);
           i++;
         }
