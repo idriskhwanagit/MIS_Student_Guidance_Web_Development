@@ -1186,20 +1186,19 @@ That is what we fix now.
 
 ## 6.4 — The router
 
-Change `app.py`. First **delete** the top of the file (the `import` lines
-and `BASE_DIR`) and put this in its place:
+Change `app.py`. First at the top:
 
-```python app.py
-import os
-import re
-import urllib.parse
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-import database
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
-STATIC_DIR = os.path.join(BASE_DIR, "static")
+```diff app.py
+ import os
+ import re
++import urllib.parse
+ from http.server import BaseHTTPRequestHandler, HTTPServer
+ 
+ import database
+ 
+ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+ TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
++STATIC_DIR = os.path.join(BASE_DIR, "static")
 ```
 
 Then the class:
@@ -2339,7 +2338,7 @@ Change the function like this:
 
 ## 9.3 — Change `templates/form.html`
 
-Delete everything in it and put this in its place. Three changes: a hidden field, a variable action, and a variable button.
+Three changes: a hidden field, a variable action, and a variable button.
 
 ```diff templates/form.html
  <h2>{{ heading }}</h2>
@@ -2416,38 +2415,42 @@ Delete everything in it and put this in its place. Three changes: a hidden field
 
 Change the function like this:
 
-```python app.py
-    def page_form(self, row_id="", errors="", values=None):
-        student = database.get_student(row_id) if row_id else None
-
-        if row_id and student is None:
-            self.send_response(404)
-            self.end_headers()
-            return
-
-        if values is None:
-            values = dict(student) if student else {}
-
-        is_edit = student is not None
-        gender = values.get("gender", "")
-
-        body = render(
-            "form.html",
-            heading="Edit student" if is_edit else "Register a new student",
-            action="/edit" if is_edit else "/add",
-            submit_label="Save changes" if is_edit else "Register student",
-            row_id=esc(values.get("id", "")),
-            errors=errors,
-            student_id=esc(values.get("student_id", "")),
-            full_name=esc(values.get("full_name", "")),
-            email=esc(values.get("email", "")),
-            phone=esc(values.get("phone", "")),
-            departments=build_department_options(values.get("department", "")),
-            male_checked=" checked" if gender == "Male" else "",
-            female_checked=" checked" if gender == "Female" else "",
-        )
-        title = "Edit student" if is_edit else "New student"
-        self.send_html(render("layout.html", title=title, content=body))
+```diff app.py
+-    def page_form(self, errors="", values=None):
+-        values = values or {}
++    def page_form(self, row_id="", errors="", values=None):
++        student = database.get_student(row_id) if row_id else None
++
++        if row_id and student is None:
++            self.send_response(404)
++            self.end_headers()
++            return
++
++        if values is None:
++            values = dict(student) if student else {}
++
++        is_edit = student is not None
++        gender = values.get("gender", "")
++
+         body = render(
+             "form.html",
+-            heading="Register a new student",
++            heading="Edit student" if is_edit else "Register a new student",
++            action="/edit" if is_edit else "/add",
++            submit_label="Save changes" if is_edit else "Register student",
++            row_id=esc(values.get("id", "")),
+             errors=errors,
+             student_id=esc(values.get("student_id", "")),
+             full_name=esc(values.get("full_name", "")),
+             email=esc(values.get("email", "")),
+             phone=esc(values.get("phone", "")),
+             departments=build_department_options(values.get("department", "")),
++            male_checked=" checked" if gender == "Male" else "",
++            female_checked=" checked" if gender == "Female" else "",
+         )
+-        self.send_html(render("layout.html", title="New student", content=body))
++        title = "Edit student" if is_edit else "New student"
++        self.send_html(render("layout.html", title=title, content=body))
 ```
 
 <!-- collapse -->
@@ -2468,7 +2471,7 @@ Change the function like this:
 
 ## 9.5 — Change `save_student`
 
-Delete the `save_student` function **completely** and put this in its place:
+Change `save_student` like this:
 
 ```diff app.py
 -    def save_student(self):
@@ -3095,10 +3098,11 @@ Change `page_home` again, like this:
 
 In `do_GET`:
 
-```python app.py
-        if url.path == "/":
-            query = urllib.parse.parse_qs(url.query)
-            self.page_home(query.get("q", [""])[0])
+```diff app.py
+         if url.path == "/":
+-            self.page_home()
++            query = urllib.parse.parse_qs(url.query)
++            self.page_home(query.get("q", [""])[0])
 ```
 
 > The same shape as `/edit?id=...` in Step 9 — with `q` this time.
