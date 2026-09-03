@@ -679,6 +679,36 @@ You should see:
 The first one is our table. SQLite created the other two itself — one for
 `UNIQUE` and one for `AUTOINCREMENT`.
 
+### The table is empty — how do we know?
+
+The table exists, but there is no student in it yet. Type this:
+
+```bash
+python -c "import database; print(database.get_connection().execute('SELECT COUNT(*) FROM students').fetchone()[0])"
+```
+
+You should see:
+
+```
+0
+```
+
+**Zero means the table is empty** — which is right at this point. In Step 7
+we put data in and this number changes.
+
+<!-- collapse -->
+### What does this command do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `SELECT COUNT(*)` | Counts the rows, rather than reading them |
+| `FROM students` | In the students table |
+| `.fetchone()` | Takes one row — the result of the count |
+| `[0]` | The first column of that row, which is the number |
+
+> This one is worth keeping. Whenever you are unsure whether something was
+> saved, this command answers it.
+
 <!-- collapse -->
 ### What does this command do?
 
