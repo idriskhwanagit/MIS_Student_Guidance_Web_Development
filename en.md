@@ -43,7 +43,7 @@ For a student who:
 | 7 | **R** — showing the student list | ✅ |
 | 8 | **C** — the registration form + validation | ✅ |
 | 9 | **U** — editing | ✅ |
-| 10 | **D** — deleting | ⏳ |
+| 10 | **D** — deleting | ✅ |
 | 11 | Search | ⏳ |
 | 12 | Security — SQL Injection and XSS | ⏳ |
 | 13 | Final testing and `run.bat` | ⏳ |
@@ -2573,4 +2573,230 @@ shortest step but carries an important point about safety.
 
 ---
 
-> Step 10 will be added here.
+# Step 10 — **D** in CRUD: deleting
+
+> The shortest step — and the one with the most important safety question in
+> it.
+
+## What we do
+
+Add a delete button, with a confirmation.
+
+## Why deleting is different
+
+`Create` and `Update` can be corrected — you can type it again.
+**Deleting does not come back.** So two things are needed:
+
+1. **A `POST`, not an ordinary link**
+2. **A confirmation**
+
+---
+
+## 10.1 — A function for `database.py`
+
+```python database.py
+def delete_student(row_id):
+    with get_connection() as connection:
+        connection.execute("DELETE FROM students WHERE id = ?", (row_id,))
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `DELETE FROM students` | Removes a row |
+| `WHERE id = ?` | **Only that row** |
+| `?` | The same protection against SQL Injection |
+
+> ⚠️ `DELETE FROM students;` without a `WHERE` removes **every student**.
+> The same warning as Step 9.
+
+## 10.2 — The button in the table
+
+Change `build_table_rows` — the `Actions` column now holds two things:
+
+```python app.py
+def build_table_rows(students):
+    rows = []
+    for number, student in enumerate(students, start=1):
+        rows.append(
+            """
+            <tr>
+              <td>{number}</td>
+              <td>{student_id}</td>
+              <td>{full_name}</td>
+              <td>{department}</td>
+              <td>{created_at}</td>
+              <td class="actions">
+                <a href="/edit?id={row_id}">Edit</a>
+                <form method="POST" action="/delete" class="inline"
+                      onsubmit="return confirm('Delete this student?');">
+                  <input type="hidden" name="id" value="{row_id}">
+                  <button type="submit" class="danger">Delete</button>
+                </form>
+              </td>
+            </tr>
+            """.format(
+                number=number,
+                row_id=student["id"],
+                student_id=esc(student["student_id"]),
+                full_name=esc(student["full_name"]),
+                department=esc(student["department"]),
+                created_at=esc(student["created_at"]),
+            )
+        )
+    return "".join(rows)
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `<form method="POST">` | A small form on every row |
+| `<input type="hidden" name="id">` | Which student to delete |
+| `onsubmit="return confirm(...)"` | The confirmation — on `Cancel`, nothing happens |
+| `class="inline"` | Stops the form starting a new line |
+| `class="danger"` | The button in red |
+
+> ### ⚠️ Why a form and not a link?
+>
+> If we had written:
+>
+> ```html
+> <a href="/delete?id=3">Delete</a>
+> ```
+>
+> then **anything that opens links** would delete students:
+>
+> - browsers **prefetch** links to feel faster
+> - Google and other crawlers follow links
+> - any browser extension
+>
+> The rule: **a `GET` must never change anything.** It is covered in the
+> theory lesson.
+>
+> A `POST` is only sent when a person clicks.
+
+> ### 🤔 Is `confirm()` protection?
+>
+> **No.** It is JavaScript, on the client — removable with `F12`, like the
+> `required` in Step 8.
+>
+> But its purpose is different: it guards against **human error**, not
+> against an attacker. Somebody who deletes on purpose is allowed to.
+
+## 10.3 — The delete route
+
+In `do_POST`, after `/edit`:
+
+```python app.py
+        elif url.path == "/delete":
+            form = self.read_form()
+            database.delete_student(form.get("id"))
+            self.redirect("/")
+```
+
+> It is only in `do_POST` — **not** in `do_GET`. That is the rule we just
+> talked about.
+
+## 10.4 — Styling
+
+At the end of `static/style.css`:
+
+```css static/style.css
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.inline {
+  display: inline;
+  margin: 0;
+}
+
+.danger {
+  padding: 4px 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  font-size: 13px;
+}
+
+.danger:hover {
+  background: #dc2626;
+  color: #fff;
+}
+```
+
+<!-- collapse -->
+### What does this CSS do?
+
+| Rule | What it does |
+| ---- | ------------ |
+| `.actions { display: flex }` | *Edit* and *Delete* side by side |
+| `.inline { display: inline }` | The form behaves like text, not a block |
+| `.danger` | Red, so the user knows it is dangerous |
+| `:hover` | It darkens as the mouse comes over it |
+
+> Colour here is **information, not decoration**. A red button says "careful".
+
+---
+
+## 10.5 — Test it
+
+Restart the server, `Ctrl + Shift + R`.
+
+**1. Click Delete** — a question appears.
+
+**2. Press `Cancel`** — nothing happens. The student is still there.
+
+**3. Do it again and press `OK`** — the student is removed and the list
+reloads.
+
+**4. Delete them all** — you should see *No student is registered yet.*
+That is the `else` we wrote in Step 7.
+
+**5. Test the rule:**
+
+```bash
+http://localhost:8000/delete?id=1
+```
+
+Open that in the browser. You should get a **`404`**, and **nothing is
+deleted** — because it is a `GET`, not a `POST`.
+
+---
+
+## If you get an error
+
+| Problem | Fix |
+| ------- | --- |
+| The question does not appear | Check `onsubmit="return confirm(...)"` |
+| Nothing is deleted | `elif url.path == "/delete"` is missing from `do_POST` |
+| Every student was deleted! | You forgot `WHERE id = ?` |
+| The button starts a new line | `class="inline"` is missing from the form |
+| I get a `404` when clicking | The form is not `method="POST"` |
+| The page does not refresh after deleting | `self.redirect("/")` is missing |
+
+---
+
+## ✅ This step is finished when
+
+- A red *Delete* button sits beside each student
+- A confirmation appears before deleting
+- `Cancel` does nothing
+- Deleting **cannot** be done with a `GET`
+- When the list empties, the message appears
+
+**🎉 All four letters of CRUD are done.**
+
+The project works now. In the next two steps we add something new (search),
+and then come back to security — the two attacks from the theory lesson, this
+time in your own code.
+
+---
+
+> Step 11 will be added here.
