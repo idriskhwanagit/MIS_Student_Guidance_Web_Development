@@ -1028,10 +1028,13 @@ Save it and just press `F5` in the browser.
 **Why?** Because `render()` reads the file **on every request**. Python code,
 on the other hand, is read once, when the server starts.
 
-| What you change | Restart needed? |
-| --------------- | --------------- |
-| `templates/*.html` | **No** — just `F5` |
-| `app.py` or `database.py` | **Yes** |
+| If you change this | Then do this |
+| ------------------ | ------------ |
+| An HTML file in the `templates` folder | Just `F5` in the browser |
+| `app.py` or `database.py` | `Ctrl + C` → `python app.py` → `F5` |
+
+> **Why:** `render()` reads the HTML file on **every request**, so the change
+> shows at once. Python code is read **once** — when the server starts.
 
 ---
 
@@ -1429,8 +1432,13 @@ The browser **caches** the CSS file — it keeps it in memory to be faster.
 
 Use **`Ctrl + Shift + R`** — that ignores the cache.
 
-> This differs from the rule in Step 5. CSS changes without restarting the
-> server, but it does need `Ctrl + Shift + R`.
+You now have three cases — here is the whole table:
+
+| If you change this | Then do this |
+| ------------------ | ------------ |
+| An HTML file in `templates` | `F5` |
+| `static/style.css` | **`Ctrl + Shift + R`** |
+| `app.py` or `database.py` | `Ctrl + C` → `python app.py` → `F5` |
 
 ---
 
