@@ -1409,11 +1409,50 @@ The table in 6.1.1 describes each rule. But **seeing beats reading**.
 
 **Right-click** on the page → **Inspect**
 
-A panel opens at the bottom or the side. In the **Styles** section, each CSS
-rule has a small **checkbox** beside it.
+A panel opens with two main parts:
 
-Click `<div class="card">` in the HTML part, then switch these three rules
-**off** one at a time — and watch the page:
+- **The top (or left) part** — the page's HTML
+- **The Styles part** — its CSS
+
+### 1. Click the box
+
+In the HTML part, find this line and click it:
+
+```
+<div class="card">
+```
+
+### 2. Now look at the Styles part
+
+**What you see is the very code you wrote:**
+
+```
+Styles
+──────────────────────────────────────────
+.card {                      style.css:34
+  ☑  max-width: 700px;
+  ☑  padding: 20px;
+  ☑  background: #ffffff;
+  ☑  border: 1px solid #e5e7eb;
+  ☑  border-radius: 10px;
+}
+```
+
+Three things to learn here:
+
+| What you see | What it means |
+| ------------ | ------------- |
+| `.card { ... }` | The same rule you wrote in `style.css` |
+| `style.css:34` | **Which file and which line** — click it and you land on that line |
+| ☑ beside each line | A checkbox — you can switch it off |
+
+> **This is the best tool there is for learning CSS.** When a rule of yours
+> does not seem to work, this is where you find out whether it reached the
+> element at all.
+
+### 3. Now switch the checkboxes off
+
+Switch these three rules **off** one at a time — and watch the page:
 
 | Switch this off | What happens |
 | --------------- | ------------ |

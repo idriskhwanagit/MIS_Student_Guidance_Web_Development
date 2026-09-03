@@ -570,6 +570,133 @@ body {
   text-align: center;
 }
 
+/* --- the step player ------------------------------------------------------
+   A silent replay of one step: each block of code typed out in turn, with
+   the file it belongs in named above it. Built from the step's own blocks,
+   so it can never describe something the step does not say.
+   ------------------------------------------------------------------------ */
+.show-me {
+  display: inline-flex;
+  align-items: center;
+  gap: .45rem;
+  margin: 0 0 1.5rem;
+  padding: .5rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 999px;
+  background: var(--accent-wash);
+  color: var(--accent-ink);
+  font-family: var(--f-ui);
+  font-size: .88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.show-me:hover { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); }
+
+.player {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 1.5rem;
+  background: rgba(8, 16, 20, .72);
+  backdrop-filter: blur(3px);
+}
+
+.player-box {
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 54rem);
+  max-height: min(100%, 40rem);
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--code-bg);
+  box-shadow: 0 30px 70px -20px rgba(0, 0, 0, .8);
+}
+
+.player-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: .7rem 1.1rem;
+  background: #0b232c;
+  color: #8fb4bf;
+  font-family: var(--f-mono);
+  font-size: .78rem;
+}
+
+.player-head .where { color: #d8ecf2; font-weight: 600; }
+
+.player-code {
+  flex: 1;
+  margin: 0;
+  padding: 1.1rem 1.25rem;
+  overflow: auto;
+  color: var(--code-ink);
+  font-family: var(--f-mono);
+  font-size: .84rem;
+  line-height: 1.7;
+  white-space: pre;
+  direction: ltr;
+  text-align: left;
+}
+
+.player-code .caret {
+  display: inline-block;
+  width: .5em;
+  background: #8fe3c8;
+  animation: caret 1s steps(2) infinite;
+}
+
+@keyframes caret { 50% { opacity: 0; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .player-code .caret { animation: none; }
+}
+
+.player-bar {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  padding: .65rem 1.1rem;
+  border-top: 1px solid rgba(255, 255, 255, .08);
+  background: #0b232c;
+}
+
+.player-bar button {
+  padding: .35rem .7rem;
+  border: 1px solid rgba(255, 255, 255, .16);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .06);
+  color: #cfe2e8;
+  font-family: var(--f-ui);
+  font-size: .8rem;
+  cursor: pointer;
+}
+
+.player-bar button:hover { background: rgba(255, 255, 255, .14); }
+
+.player-bar .dots {
+  display: flex;
+  gap: .3rem;
+  margin-inline: auto;
+}
+
+.player-bar .dots i {
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, .22);
+}
+
+.player-bar .dots i.on { background: #8fe3c8; }
+
+@media (max-width: 40rem) {
+  .player-bar .dots { display: none; }
+}
+
 /* --- toast --------------------------------------------------------------- */
 .toast {
   position: fixed;
@@ -616,7 +743,7 @@ body {
 @page { margin: 14mm 13mm; }
 
 @media print {
-  .topbar, .rail, .copy, .toast { display: none !important; }
+  .topbar, .rail, .copy, .toast, .show-me, .player { display: none !important; }
   .explain { border: 0; background: none; }
   .explain > summary { padding-inline: 0; color: var(--ink); }
   .explain > :not(summary) { margin-inline: 0; }
@@ -642,6 +769,24 @@ body {
 
   <div class="watermark" id="watermark" hidden aria-hidden="true"></div>
   <div class="toast" id="toast" role="status" hidden></div>
+
+  <div class="player" id="player" hidden aria-hidden="true">
+    <div class="player-box">
+      <div class="player-head">
+        <span class="where"></span>
+        <span class="count"></span>
+      </div>
+      <pre class="player-code"></pre>
+      <div class="player-bar">
+        <button type="button" data-act="prev" title="Previous">◀</button>
+        <button type="button" data-act="toggle" title="Play / pause">⏸</button>
+        <button type="button" data-act="next" title="Next">▶</button>
+        <span class="dots"></span>
+        <button type="button" data-act="speed" title="Speed">1×</button>
+        <button type="button" data-act="close" title="Close">✕</button>
+      </div>
+    </div>
+  </div>
 
   <header class="topbar">
     <div class="brand">
@@ -694,6 +839,7 @@ body {
           keep: "بۆ هێشتنەوەی کۆپییەک، Ctrl + P دابگرە و وەک PDF چاپی بکە",
           terminal: "تێرمیناڵ",
           copyNew: "کۆپی = تەنها کۆدی نوێ",
+          showMe: "ئەم هەنگاوە پیشانم بدە",
           loading: "دەقەکە دەهێنرێت…",
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
     en: { brand: "Student Guide", langLabel: "Language", tocLabel: "Contents",
@@ -701,6 +847,7 @@ body {
           keep: "To keep a copy, press Ctrl + P and print to PDF",
           terminal: "Terminal",
           copyNew: "copy = the new code only",
+          showMe: "Show me this step",
           loading: "Loading the text…",
           failed: "The text could not be loaded. Check your connection and reload the page." }
   };
@@ -968,6 +1115,8 @@ body {
        from the document title — so it follows the guide and its language. */
     document.title = headings.length ? headings[0].text : document.title;
 
+    addShowMeButtons();
+
     /* contents */
     toc.innerHTML = "";
     headings.filter(function (h) { return h.level <= 3; }).forEach(function (h) {
@@ -998,6 +1147,157 @@ body {
       paint();
     })["catch"](function () {
       reader.innerHTML = '<p class="state">' + words.failed + "</p>";
+    });
+  }
+
+  /* ---- the step player ---------------------------------------------------
+     Replays one step: every block of code in it, typed out in order, with
+     the file it belongs in named above. The frames are read out of the page
+     itself, so the replay always matches what the step says.            */
+  var player = document.getElementById("player");
+  var playerWhere = player.querySelector(".where");
+  var playerCount = player.querySelector(".count");
+  var playerCode = player.querySelector(".player-code");
+  var playerDots = player.querySelector(".dots");
+  var playerToggle = player.querySelector('[data-act="toggle"]');
+  var playerSpeed = player.querySelector('[data-act="speed"]');
+
+  var reel = { frames: [], at: 0, typed: 0, timer: null, playing: false, rate: 1 };
+  var SPEEDS = [1, 2, 0.5];
+  var calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* every code block between one step heading and the next */
+  function framesFor(heading) {
+    var frames = [];
+    var node = heading.nextElementSibling;
+    while (node && node.tagName !== "H1") {
+      var blocks = node.classList && node.classList.contains("block")
+        ? [node] : node.querySelectorAll ? node.querySelectorAll(".block") : [];
+      Array.prototype.forEach.call(blocks, function (block) {
+        var label = block.querySelector(".where span");
+        var code = block.querySelector("code");
+        if (!code) { return; }
+        frames.push({
+          where: label ? label.textContent : "",
+          code: code.getAttribute("data-copy") || code.textContent
+        });
+      });
+      node = node.nextElementSibling;
+    }
+    return frames;
+  }
+
+  function drawDots() {
+    playerDots.innerHTML = "";
+    reel.frames.forEach(function (_, index) {
+      var dot = document.createElement("i");
+      if (index === reel.at) { dot.className = "on"; }
+      playerDots.appendChild(dot);
+    });
+  }
+
+  function drawFrame() {
+    var frame = reel.frames[reel.at];
+    playerWhere.textContent = frame.where || UI[state.lang].terminal;
+    playerCount.textContent = (reel.at + 1) + " / " + reel.frames.length;
+    playerCode.textContent = frame.code.slice(0, reel.typed);
+    if (reel.typed < frame.code.length) {
+      playerCode.appendChild(document.createElement("span")).className = "caret";
+    }
+    drawDots();
+  }
+
+  function stopTimer() {
+    if (reel.timer) { clearInterval(reel.timer); reel.timer = null; }
+  }
+
+  function setPlaying(on) {
+    reel.playing = on;
+    playerToggle.textContent = on ? "⏸" : "▶";
+    stopTimer();
+    if (!on) { return; }
+
+    reel.timer = setInterval(function () {
+      var frame = reel.frames[reel.at];
+      if (reel.typed < frame.code.length) {
+        reel.typed = Math.min(frame.code.length, reel.typed + Math.ceil(3 * reel.rate));
+        drawFrame();
+        playerCode.scrollTop = playerCode.scrollHeight;
+        return;
+      }
+      /* the frame is fully typed — hold it, then move on */
+      stopTimer();
+      if (reel.at + 1 >= reel.frames.length) {
+        setPlaying(false);
+        return;
+      }
+      setTimeout(function () {
+        if (!reel.playing) { return; }
+        reel.at += 1;
+        reel.typed = 0;
+        setPlaying(true);
+      }, 900 / reel.rate);
+    }, 16);
+  }
+
+  function goTo(index) {
+    reel.at = Math.max(0, Math.min(reel.frames.length - 1, index));
+    reel.typed = calm ? reel.frames[reel.at].code.length : 0;
+    drawFrame();
+  }
+
+  function openPlayer(heading) {
+    reel.frames = framesFor(heading);
+    if (!reel.frames.length) { return; }
+    reel.rate = 1;
+    playerSpeed.textContent = "1×";
+    player.hidden = false;
+    player.removeAttribute("aria-hidden");
+    goTo(0);
+    if (!calm) { setPlaying(true); }
+  }
+
+  function closePlayer() {
+    setPlaying(false);
+    player.hidden = true;
+    player.setAttribute("aria-hidden", "true");
+  }
+
+  player.addEventListener("click", function (e) {
+    if (e.target === player) { closePlayer(); return; }
+    var act = e.target.closest("[data-act]");
+    if (!act) { return; }
+    var what = act.getAttribute("data-act");
+
+    if (what === "close") { closePlayer(); }
+    if (what === "toggle") { setPlaying(!reel.playing); }
+    if (what === "prev") { setPlaying(false); goTo(reel.at - 1); }
+    if (what === "next") { setPlaying(false); goTo(reel.at + 1); }
+    if (what === "speed") {
+      reel.rate = SPEEDS[(SPEEDS.indexOf(reel.rate) + 1) % SPEEDS.length];
+      act.textContent = reel.rate + "×";
+      if (reel.playing) { setPlaying(true); }
+    }
+  });
+
+  document.addEventListener("keydown", function (e) {
+    if (player.hidden) { return; }
+    if (e.key === "Escape") { closePlayer(); }
+    if (e.key === " ") { e.preventDefault(); setPlaying(!reel.playing); }
+    if (e.key === "ArrowRight") { setPlaying(false); goTo(reel.at + 1); }
+    if (e.key === "ArrowLeft") { setPlaying(false); goTo(reel.at - 1); }
+  });
+
+  /* one button under every step heading that has code in it */
+  function addShowMeButtons() {
+    reader.querySelectorAll("h1").forEach(function (heading) {
+      if (!framesFor(heading).length) { return; }
+      var button = document.createElement("button");
+      button.type = "button";
+      button.className = "show-me";
+      button.textContent = "▶  " + UI[state.lang].showMe;
+      button.addEventListener("click", function () { openPlayer(heading); });
+      heading.parentNode.insertBefore(button, heading.nextSibling);
     });
   }
 
