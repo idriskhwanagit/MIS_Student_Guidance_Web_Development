@@ -1127,7 +1127,23 @@ Those two lines were only for the test. Take them both out:
  <p>Students registered: {{ total }}</p>
 ```
 
-`F5` → the page is right again.
+### And one last thing — put the sentence back
+
+`Hello from my own page!` was written in 5.7, and that was only a test too.
+Put it back as it was:
+
+```diff templates/home.html
+-<p>Hello from my own page!</p>
++<p>Welcome to the Student Registration System.</p>
+ <p>Students registered: {{ total }}</p>
+```
+
+`F5` → the page is right again:
+
+```
+Welcome to the Student Registration System.
+Students registered: 0
+```
 
 > ⚠️ **Both of them matter.** If they stay, your files will not match the
 > ones in the guide from here on, and the changes shown in later steps will
@@ -1770,6 +1786,10 @@ The line **Students registered: 0** is **gone**. Only this is left:
 ```
 Welcome to the Student Registration System.
 ```
+
+> If you see **`Hello from my own page!`** instead, you never put the
+> sentence back at the end of Step 5. It is not serious — but put it back
+> now, because 8.7 changes this line and it has to match the guide.
 
 **Why?** We removed `{{ total }}`, and nothing has been passed to the new
 `{{ table }}` yet. When `render()` meets a name it was given no value for,

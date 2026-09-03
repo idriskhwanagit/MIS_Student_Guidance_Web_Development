@@ -1126,7 +1126,23 @@ Students registered: 0
  <p>Students registered: {{ total }}</p>
 ```
 
-`F5` → پەڕەکە دیسان ڕێکە.
+### و دوا شت — دەقەکەش بگەڕێنەوە
+
+لە ٥.٧دا `Hello from my own page!`مان نووسی، ئەویش تەنها تاقیکردنەوە بوو.
+بیگەڕێنەوە بۆ ئەوەی بوو:
+
+```diff templates/home.html
+-<p>Hello from my own page!</p>
++<p>Welcome to the Student Registration System.</p>
+ <p>Students registered: {{ total }}</p>
+```
+
+`F5` → پەڕەکە دیسان ڕێکە:
+
+```
+Welcome to the Student Registration System.
+Students registered: 0
+```
 
 > ⚠️ **گرنگە هەردووکیان لابەریت.** ئەگەر بمێننەوە، لە هەنگاوەکانی
 > داهاتوودا فایلەکانت وەک ئەوانەی ڕێنماییەکە نابن، و گۆڕانکارییەکان
@@ -1767,6 +1783,10 @@ python -c "import database; rows = database.get_all_students(); print(len(rows),
 ```
 Welcome to the Student Registration System.
 ```
+
+> ئەگەر لەبری ئەمە **`Hello from my own page!`**ت بینی، واتە دەقەکەت لە
+> کۆتایی هەنگاوی ٥دا نەگەڕاندووەتەوە. کێشەیەکی گەورە نییە — بەڵام ئێستا
+> بیگەڕێنەوە، چونکە لە ٨.٧دا ئەم دێڕە دەگۆڕین و پێویستە وەک ڕێنماییەکە بێت.
 
 **بۆچی؟** `{{ total }}`مان لابرد، و `{{ table }}`ی نوێش هێشتا هیچی
 پێنەنێردراوە. کاتێک `render()` ناوێک دەبینێت کە نرخێکی بۆ نەنێردراوە، بە
