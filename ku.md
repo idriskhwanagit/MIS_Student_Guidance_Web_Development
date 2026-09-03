@@ -1778,7 +1778,9 @@ python -c "import database; rows = database.get_all_students(); print(len(rows),
 > لەبیرت بێت لە هەنگاوی ٥: فایلی template لە **هەر داواکارییەکدا**
 > دەخوێنرێتەوە، بۆیە گۆڕانکاری تێیدا دەستبەجێ دەردەکەوێت.
 
-دێڕی **Students registered: 0** **نامێنێت**. تەنها ئەمە دەمێنێتەوە:
+دێڕی **Students registered: 0** **نامێنێت** — ئەو دێڕەی لە ٥.٦ـەوە
+لەسەر پەڕەکە بوو و لە کۆتایی هەنگاوی ٦یشدا دەتبینی. تەنها ئەمە
+دەمێنێتەوە:
 
 ```
 Welcome to the Student Registration System.

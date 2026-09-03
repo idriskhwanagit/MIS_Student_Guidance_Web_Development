@@ -1781,7 +1781,9 @@ A new file in the `templates` folder:
 > Remember from Step 5: a template file is read on **every request**, so a
 > change inside one shows up immediately.
 
-The line **Students registered: 0** is **gone**. Only this is left:
+The line **Students registered: 0** is **gone** — the one that has been
+on the page since 5.6, and was still there at the end of Step 6. Only
+this is left:
 
 ```
 Welcome to the Student Registration System.
