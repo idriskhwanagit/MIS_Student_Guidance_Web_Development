@@ -40,7 +40,7 @@ For a student who:
 | 4 | The database (`database.py`) | ✅ |
 | 5 | Templates and the `render()` function | ✅ |
 | 6 | CSS — designing the pages | ✅ |
-| 7 | **R** — showing the student list | ⏳ |
+| 7 | **R** — showing the student list | ✅ |
 | 8 | **C** — the registration form + validation | ⏳ |
 | 9 | **U** — editing | ⏳ |
 | 10 | **D** — deleting | ⏳ |
@@ -1264,4 +1264,311 @@ CRUD: **R** — showing the list of students from the database.
 
 ---
 
-> Step 7 will be added here.
+# Step 7 — **R** in CRUD: showing the list
+
+> Now we start CRUD. The first letter is **R** — reading.
+
+## What we do
+
+Read the students out of the database and show them in a table.
+
+## Why R first, and not C?
+
+Because without a way to see the data, you cannot tell whether registering
+worked. **First we build the way to look, then the way to add.**
+
+---
+
+## 7.1 — Two functions for `database.py`
+
+Add these at the end of `database.py`:
+
+```python
+def add_student(student_id, full_name, department, gender, email, phone):
+    with get_connection() as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO students (student_id, full_name, department, gender, email, phone)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (student_id, full_name, department, gender, email, phone),
+        )
+        return cursor.lastrowid
+
+
+def get_all_students():
+    with get_connection() as connection:
+        return connection.execute(
+            "SELECT * FROM students ORDER BY id DESC"
+        ).fetchall()
+```
+
+| Part | What it does |
+| ---- | ------------ |
+| `INSERT INTO ... VALUES (?, ?, ...)` | Adds a new row |
+| `?` | A place for a value — **never write the value in directly** |
+| `cursor.lastrowid` | The id of the row just added |
+| `SELECT *` | Every column |
+| `ORDER BY id DESC` | Newest at the top |
+| `.fetchall()` | Takes all the rows |
+
+> ### ⚠️ Why do we use `?`
+>
+> It is the **only** defence against **SQL Injection**.
+>
+> If you write `"... VALUES ('" + full_name + "')"`, somebody can type a name
+> that contains SQL of their own, and drop your table.
+>
+> With `?`, SQLite knows this is **a value, not a command**. Even a name like
+> `'; DROP TABLE students; --` is stored as nothing more than a name.
+>
+> This is covered in detail in the theory lesson.
+
+## 7.2 — Add some test data
+
+We have no form yet. So we add two students from the terminal:
+
+```
+python -c "import database; database.init_db(); database.add_student('MIS-2025-001', 'Ahmad Karim', 'MIS', 'Male', 'ahmad@example.com', '0770 111 1111')"
+```
+
+```
+python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Accounting', 'Female', 'sara@example.com', '0770 222 2222')"
+```
+
+> Run the same command twice and you get an error:
+> `UNIQUE constraint failed` — the database refuses the duplicate itself,
+> exactly as we set up in Step 4.
+
+---
+
+## 7.3 — `templates/list.html`
+
+A new file in the `templates` folder:
+
+```html
+<p>{{ total }} student(s)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Student ID</th>
+      <th>Full name</th>
+      <th>Department</th>
+      <th>Registered at</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ rows }}
+  </tbody>
+</table>
+```
+
+`<tbody>` is empty — the rows come from Python.
+
+## 7.4 — Change `templates/home.html`
+
+```html
+<p>Welcome to the Student Registration System.</p>
+
+{{ table }}
+```
+
+## 7.5 — Two functions for `app.py`
+
+Add `import html` at the top, then these two functions beside `render()`:
+
+```python
+def esc(value):
+    return html.escape("" if value is None else str(value))
+
+
+def build_table_rows(students):
+    rows = []
+    for number, student in enumerate(students, start=1):
+        rows.append(
+            """
+            <tr>
+              <td>{number}</td>
+              <td>{student_id}</td>
+              <td>{full_name}</td>
+              <td>{department}</td>
+              <td>{created_at}</td>
+            </tr>
+            """.format(
+                number=number,
+                student_id=esc(student["student_id"]),
+                full_name=esc(student["full_name"]),
+                department=esc(student["department"]),
+                created_at=esc(student["created_at"]),
+            )
+        )
+    return "".join(rows)
+```
+
+| Part | What it does |
+| ---- | ------------ |
+| `enumerate(students, start=1)` | Numbers the rows: 1, 2, 3 … |
+| `student["full_name"]` | Reads the column by name — thanks to `row_factory` in Step 4 |
+| `"""...""".format(...)` | A small template for each row |
+| `"".join(rows)` | Joins every row into one piece of text |
+| **`esc(...)`** | Makes the text safe — see below |
+
+## 7.6 — Change `page_home`
+
+```python
+    def page_home(self):
+        students = database.get_all_students()
+
+        if students:
+            table = render("list.html",
+                           rows=build_table_rows(students),
+                           total=len(students))
+        else:
+            table = "<p>No student is registered yet.</p>"
+
+        body = render("home.html", table=table)
+        page = render("layout.html", title="Students", content=body)
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(page.encode("utf-8"))
+```
+
+> **That `if` matters.** When there are no students, do not show an empty
+> table — write a clear message. This is called an **empty state**, and it is
+> part of what separates a good program from a poor one.
+
+## 7.7 — Style the table
+
+At the end of `static/style.css`:
+
+```css
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+thead th {
+  color: #6b7280;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+```
+
+---
+
+## 7.8 — Test it
+
+Restart the server and press `Ctrl + Shift + R`.
+
+## What you should see
+
+```
+2 student(s)
+
+#   STUDENT ID     FULL NAME     DEPARTMENT   REGISTERED AT
+1   MIS-2025-002   Sara Ali      Accounting   2026-09-03 06:07
+2   MIS-2025-001   Ahmad Karim   MIS          2026-09-03 06:07
+```
+
+**Sara is at the top** because of `ORDER BY id DESC` — newest first.
+
+> Look at the `#` column: Sara is number **1**, although her `id` is 2. That
+> number comes from `enumerate()` and is only the position on the page — not
+> the database `id`. That is deliberate: a student has no need for the
+> internal id.
+
+> `created_at` filled itself in — we never sent it. That was the
+> `DEFAULT (datetime('now', 'localtime'))` from Step 4.
+
+---
+
+## 7.9 — A security test
+
+Now add a student whose name is code:
+
+```
+python -c "import database; database.add_student('MIS-2025-003', '<script>alert(1)</script>', 'MIS', 'Male', '', '')"
+```
+
+Press `F5`.
+
+**You should see the name as text**, like this:
+
+```
+<script>alert(1)</script>
+```
+
+and not an alert box.
+
+**Why?** Because of `esc()`. It turns `<` into `&lt;`, so the browser reads it
+as **text** rather than as **code**.
+
+> Remove `esc()` and try again and the box appears. That is **XSS** — and
+> those three letters are the reason it does not.
+>
+> In a real system that code could steal other people's accounts.
+
+Then delete it:
+
+```
+python -c "import database; database.get_connection().execute('DELETE FROM students WHERE id = 3').connection.commit()"
+```
+
+---
+
+## If you get an error
+
+| Problem | Fix |
+| ------- | --- |
+| `no such table: students` | Run `python -c "import database; database.init_db()"` |
+| `UNIQUE constraint failed` | You are adding the same `student_id` twice — change the number |
+| The table is empty | You have not added the data (see 7.2) |
+| `{{ rows }}` appears as it is | The names do not match. Check `render("list.html", rows=...)` |
+| `TypeError: tuple indices must be integers` | `row_factory = sqlite3.Row` is missing from `database.py` |
+| `NameError: name 'html' is not defined` | You forgot `import html` |
+| An `alert` box appears | You did not use `esc()` |
+| The table has no styling | `Ctrl + Shift + R` |
+
+---
+
+## ✅ This step is finished when
+
+```
+student-system/
+├── app.py              <- esc() and build_table_rows()
+├── database.py         <- add_student() and get_all_students()
+├── students.db         <- has data in it
+├── templates/
+│   ├── layout.html
+│   ├── home.html       <- changed
+│   └── list.html       <- new
+└── static/
+    └── style.css       <- table styling
+```
+
+- The students appear, out of the database
+- The newest is at the top
+- With no students, a clear message appears instead
+- You know what `?` and `esc()` protect against
+
+**One of four is done.** In the next step we build **C** — a form so a student
+can be added without the terminal.
+
+---
+
+> Step 8 will be added here.

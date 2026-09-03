@@ -41,7 +41,7 @@
 | ٤ | داتابەیس (`database.py`) | ✅ |
 | ٥ | Templates و فەنکشنی `render()` | ✅ |
 | ٦ | CSS — دیزاینی پەڕەکان | ✅ |
-| ٧ | **R** — پیشاندانی لیستی قوتابیان | ⏳ |
+| ٧ | **R** — پیشاندانی لیستی قوتابیان | ✅ |
 | ٨ | **C** — فۆڕمی تۆمارکردن + پشکنین | ⏳ |
 | ٩ | **U** — دەستکاریکردن | ⏳ |
 | ١٠ | **D** — سڕینەوە | ⏳ |
@@ -1260,4 +1260,311 @@ CRUD دەست پێدەکەین: **R** — پیشاندانی لیستی قوتا
 
 ---
 
-> هەنگاوی ٧ لێرە زیاد دەکرێت.
+# هەنگاوی ٧ — **R** لە CRUD: پیشاندانی لیستەکە
+
+> ئێستا دەست بە CRUD دەکەین. یەکەم پیت **R**ـە — خوێندنەوە.
+
+## چی دەکەین
+
+قوتابییەکان لە داتابەیسەوە دەخوێنینەوە و لە خشتەیەکدا پیشانیان دەدەین.
+
+## بۆچی سەرەتا R، نەک C؟
+
+چونکە بەبێ پیشاندان، ناتوانیت بزانیت تۆمارکردنەکە کاری کردووە یان نا.
+**سەرەتا شێوەی بینین دروست دەکەین، پاشان شێوەی زیادکردن.**
+
+---
+
+## ٧.١ — دوو فەنکشن بۆ `database.py`
+
+لە کۆتایی `database.py` ئەمانە زیاد بکە:
+
+```python
+def add_student(student_id, full_name, department, gender, email, phone):
+    with get_connection() as connection:
+        cursor = connection.execute(
+            """
+            INSERT INTO students (student_id, full_name, department, gender, email, phone)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            (student_id, full_name, department, gender, email, phone),
+        )
+        return cursor.lastrowid
+
+
+def get_all_students():
+    with get_connection() as connection:
+        return connection.execute(
+            "SELECT * FROM students ORDER BY id DESC"
+        ).fetchall()
+```
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `INSERT INTO ... VALUES (?, ?, ...)` | ڕیزێکی نوێ زیاد دەکات |
+| `?` | شوێنی نرخێک — **هەرگیز نرخەکە ڕاستەوخۆ مەنووسە** |
+| `cursor.lastrowid` | ژمارەی ئەو ڕیزەی تازە زیاد بوو |
+| `SELECT *` | هەموو ستوونەکان |
+| `ORDER BY id DESC` | نوێترین لە سەرەوە |
+| `.fetchall()` | هەموو ڕیزەکان وەردەگرێت |
+
+> ### ⚠️ بۆچی `?` بەکاردەهێنین؟
+>
+> ئەمە **تاکە ڕێگایە** بۆ ڕێگرتن لە **SQL Injection**.
+>
+> ئەگەر بنووسیت `"... VALUES ('" + full_name + "')"`، ئەوا کەسێک دەتوانێت
+> ناوێک بنووسێت کە فەرمانی SQLـی تێدا بێت، و خشتەکەت بسڕێتەوە.
+>
+> بە `?`، SQLite دەزانێت ئەمە **نرخێکە، نەک فەرمان**. تەنانەت ئەگەر ناوەکە
+> `'; DROP TABLE students; --`یش بێت، تەنها وەک ناوێک پاشەکەوت دەکرێت.
+>
+> ئەمە لە وانەی تیۆریدا بە وردی باسکراوە.
+
+## ٧.٢ — داتای تاقیکردنەوە زیاد بکە
+
+هێشتا فۆڕممان نییە. بۆیە دوو قوتابی لە تێرمیناڵەوە زیاد دەکەین:
+
+```
+python -c "import database; database.init_db(); database.add_student('MIS-2025-001', 'Ahmad Karim', 'MIS', 'Male', 'ahmad@example.com', '0770 111 1111')"
+```
+
+```
+python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Accounting', 'Female', 'sara@example.com', '0770 222 2222')"
+```
+
+> ئەگەر دووبارە هەمان فەرمان بکەیت، هەڵەیەک دەبینیت:
+> `UNIQUE constraint failed` — داتابەیسەکە خۆی ڕێگری لە دووبارەبوونەوە
+> دەکات، وەک لە هەنگاوی ٤دا دامانناوە.
+
+---
+
+## ٧.٣ — `templates/list.html`
+
+فایلێکی نوێ لە فۆڵدەری `templates`:
+
+```html
+<p>{{ total }} student(s)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Student ID</th>
+      <th>Full name</th>
+      <th>Department</th>
+      <th>Registered at</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ rows }}
+  </tbody>
+</table>
+```
+
+`<tbody>` بەتاڵە — ڕیزەکانی لە Pythonـەوە دێن.
+
+## ٧.٤ — `templates/home.html` بگۆڕە
+
+```html
+<p>Welcome to the Student Registration System.</p>
+
+{{ table }}
+```
+
+## ٧.٥ — دوو فەنکشن بۆ `app.py`
+
+سەرەتا لە سەرەوە `import html` زیاد بکە، پاشان ئەم دوو فەنکشنە لەتەنیشت
+`render()`:
+
+```python
+def esc(value):
+    return html.escape("" if value is None else str(value))
+
+
+def build_table_rows(students):
+    rows = []
+    for number, student in enumerate(students, start=1):
+        rows.append(
+            """
+            <tr>
+              <td>{number}</td>
+              <td>{student_id}</td>
+              <td>{full_name}</td>
+              <td>{department}</td>
+              <td>{created_at}</td>
+            </tr>
+            """.format(
+                number=number,
+                student_id=esc(student["student_id"]),
+                full_name=esc(student["full_name"]),
+                department=esc(student["department"]),
+                created_at=esc(student["created_at"]),
+            )
+        )
+    return "".join(rows)
+```
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `enumerate(students, start=1)` | ژمارە دەداتە ڕیزەکان: ١، ٢، ٣ … |
+| `student["full_name"]` | ستوونەکە بە ناوەکەی دەخوێنێتەوە — سوودی `row_factory`ی هەنگاوی ٤ |
+| `"""...""".format(...)` | قاڵبێکی بچووک بۆ هەر ڕیزێک |
+| `"".join(rows)` | هەموو ڕیزەکان دەکاتە یەک دەق |
+| **`esc(...)`** | دەقەکە ئەمن دەکاتەوە — بڕوانە خوارەوە |
+
+## ٧.٦ — `page_home` بگۆڕە
+
+```python
+    def page_home(self):
+        students = database.get_all_students()
+
+        if students:
+            table = render("list.html",
+                           rows=build_table_rows(students),
+                           total=len(students))
+        else:
+            table = "<p>No student is registered yet.</p>"
+
+        body = render("home.html", table=table)
+        page = render("layout.html", title="Students", content=body)
+
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(page.encode("utf-8"))
+```
+
+> **ئەو `if`ـە بەشێکی گرنگە.** ئەگەر هیچ قوتابییەک نەبێت، خشتەیەکی بەتاڵ
+> پیشان مەدە — پەیامێکی ڕوون بنووسە. ئەمە پێی دەگوترێت **empty state**، و
+> جیاوازی نێوان پڕۆگرامێکی باش و خراپە.
+
+## ٧.٧ — دیزاینی خشتەکە
+
+لە کۆتایی `static/style.css`:
+
+```css
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+thead th {
+  color: #6b7280;
+  font-size: 13px;
+  text-transform: uppercase;
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+```
+
+---
+
+## ٧.٨ — تاقیکردنەوە
+
+سێرڤەرەکە دووبارە بکەرەوە و `Ctrl + Shift + R` لێبدە.
+
+## چی دەبینیت
+
+```
+2 student(s)
+
+#   STUDENT ID     FULL NAME     DEPARTMENT   REGISTERED AT
+1   MIS-2025-002   Sara Ali      Accounting   2026-09-03 06:07
+2   MIS-2025-001   Ahmad Karim   MIS          2026-09-03 06:07
+```
+
+**سارا لە سەرەوەیە** چونکە `ORDER BY id DESC` — نوێترین یەکەم.
+
+> سەیری ستوونی `#` بکە: سارا ژمارە **١**ـە، هەرچەندە `id`ـەکەی ٢ـە. ئەو
+> ژمارەیە لە `enumerate()`ـەوە دێت و تەنها ڕیزبەندی ناو لاپەڕەکەیە — نەک
+> `id`ی داتابەیس. ئەمە بە ئەنقەستە: قوتابی پێویستی بە `id`ی ناوخۆیی نییە.
+
+> `created_at` خۆکارانە پڕ بووەتەوە — ئێمە هەرگیز نەمانناردووە. ئەوە
+> `DEFAULT (datetime('now', 'localtime'))`ی هەنگاوی ٤ بوو.
+
+---
+
+## ٧.٩ — تاقیکردنەوەی پاراستن
+
+ئێستا قوتابییەک زیاد بکە کە ناوەکەی کۆدە:
+
+```
+python -c "import database; database.add_student('MIS-2025-003', '<script>alert(1)</script>', 'MIS', 'Male', '', '')"
+```
+
+`F5` لێبدە.
+
+**دەبێت ناوەکە وەک دەق ببینیت**، بەم شێوەیە:
+
+```
+<script>alert(1)</script>
+```
+
+نەک پەنجەرەیەکی ئاگادارکردنەوە.
+
+**بۆچی؟** لەبەر `esc()`. ئەو `<` دەکات بە `&lt;`، بۆیە وێبگەڕ وەک **دەق**
+لێی دەڕوانێت، نەک وەک **کۆد**.
+
+> ئەگەر `esc()` لابەریت و دووبارە تاقی بکەیتەوە، پەنجەرەکە دەردەکەوێت.
+> ئەمە **XSS**ـە — و ئەم سێ پیتە هۆکاری ڕێگریکردنیانە.
+>
+> لە پڕۆژەیەکی ڕاستەقینەدا، ئەو کۆدە دەتوانێت هەژماری بەکارهێنەران بدزێت.
+
+پاشان بیسڕەوە:
+
+```
+python -c "import database; database.get_connection().execute('DELETE FROM students WHERE id = 3').connection.commit()"
+```
+
+---
+
+## ئەگەر هەڵە دەرکەوت
+
+| کێشە | چارەسەر |
+|------|---------|
+| `no such table: students` | `python -c "import database; database.init_db()"` بکە |
+| `UNIQUE constraint failed` | هەمان `student_id` دووبارە زیاد دەکەیت — ژمارەکە بگۆڕە |
+| خشتەکە بەتاڵە | داتاکەت زیاد نەکردووە (بڕوانە ٧.٢) |
+| `{{ rows }}` وەک خۆی دەردەکەوێت | ناوەکە یەک ناگرێتەوە. `render("list.html", rows=...)` بپشکنە |
+| `TypeError: tuple indices must be integers` | `row_factory = sqlite3.Row`ت لە `database.py`دا نییە |
+| `NameError: name 'html' is not defined` | `import html`ت لەبیر چووە |
+| پەنجەرەی `alert` دەردەکەوێت | `esc()`ت بەکارنەهێناوە |
+| خشتەکە دیزاینی نییە | `Ctrl + Shift + R` |
+
+---
+
+## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
+
+```
+student-system/
+├── app.py              ← esc() و build_table_rows()
+├── database.py         ← add_student() و get_all_students()
+├── students.db         ← داتای تێدایە
+├── templates/
+│   ├── layout.html
+│   ├── home.html       ← گۆڕدرا
+│   └── list.html       ← نوێ
+└── static/
+    └── style.css       ← دیزاینی خشتە
+```
+
+- قوتابییەکان لە داتابەیسەوە دەردەکەون
+- نوێترین لە سەرەوەیە
+- ئەگەر هیچ قوتابییەک نەبێت، پەیامێکی ڕوون دەردەکەوێت
+- دەزانیت `?` و `esc()` چی دەپارێزن
+
+**یەک لە چوار تەواو بوو.** لە هەنگاوی داهاتوودا **C** دروست دەکەین —
+فۆڕمێک کە قوتابی خۆی زیاد بکات، بەبێ تێرمیناڵ.
+
+---
+
+> هەنگاوی ٨ لێرە زیاد دەکرێت.
