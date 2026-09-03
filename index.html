@@ -422,6 +422,20 @@ body {
 .explain > :not(summary) { margin-inline: 1rem; }
 .explain > :last-child { margin-bottom: 1rem; }
 
+/* --- where a block of code goes ----------------------------------------- */
+.block > .where {
+  display: flex;
+  padding: .45rem .95rem;
+  border-radius: 10px 10px 0 0;
+  background: #0b232c;
+  color: #8fb4bf;
+  font-family: var(--f-mono);
+  font-size: .74rem;
+  letter-spacing: .02em;
+}
+
+.block > .where + pre { border-radius: 0 0 10px 10px; }
+
 /* --- code blocks --------------------------------------------------------- */
 .block {
   position: relative;
@@ -655,11 +669,13 @@ body {
     ku: { brand: "ڕێنمایی قوتابی", langLabel: "زمان", tocLabel: "ناوەڕۆک",
           copy: "کۆپی", copied: "کۆپی کرا",
           keep: "بۆ هێشتنەوەی کۆپییەک، Ctrl + P دابگرە و وەک PDF چاپی بکە",
+          terminal: "تێرمیناڵ",
           loading: "دەقەکە دەهێنرێت…",
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
     en: { brand: "Student Guide", langLabel: "Language", tocLabel: "Contents",
           copy: "Copy", copied: "Copied",
           keep: "To keep a copy, press Ctrl + P and print to PDF",
+          terminal: "Terminal",
           loading: "Loading the text…",
           failed: "The text could not be loaded. Check your connection and reload the page." }
   };
@@ -723,13 +739,19 @@ body {
       /* fenced code */
       if (/^```/.test(line)) {
         flushPara();
-        var lang = line.slice(3).trim();
+        var fence = line.slice(3).trim().split(/\s+/);
+        var lang = fence[0] || "";
+        var where = fence.slice(1).join(" ") ||
+          (lang === "bash" ? UI[state.lang].terminal : "");
         var code = [];
         i++;
         while (i < lines.length && !/^```/.test(lines[i])) { code.push(lines[i]); i++; }
         i++;
-        out.push('<div class="block"><button type="button" class="copy">' + UI[state.lang].copy +
-          '</button><pre><code data-lang="' + esc(lang) + '">' + esc(code.join("\n")) + "</code></pre></div>");
+        out.push('<div class="block"><button type="button" class="copy">' +
+          UI[state.lang].copy + '</button>' +
+          (where ? '<div class="where"><span>' + esc(where) + '</span></div>' : '') +
+          '<pre><code data-lang="' + esc(lang) + '">' + esc(code.join('\n')) +
+          '</code></pre></div>');
         continue;
       }
 

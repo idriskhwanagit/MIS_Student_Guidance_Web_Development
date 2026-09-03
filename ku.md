@@ -85,7 +85,7 @@ VS Code بکەرەوە، پاشان لە مێنیوی سەرەوە:
 
 ئەمە بنووسە و `Enter` لێبدە:
 
-```
+```bash
 python --version
 ```
 
@@ -135,7 +135,7 @@ Python 3.13.14
 
 ئێستا ئەمە بنووسە:
 
-```
+```bash
 python -c "import sqlite3; print('SQLite OK')"
 ```
 
@@ -166,7 +166,7 @@ SQLite OK
 
 ئەم دوو فەرمانە کاردەکەن و ئەنجام دەدەن:
 
-```
+```bash
 python --version                                →  Python 3.x.x
 python -c "import sqlite3; print('SQLite OK')"  →  SQLite OK
 ```
@@ -258,7 +258,7 @@ static
 
 تێرمیناڵێک بکەرەوە (**Terminal → New Terminal**) و ئەمە بنووسە:
 
-```
+```bash
 dir
 ```
 
@@ -353,7 +353,7 @@ app.py
 
 ## ٣.٢ — کۆدەکە بنووسە
 
-```python
+```python app.py
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
@@ -400,7 +400,7 @@ server.serve_forever()
 
 لە تێرمیناڵدا:
 
-```
+```bash
 python app.py
 ```
 
@@ -541,7 +541,7 @@ database.py
 
 ## ٤.٢ — کۆدەکە بنووسە
 
-```python
+```python database.py
 import os
 import sqlite3
 
@@ -617,7 +617,7 @@ def init_db():
 `database.py` بە تەنها هیچ ناکات — کەس بانگی نەکردووە. لە `app.py`دا
 **دوو دێڕ** زیاد بکە:
 
-```python
+```python app.py
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import database                                    # ← نوێ
@@ -642,7 +642,7 @@ server.serve_forever()
 
 ## ٤.٦ — تاقیکردنەوە
 
-```
+```bash
 python app.py
 ```
 
@@ -668,7 +668,7 @@ student-system/
 
 بۆ ئەوەی دڵنیا ببیت خشتەکە بەڕاستی دروست بووە، ئەمە لە تێرمیناڵدا بنووسە:
 
-```
+```bash
 python -c "import database; print([r['name'] for r in database.get_connection().execute('SELECT name FROM sqlite_master')])"
 ```
 
@@ -772,7 +772,7 @@ layout.html
 
 ئەمە بنووسە:
 
-```html
+```html templates/layout.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -796,7 +796,7 @@ layout.html
 
 فایلێکی تر لە هەمان فۆڵدەردا:
 
-```html
+```html templates/home.html
 <p>Welcome to the Student Registration System.</p>
 <p>Students registered: {{ total }}</p>
 ```
@@ -808,7 +808,7 @@ layout.html
 
 لە `app.py`دا، ئەمانە زیاد بکە. سەرەتا لە سەرەوە:
 
-```python
+```python app.py
 import os
 import re
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -834,7 +834,7 @@ def render(template_name, **values):
 
 `do_GET` بگۆڕە بۆ ئەمە:
 
-```python
+```python app.py
 class StudentAppHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         body = render("home.html", total=0)
@@ -871,7 +871,7 @@ class StudentAppHandler(BaseHTTPRequestHandler):
 
 ## ٥.٦ — تاقیکردنەوە
 
-```
+```bash
 python app.py
 ```
 
@@ -895,7 +895,7 @@ Students registered: 0
 
 سێرڤەرەکە **مەوەستێنە**. `home.html` بکەرەوە و دەقەکەی بگۆڕە:
 
-```html
+```html templates/home.html
 <p>Hello from my own page!</p>
 <p>Students registered: {{ total }}</p>
 ```
@@ -1001,7 +1001,7 @@ student-system/
 style.css
 ```
 
-```css
+```css static/style.css
 :root {
   --brand: #2563eb;
   --text: #1f2937;
@@ -1062,7 +1062,7 @@ h1 {
 
 `templates/layout.html` بکەرەوە و دوو گۆڕانکاری بکە:
 
-```html
+```html templates/layout.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1103,7 +1103,7 @@ HTML بۆ ناردووەتەوە.
 
 `app.py` بگۆڕە. سەرەتا لە سەرەوە:
 
-```python
+```python app.py
 import os
 import re
 import urllib.parse
@@ -1118,7 +1118,7 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 پاشان کلاسەکە:
 
-```python
+```python app.py
 class StudentAppHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         url = urllib.parse.urlparse(self.path)
@@ -1195,7 +1195,7 @@ class StudentAppHandler(BaseHTTPRequestHandler):
 
 سێرڤەرەکە دووبارە بکەرەوە:
 
-```
+```bash
 python app.py
 ```
 
@@ -1300,7 +1300,7 @@ CRUD دەست پێدەکەین: **R** — پیشاندانی لیستی قوتا
 
 لە کۆتایی `database.py` ئەمانە زیاد بکە:
 
-```python
+```python database.py
 def add_student(student_id, full_name, department, gender, email, phone):
     with get_connection() as connection:
         cursor = connection.execute(
@@ -1348,11 +1348,11 @@ def get_all_students():
 
 هێشتا فۆڕممان نییە. بۆیە دوو قوتابی لە تێرمیناڵەوە زیاد دەکەین:
 
-```
+```bash
 python -c "import database; database.init_db(); database.add_student('MIS-2025-001', 'Ahmad Karim', 'MIS', 'Male', 'ahmad@example.com', '0770 111 1111')"
 ```
 
-```
+```bash
 python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Accounting', 'Female', 'sara@example.com', '0770 222 2222')"
 ```
 
@@ -1366,7 +1366,7 @@ python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Ac
 
 فایلێکی نوێ لە فۆڵدەری `templates`:
 
-```html
+```html templates/list.html
 <p>{{ total }} student(s)</p>
 
 <table>
@@ -1389,7 +1389,7 @@ python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Ac
 
 ## ٧.٤ — `templates/home.html` بگۆڕە
 
-```html
+```html templates/home.html
 <p>Welcome to the Student Registration System.</p>
 
 {{ table }}
@@ -1400,7 +1400,7 @@ python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Ac
 سەرەتا لە سەرەوە `import html` زیاد بکە، پاشان ئەم دوو فەنکشنە لەتەنیشت
 `render()`:
 
-```python
+```python app.py
 def esc(value):
     return html.escape("" if value is None else str(value))
 
@@ -1441,7 +1441,7 @@ def build_table_rows(students):
 
 ## ٧.٦ — `page_home` بگۆڕە
 
-```python
+```python app.py
     def page_home(self):
         students = database.get_all_students()
 
@@ -1469,7 +1469,7 @@ def build_table_rows(students):
 
 لە کۆتایی `static/style.css`:
 
-```css
+```css static/style.css
 table {
   width: 100%;
   border-collapse: collapse;
@@ -1537,7 +1537,7 @@ tbody tr:last-child td {
 
 ئێستا قوتابییەک زیاد بکە کە ناوەکەی کۆدە:
 
-```
+```bash
 python -c "import database; database.add_student('MIS-2025-003', '<script>alert(1)</script>', 'MIS', 'Male', '', '')"
 ```
 
@@ -1561,7 +1561,7 @@ python -c "import database; database.add_student('MIS-2025-003', '<script>alert(
 
 پاشان بیسڕەوە:
 
-```
+```bash
 python -c "import database; database.get_connection().execute('DELETE FROM students WHERE id = 3').connection.commit()"
 ```
 

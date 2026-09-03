@@ -84,7 +84,7 @@ you type commands, not code.
 
 Type this and press `Enter`:
 
-```
+```bash
 python --version
 ```
 
@@ -134,7 +134,7 @@ In that case go to 1.3.
 
 Now type this:
 
-```
+```bash
 python -c "import sqlite3; print('SQLite OK')"
 ```
 
@@ -165,7 +165,7 @@ install anything else. No XAMPP, no MySQL, no phpMyAdmin.
 
 These two commands work and produce output:
 
-```
+```bash
 python --version                                →  Python 3.x.x
 python -c "import sqlite3; print('SQLite OK')"  →  SQLite OK
 ```
@@ -256,7 +256,7 @@ They are empty for now. We fill them in the steps ahead.
 
 Open a terminal (**Terminal → New Terminal**) and type:
 
-```
+```bash
 dir
 ```
 
@@ -352,7 +352,7 @@ app.py
 
 ## 3.2 — Type the code
 
-```python
+```python app.py
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
@@ -399,7 +399,7 @@ server.serve_forever()
 
 In the terminal:
 
-```
+```bash
 python app.py
 ```
 
@@ -539,7 +539,7 @@ It belongs beside `app.py` — directly in the project folder.
 
 ## 4.2 — Type the code
 
-```python
+```python database.py
 import os
 import sqlite3
 
@@ -617,7 +617,7 @@ Save with `Ctrl + S`.
 `database.py` does nothing on its own — nobody has called it. Add **two
 lines** to `app.py`:
 
-```python
+```python app.py
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import database                                    # <- new
@@ -642,7 +642,7 @@ Save both files with `Ctrl + S`.
 
 ## 4.6 — Test it
 
-```
+```bash
 python app.py
 ```
 
@@ -668,7 +668,7 @@ Press `Ctrl + C` to stop.
 
 To be sure the table really exists, type this in the terminal:
 
-```
+```bash
 python -c "import database; print([r['name'] for r in database.get_connection().execute('SELECT name FROM sqlite_master')])"
 ```
 
@@ -774,7 +774,7 @@ layout.html
 
 Type this:
 
-```html
+```html templates/layout.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -798,7 +798,7 @@ content changes.
 
 Another file in the same folder:
 
-```html
+```html templates/home.html
 <p>Welcome to the Student Registration System.</p>
 <p>Students registered: {{ total }}</p>
 ```
@@ -810,7 +810,7 @@ those are in `layout.html`.
 
 Add this to `app.py`. First at the top:
 
-```python
+```python app.py
 import os
 import re
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -836,7 +836,7 @@ def render(template_name, **values):
 
 Change `do_GET` to this:
 
-```python
+```python app.py
 class StudentAppHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         body = render("home.html", total=0)
@@ -873,7 +873,7 @@ class StudentAppHandler(BaseHTTPRequestHandler):
 
 ## 5.6 — Test it
 
-```
+```bash
 python app.py
 ```
 
@@ -897,7 +897,7 @@ Students registered: 0
 
 Leave the server **running**. Open `home.html` and change the text:
 
-```html
+```html templates/home.html
 <p>Hello from my own page!</p>
 <p>Students registered: {{ total }}</p>
 ```
@@ -1005,7 +1005,7 @@ Click the `static` folder, then **New File**:
 style.css
 ```
 
-```css
+```css static/style.css
 :root {
   --brand: #2563eb;
   --text: #1f2937;
@@ -1066,7 +1066,7 @@ h1 {
 
 Open `templates/layout.html` and make two changes:
 
-```html
+```html templates/layout.html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1107,7 +1107,7 @@ That is what we fix now.
 
 Change `app.py`. First at the top:
 
-```python
+```python app.py
 import os
 import re
 import urllib.parse
@@ -1122,7 +1122,7 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 Then the class:
 
-```python
+```python app.py
 class StudentAppHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         url = urllib.parse.urlparse(self.path)
@@ -1199,7 +1199,7 @@ class StudentAppHandler(BaseHTTPRequestHandler):
 
 Restart the server:
 
-```
+```bash
 python app.py
 ```
 
@@ -1304,7 +1304,7 @@ worked. **First we build the way to look, then the way to add.**
 
 Add these at the end of `database.py`:
 
-```python
+```python database.py
 def add_student(student_id, full_name, department, gender, email, phone):
     with get_connection() as connection:
         cursor = connection.execute(
@@ -1352,11 +1352,11 @@ def get_all_students():
 
 We have no form yet. So we add two students from the terminal:
 
-```
+```bash
 python -c "import database; database.init_db(); database.add_student('MIS-2025-001', 'Ahmad Karim', 'MIS', 'Male', 'ahmad@example.com', '0770 111 1111')"
 ```
 
-```
+```bash
 python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Accounting', 'Female', 'sara@example.com', '0770 222 2222')"
 ```
 
@@ -1370,7 +1370,7 @@ python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Ac
 
 A new file in the `templates` folder:
 
-```html
+```html templates/list.html
 <p>{{ total }} student(s)</p>
 
 <table>
@@ -1393,7 +1393,7 @@ A new file in the `templates` folder:
 
 ## 7.4 — Change `templates/home.html`
 
-```html
+```html templates/home.html
 <p>Welcome to the Student Registration System.</p>
 
 {{ table }}
@@ -1403,7 +1403,7 @@ A new file in the `templates` folder:
 
 Add `import html` at the top, then these two functions beside `render()`:
 
-```python
+```python app.py
 def esc(value):
     return html.escape("" if value is None else str(value))
 
@@ -1444,7 +1444,7 @@ def build_table_rows(students):
 
 ## 7.6 — Change `page_home`
 
-```python
+```python app.py
     def page_home(self):
         students = database.get_all_students()
 
@@ -1472,7 +1472,7 @@ def build_table_rows(students):
 
 At the end of `static/style.css`:
 
-```css
+```css static/style.css
 table {
   width: 100%;
   border-collapse: collapse;
@@ -1541,7 +1541,7 @@ Restart the server and press `Ctrl + Shift + R`.
 
 Now add a student whose name is code:
 
-```
+```bash
 python -c "import database; database.add_student('MIS-2025-003', '<script>alert(1)</script>', 'MIS', 'Male', '', '')"
 ```
 
@@ -1565,7 +1565,7 @@ as **text** rather than as **code**.
 
 Then delete it:
 
-```
+```bash
 python -c "import database; database.get_connection().execute('DELETE FROM students WHERE id = 3').connection.commit()"
 ```
 
