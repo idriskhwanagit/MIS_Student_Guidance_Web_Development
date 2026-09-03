@@ -1655,6 +1655,19 @@ python -c "import database; database.init_db(); database.add_student(student_id=
 python -c "import database; database.add_student(student_id='MIS-2025-002', full_name='Sara Ali', department='Accounting', gender='Female', email='sara@example.com', phone='0770 222 2222')"
 ```
 
+> These two lines are long, and they are not part of the project — they are
+> only test data. **Copying is allowed here.**
+
+## What you should see
+
+**Nothing.** The terminal prints an empty line and gives you back the `>`.
+
+That is not a fault. Python says nothing unless you tell it to, and we did
+not. `add_student()` records the student, but prints nothing.
+
+> If you see a long red message starting with `Traceback`, that *is* an
+> error. Read the **last line** — the reason is written there.
+
 <!-- collapse -->
 ### What does this command do?
 
@@ -1676,6 +1689,35 @@ python -c "import database; database.add_student(student_id='MIS-2025-002', full
 > Run the same command twice and you get an error:
 > `UNIQUE constraint failed` — the database refuses the duplicate itself,
 > exactly as we set up in Step 4.
+
+## 7.2.1 — Make sure it worked
+
+The commands above said nothing, so we have to ask for ourselves: **what
+went into the database?**
+
+```bash
+python -c "import database; rows = database.get_all_students(); print(len(rows), 'students'); print([r['full_name'] for r in rows])"
+```
+
+## What you should see
+
+```
+2 students
+['Sara Ali', 'Ahmad Karim']
+```
+
+| If you see | It means |
+| ---------- | -------- |
+| `2 students` | Both commands worked ✅ |
+| `0 students` | Nothing was added — run the commands above again |
+| `1 students` | Only one worked — run the other one again |
+| `no such table` | `init_db()` never ran — run the first command again |
+
+> **Why is Sara first?** Because of `ORDER BY id DESC` — newest at the top.
+> We wrote that in 7.1.
+
+> This command **changes nothing** — it only reads. Use it whenever you are
+> not sure what is in the database.
 
 ---
 
