@@ -1407,22 +1407,37 @@ then `http://localhost:8000` — and this time press `Ctrl + Shift + R`.
 
 The table in 6.1.1 describes each rule. But **seeing beats reading**.
 
-**Right-click** on the page → **Inspect**
+### 1. Right-click **on the white box itself**
 
-A panel opens with two main parts:
+Not on an empty part of the page — on the box. Then **Inspect**.
 
-- **The top (or left) part** — the page's HTML
-- **The Styles part** — its CSS
+> **Why on the box itself?** Because then the browser **selects that part
+> for you**. Click anywhere else and you have to go looking for it.
 
-### 1. Click the box
+### 2. What the panel looks like
 
-In the HTML part, find this line and click it:
+A new panel opens with tabs along its top:
+
+```
+Elements   Console   Sources   Network   ...
+```
+
+**Elements** is the one you want — it opens there by default. Inside it are
+two parts:
+
+| Part | What is in it |
+| ---- | ------------- |
+| **Elements** (top or left) | The page's HTML, as a tree |
+| **Styles** (bottom or right) | The CSS of whatever is selected |
+
+In **Elements** this line is **highlighted** — because you right-clicked
+that box:
 
 ```
 <div class="card">
 ```
 
-### 2. Now look at the Styles part
+### 3. Now look at the Styles part
 
 **What you see is the very code you wrote:**
 
@@ -1450,7 +1465,7 @@ Three things to learn here:
 > does not seem to work, this is where you find out whether it reached the
 > element at all.
 
-### 3. Now switch the checkboxes off
+### 4. Now switch the checkboxes off
 
 Switch these three rules **off** one at a time — and watch the page:
 
