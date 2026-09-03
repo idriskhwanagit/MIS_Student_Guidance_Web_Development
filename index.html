@@ -209,6 +209,22 @@ body {
   outline-offset: 2px;
 }
 
+/* --- jumping between steps on a phone ------------------------------------
+   The rail is no use on a narrow screen — it becomes a small scrolling box
+   above the text. A native picker of the thirteen steps is one tap instead.
+   ------------------------------------------------------------------------ */
+.jump {
+  display: none;
+  max-width: 12rem;
+  padding: .4rem .6rem;
+  border: 1px solid var(--rule);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font-family: var(--f-ui);
+  font-size: .85rem;
+}
+
 /* --- shell --------------------------------------------------------------- */
 .shell {
   display: grid;
@@ -251,6 +267,7 @@ body {
 
 /* --- notice ------------------------------------------------------------- */
 .notice {
+  min-width: 0;
   grid-column: 2;          /* the reading column, in either direction */
   max-width: var(--measure);
   margin-inline: auto;
@@ -318,6 +335,7 @@ body {
 
 /* --- reader -------------------------------------------------------------- */
 .reader {
+  min-width: 0;
   max-width: var(--measure);
   margin-inline: auto;
   padding: 2.25rem 2.5rem 3rem;
@@ -461,6 +479,7 @@ body {
 
 /* --- code blocks --------------------------------------------------------- */
 .block {
+  min-width: 0;
   position: relative;
   margin: 0 0 1.25rem;
   direction: ltr;
@@ -1167,6 +1186,8 @@ body {
 
 /* --- small screens ------------------------------------------------------- */
 @media (max-width: 60rem) {
+  .jump { display: block; }
+  .rail { display: none; }
   .shell { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; padding-top: 1.25rem; }
   .notice { grid-column: 1; max-width: none; }
 
@@ -1191,7 +1212,8 @@ body {
 @page { margin: 14mm 13mm; }
 
 @media print {
-  .topbar, .rail, .copy, .toast, .show-me, .player, .stage { display: none !important; }
+  .topbar, .rail, .copy, .toast, .show-me, .player, .stage,
+  .jump { display: none !important; }
   .explain { border: 0; background: none; }
   .explain > summary { padding-inline: 0; color: var(--ink); }
   .explain > :not(summary) { margin-inline: 0; }
@@ -1265,6 +1287,7 @@ body {
       </div>
     </div>
 
+    <select class="jump" id="jump" aria-label="Steps"></select>
     <button type="button" class="icon-btn" id="themeBtn" title="Theme" aria-label="Theme">◐</button>
     <button type="button" class="icon-btn" id="printBtn" title="Print" aria-label="Print">⎙</button>
   </header>
@@ -1526,6 +1549,7 @@ body {
   var notice = document.getElementById("notice");
   var watermark = document.getElementById("watermark");
   var toc = document.getElementById("toc");
+  var jump = document.getElementById("jump");
   var app = document.querySelector(".app");
 
   function paint() {
@@ -1579,6 +1603,15 @@ body {
     document.title = headings.length ? headings[0].text : document.title;
 
     addShowMeButtons();
+
+    /* a picker of the steps, for narrow screens */
+    jump.innerHTML = "";
+    headings.filter(function (h) { return h.level === 1; }).forEach(function (h) {
+      var option = document.createElement("option");
+      option.value = h.id;
+      option.textContent = h.text;
+      jump.appendChild(option);
+    });
 
     /* contents */
     toc.innerHTML = "";
@@ -2246,6 +2279,13 @@ body {
       if (h.getBoundingClientRect().top < 120) { current = h.id; }
     });
     var active = null;
+    if (current && jump.value !== current) {
+      var owns = Array.prototype.some.call(jump.options, function (o) {
+        return o.value === current;
+      });
+      if (owns) { jump.value = current; }
+    }
+
     links.forEach(function (a) {
       var here = a.getAttribute("href") === "#" + current;
       a.classList.toggle("here", here);
@@ -2276,6 +2316,13 @@ body {
     state.lang = b.dataset.lang;
     remember(STORE + ".lang", state.lang);
     paint();
+  });
+
+  jump.addEventListener("change", function () {
+    var target = document.getElementById(jump.value);
+    if (!target) { return; }
+    if (target.tagName === "DETAILS") { target.open = true; }
+    target.scrollIntoView({ block: "start" });
   });
 
   toc.addEventListener("click", function (e) {
