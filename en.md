@@ -17,6 +17,18 @@ For a student who:
 3. **Test after every step.** Never move to the next step until the current one works.
 4. **If you get an error**, look in the table below for the common ones.
 
+> **What does the copy button copy?** In the boxes that have colour in them,
+> the button copies **the whole block** as it should look **after the
+> change** — the green lines together with the uncoloured ones around them,
+> but without the struck-through ones.
+>
+> **Why not the green lines alone?** Because on their own they are
+> fragments, and you would not know where in the file they go. The whole
+> block shows you its own position.
+>
+> So: **select that block in your file and paste over it** — do not paste it
+> at the cursor.
+
 ## The shape of every step
 
 | Part | Meaning |
@@ -24,6 +36,8 @@ For a student who:
 | **What we do** | The job of this step, in one sentence |
 | **Why** | The purpose — without this you are only copying |
 | **The code** | The complete code, not a fragment |
+| **Green lines** | The ones **you add**. Uncoloured lines are already in the file — they are there so you can see where |
+| **Struck-through lines** | The ones that **must be removed** |
 | **How to test it** | Immediately after you type it |
 | **What you should see** | The expected result |
 | **If you get an error** | The most common errors and their fixes |

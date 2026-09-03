@@ -1412,7 +1412,7 @@ body {
           copy: "کۆپی", copied: "کۆپی کرا",
           keep: "بۆ هێشتنەوەی کۆپییەک، Ctrl + P دابگرە و وەک PDF چاپی بکە",
           terminal: "تێرمیناڵ",
-          copyNew: "کۆپی = تەنها کۆدی نوێ",
+          copyNew: "کۆپی = بەشەکە دوای گۆڕانکاری",
           showMe: "ئەم هەنگاوە پیشانم بدە",
           loading: "دەقەکە دەهێنرێت…",
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
@@ -1420,7 +1420,7 @@ body {
           copy: "Copy", copied: "Copied",
           keep: "To keep a copy, press Ctrl + P and print to PDF",
           terminal: "Terminal",
-          copyNew: "copy = the new code only",
+          copyNew: "copy = this block after the change",
           showMe: "Show me this step",
           loading: "Loading the text…",
           failed: "The text could not be loaded. Check your connection and reload the page." }
@@ -1502,6 +1502,10 @@ body {
                keeps the indentation lined up with the context lines */
             return '<span class="' + kind + '">' + esc(row.slice(1)) + '</span>';
           }).join('');
+          /* A diff block is one contiguous region of the file, so the copy
+             button hands over that whole region as it should look afterwards:
+             deleted lines dropped, kept lines still there. Copying only the
+             green lines would give fragments that paste back nowhere. */
           clean = code.filter(function (row) { return row.charAt(0) !== '-'; })
                       .map(function (row) { return row.replace(/^[+ ]/, ''); })
                       .join('\n');
