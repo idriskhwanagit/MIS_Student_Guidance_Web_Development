@@ -681,6 +681,18 @@ python -c "import database; print([r['name'] for r in database.get_connection().
 یەکەمیان خشتەکەی خۆمانە. ئەو دووانەی تر SQLite خۆی دروستی کردوون — یەکێک
 بۆ `UNIQUE` و یەکێک بۆ `AUTOINCREMENT`.
 
+<!-- collapse -->
+### ئەم فەرمانە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `python -c "..."` | یەک دێڕ کۆدی Python کاردەخات، بەبێ دروستکردنی فایل |
+| `import database` | فایلی `database.py`ی خۆمان دەهێنێت |
+| `get_connection()` | پەیوەندی بە داتابەیسەکەوە دەکات |
+| `SELECT name FROM sqlite_master` | ناوی هەموو ئەو شتانە دەگەڕێنێتەوە کە SQLite هەڵیگرتوون |
+| `sqlite_master` | خشتەیەکی ناوخۆیی: لیستی هەموو خشتەکان |
+| `[r['name'] for r in ...]` | تەنها ستوونی `name` دەردەهێنێت، لەبری هەموو ڕیزەکە |
+
 ---
 
 ## ⚠️ خاڵێک کە دواتر سەری لێدەشێوێنیت
@@ -1349,12 +1361,30 @@ def get_all_students():
 هێشتا فۆڕممان نییە. بۆیە دوو قوتابی لە تێرمیناڵەوە زیاد دەکەین:
 
 ```bash
-python -c "import database; database.init_db(); database.add_student('MIS-2025-001', 'Ahmad Karim', 'MIS', 'Male', 'ahmad@example.com', '0770 111 1111')"
+python -c "import database; database.init_db(); database.add_student(student_id='MIS-2025-001', full_name='Ahmad Karim', department='MIS', gender='Male', email='ahmad@example.com', phone='0770 111 1111')"
 ```
 
 ```bash
-python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Accounting', 'Female', 'sara@example.com', '0770 222 2222')"
+python -c "import database; database.add_student(student_id='MIS-2025-002', full_name='Sara Ali', department='Accounting', gender='Female', email='sara@example.com', phone='0770 222 2222')"
 ```
+
+<!-- collapse -->
+### ئەم فەرمانە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `python -c "..."` | یەک دێڕ کۆدی Python کاردەخات، بەبێ دروستکردنی فایل |
+| `import database` | فایلی `database.py`ی خۆمان دەهێنێت |
+| `database.init_db()` | دڵنیا دەبێتەوە کە خشتەکە هەیە |
+| `student_id='MIS-2025-001'` | ژمارەی زانکۆیی |
+| `full_name='Ahmad Karim'` | ناوی قوتابی |
+| `department='MIS'` | بەشەکەی |
+| `gender='Male'` | ڕەگەز |
+| `email=` و `phone=` | ئیمەیل و ژمارەی تەلەفۆن |
+
+> ناوی هەر نرخێک لەتەنیشتیەوە نووسراوە (`full_name=`)، بۆیە پێویست ناکات
+> لەبیرت بێت کامیان یەکەمە و کامیان دووەم. لە Pythonـدا پێی دەگوترێت
+> **keyword argument**.
 
 > ئەگەر دووبارە هەمان فەرمان بکەیت، هەڵەیەک دەبینیت:
 > `UNIQUE constraint failed` — داتابەیسەکە خۆی ڕێگری لە دووبارەبوونەوە
@@ -1538,7 +1568,7 @@ tbody tr:last-child td {
 ئێستا قوتابییەک زیاد بکە کە ناوەکەی کۆدە:
 
 ```bash
-python -c "import database; database.add_student('MIS-2025-003', '<script>alert(1)</script>', 'MIS', 'Male', '', '')"
+python -c "import database; database.add_student(student_id='MIS-2025-003', full_name='<script>alert(1)</script>', department='MIS', gender='Male', email='', phone='')"
 ```
 
 `F5` لێبدە.
@@ -1564,6 +1594,19 @@ python -c "import database; database.add_student('MIS-2025-003', '<script>alert(
 ```bash
 python -c "import database; database.get_connection().execute('DELETE FROM students WHERE id = 3').connection.commit()"
 ```
+
+<!-- collapse -->
+### ئەم فەرمانە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `get_connection()` | پەیوەندی بە داتابەیسەکەوە دەکات |
+| `execute('DELETE ...')` | فەرمانی SQL کاردەخات |
+| `WHERE id = 3` | تەنها ئەو ڕیزە کە `id`ـەکەی ٣ـە |
+| `.connection.commit()` | گۆڕانکارییەکە پاشەکەوت دەکات |
+
+> لە هەنگاوی ١٠دا فەنکشنێکی ڕێکوپێک بۆ سڕینەوە دەنووسین. ئێستا
+> ڕاستەوخۆ SQL بەکاردەهێنین، چونکە تەنها جارێکە.
 
 ---
 

@@ -681,6 +681,18 @@ You should see:
 The first one is our table. SQLite created the other two itself — one for
 `UNIQUE` and one for `AUTOINCREMENT`.
 
+<!-- collapse -->
+### What does this command do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `python -c "..."` | Runs one line of Python without making a file |
+| `import database` | Brings in our own `database.py` |
+| `get_connection()` | Connects to the database |
+| `SELECT name FROM sqlite_master` | Returns the name of everything SQLite is holding |
+| `sqlite_master` | An internal table: the list of all the tables |
+| `[r['name'] for r in ...]` | Pulls out only the `name` column, rather than the whole row |
+
 ---
 
 ## ⚠️ Something that will confuse you later
@@ -1353,12 +1365,30 @@ def get_all_students():
 We have no form yet. So we add two students from the terminal:
 
 ```bash
-python -c "import database; database.init_db(); database.add_student('MIS-2025-001', 'Ahmad Karim', 'MIS', 'Male', 'ahmad@example.com', '0770 111 1111')"
+python -c "import database; database.init_db(); database.add_student(student_id='MIS-2025-001', full_name='Ahmad Karim', department='MIS', gender='Male', email='ahmad@example.com', phone='0770 111 1111')"
 ```
 
 ```bash
-python -c "import database; database.add_student('MIS-2025-002', 'Sara Ali', 'Accounting', 'Female', 'sara@example.com', '0770 222 2222')"
+python -c "import database; database.add_student(student_id='MIS-2025-002', full_name='Sara Ali', department='Accounting', gender='Female', email='sara@example.com', phone='0770 222 2222')"
 ```
+
+<!-- collapse -->
+### What does this command do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `python -c "..."` | Runs one line of Python without making a file |
+| `import database` | Brings in our own `database.py` |
+| `database.init_db()` | Makes sure the table is there |
+| `student_id='MIS-2025-001'` | The university number |
+| `full_name='Ahmad Karim'` | The student's name |
+| `department='MIS'` | Their department |
+| `gender='Male'` | Gender |
+| `email=` and `phone=` | Email and phone number |
+
+> Each value carries its own name (`full_name=`), so you do not have to
+> remember which one comes first. In Python this is called a
+> **keyword argument**.
 
 > Run the same command twice and you get an error:
 > `UNIQUE constraint failed` — the database refuses the duplicate itself,
@@ -1542,7 +1572,7 @@ Restart the server and press `Ctrl + Shift + R`.
 Now add a student whose name is code:
 
 ```bash
-python -c "import database; database.add_student('MIS-2025-003', '<script>alert(1)</script>', 'MIS', 'Male', '', '')"
+python -c "import database; database.add_student(student_id='MIS-2025-003', full_name='<script>alert(1)</script>', department='MIS', gender='Male', email='', phone='')"
 ```
 
 Press `F5`.
@@ -1568,6 +1598,19 @@ Then delete it:
 ```bash
 python -c "import database; database.get_connection().execute('DELETE FROM students WHERE id = 3').connection.commit()"
 ```
+
+<!-- collapse -->
+### What does this command do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `get_connection()` | Connects to the database |
+| `execute('DELETE ...')` | Runs the SQL statement |
+| `WHERE id = 3` | Only the row whose `id` is 3 |
+| `.connection.commit()` | Saves the change |
+
+> In Step 10 we write a proper function for deleting. Here we use SQL
+> directly, because it is a one-off.
 
 ---
 
