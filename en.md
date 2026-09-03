@@ -976,9 +976,10 @@ Students registered: 0
 
 Leave the server **running**. Open `home.html` and change the text:
 
-```html templates/home.html
-<p>Hello from my own page!</p>
-<p>Students registered: {{ total }}</p>
+```diff templates/home.html
+-<p>Welcome to the Student Registration System.</p>
++<p>Hello from my own page!</p>
+ <p>Students registered: {{ total }}</p>
 ```
 
 Save it and just press `F5` in the browser.
@@ -1145,21 +1146,22 @@ h1 {
 
 Open `templates/layout.html` and make two changes:
 
-```html templates/layout.html
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>{{ title }}</title>
-  <link rel="stylesheet" href="/static/style.css">
-</head>
-<body>
-  <h1>{{ title }}</h1>
-  <div class="card">
-    {{ content }}
-  </div>
-</body>
-</html>
+```diff templates/layout.html
+ <!DOCTYPE html>
+ <html lang="en">
+ <head>
+   <meta charset="UTF-8">
+   <title>{{ title }}</title>
++  <link rel="stylesheet" href="/static/style.css">
+ </head>
+ <body>
+   <h1>{{ title }}</h1>
+-  {{ content }}
++  <div class="card">
++    {{ content }}
++  </div>
+ </body>
+ </html>
 ```
 
 **Two additions:** the `<link>` line, and `<div class="card">` around the
@@ -1202,44 +1204,44 @@ STATIC_DIR = os.path.join(BASE_DIR, "static")
 
 Then the class:
 
-```python app.py
-class StudentAppHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        url = urllib.parse.urlparse(self.path)
-
-        if url.path == "/":
-            self.page_home()
-        elif url.path.startswith("/static/"):
-            self.send_static(url.path[len("/static/"):])
-        else:
-            self.send_response(404)
-            self.end_headers()
-
-    def page_home(self):
-        body = render("home.html", total=0)
-        page = render("layout.html", title="Students", content=body)
-
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(page.encode("utf-8"))
-
-    def send_static(self, filename):
-        safe_name = os.path.basename(filename)
-        path = os.path.join(STATIC_DIR, safe_name)
-
-        if not os.path.isfile(path):
-            self.send_response(404)
-            self.end_headers()
-            return
-
-        with open(path, "rb") as file:
-            body = file.read()
-
-        self.send_response(200)
-        self.send_header("Content-Type", "text/css; charset=utf-8")
-        self.end_headers()
-        self.wfile.write(body)
+```diff app.py
+ class StudentAppHandler(BaseHTTPRequestHandler):
+     def do_GET(self):
++        url = urllib.parse.urlparse(self.path)
++
++        if url.path == "/":
++            self.page_home()
++        elif url.path.startswith("/static/"):
++            self.send_static(url.path[len("/static/"):])
++        else:
++            self.send_response(404)
++            self.end_headers()
++
++    def page_home(self):
+         body = render("home.html", total=0)
+         page = render("layout.html", title="Students", content=body)
+ 
+         self.send_response(200)
+         self.send_header("Content-Type", "text/html; charset=utf-8")
+         self.end_headers()
+         self.wfile.write(page.encode("utf-8"))
++
++    def send_static(self, filename):
++        safe_name = os.path.basename(filename)
++        path = os.path.join(STATIC_DIR, safe_name)
++
++        if not os.path.isfile(path):
++            self.send_response(404)
++            self.end_headers()
++            return
++
++        with open(path, "rb") as file:
++            body = file.read()
++
++        self.send_response(200)
++        self.send_header("Content-Type", "text/css; charset=utf-8")
++        self.end_headers()
++        self.wfile.write(body)
 ```
 
 <!-- collapse -->
@@ -2339,57 +2341,61 @@ Change the function like this:
 
 Delete everything in it and put this in its place. Three changes: a hidden field, a variable action, and a variable button.
 
-```html templates/form.html
-<h2>{{ heading }}</h2>
-
-{{ errors }}
-
-<form method="POST" action="{{ action }}" class="student-form">
-
-  <input type="hidden" name="id" value="{{ row_id }}">
-
-  <label class="field">
-    <span>Student ID *</span>
-    <input type="text" name="student_id" value="{{ student_id }}" required>
-  </label>
-
-  <label class="field">
-    <span>Full name *</span>
-    <input type="text" name="full_name" value="{{ full_name }}" required>
-  </label>
-
-  <label class="field">
-    <span>Department *</span>
-    <select name="department" required>
-      <option value="">-- Choose a department --</option>
-      {{ departments }}
-    </select>
-  </label>
-
-  <div class="field">
-    <span>Gender *</span>
-    <div class="radio-row">
-      <label><input type="radio" name="gender" value="Male"{{ male_checked }} required> Male</label>
-      <label><input type="radio" name="gender" value="Female"{{ female_checked }}> Female</label>
-    </div>
-  </div>
-
-  <label class="field">
-    <span>Email</span>
-    <input type="email" name="email" value="{{ email }}">
-  </label>
-
-  <label class="field">
-    <span>Phone</span>
-    <input type="text" name="phone" value="{{ phone }}">
-  </label>
-
-  <div class="form-actions">
-    <button type="submit">{{ submit_label }}</button>
-    <a href="/">Cancel</a>
-  </div>
-
-</form>
+```diff templates/form.html
+ <h2>{{ heading }}</h2>
+ 
+ {{ errors }}
+ 
+-<form method="POST" action="/add" class="student-form">
++<form method="POST" action="{{ action }}" class="student-form">
++
++  <input type="hidden" name="id" value="{{ row_id }}">
+ 
+   <label class="field">
+     <span>Student ID *</span>
+     <input type="text" name="student_id" value="{{ student_id }}" required>
+   </label>
+ 
+   <label class="field">
+     <span>Full name *</span>
+     <input type="text" name="full_name" value="{{ full_name }}" required>
+   </label>
+ 
+   <label class="field">
+     <span>Department *</span>
+     <select name="department" required>
+       <option value="">-- Choose a department --</option>
+       {{ departments }}
+     </select>
+   </label>
+ 
+   <div class="field">
+     <span>Gender *</span>
+     <div class="radio-row">
+-      <label><input type="radio" name="gender" value="Male" required> Male</label>
+-      <label><input type="radio" name="gender" value="Female"> Female</label>
++      <label><input type="radio" name="gender" value="Male"{{ male_checked }} required> Male</label>
++      <label><input type="radio" name="gender" value="Female"{{ female_checked }}> Female</label>
+     </div>
+   </div>
+ 
+   <label class="field">
+     <span>Email</span>
+     <input type="email" name="email" value="{{ email }}">
+   </label>
+ 
+   <label class="field">
+     <span>Phone</span>
+     <input type="text" name="phone" value="{{ phone }}">
+   </label>
+ 
+   <div class="form-actions">
+-    <button type="submit">Register student</button>
++    <button type="submit">{{ submit_label }}</button>
+     <a href="/">Cancel</a>
+   </div>
+ 
+ </form>
 ```
 
 <!-- collapse -->
@@ -2464,42 +2470,46 @@ Change the function like this:
 
 Delete the `save_student` function **completely** and put this in its place:
 
-```python app.py
-    def save_student(self, is_edit=False):
-        form = self.read_form()
-        row_id = form.get("id", "") if is_edit else ""
-
-        problems = []
-        if not form.get("student_id"):
-            problems.append("Student ID is required.")
-        if not form.get("full_name"):
-            problems.append("Full name is required.")
-        if not form.get("department"):
-            problems.append("Please choose a department.")
-        if not form.get("gender"):
-            problems.append("Please choose a gender.")
-        if form.get("email") and "@" not in form["email"]:
-            problems.append("The email address is not valid.")
-        if form.get("student_id") and database.student_id_exists(
-            form["student_id"], ignore_row_id=row_id if is_edit else None
-        ):
-            problems.append("This student ID is already registered.")
-
-        if problems:
-            items = "".join("<li>" + esc(p) + "</li>" for p in problems)
-            return self.page_form(row_id, '<div class="alert"><ul>' + items + "</ul></div>", form)
-
-        values = (
-            form["student_id"], form["full_name"], form["department"],
-            form["gender"], form.get("email", ""), form.get("phone", ""),
-        )
-
-        if is_edit:
-            database.update_student(row_id, *values)
-        else:
-            database.add_student(*values)
-
-        self.redirect("/")
+```diff app.py
+-    def save_student(self):
++    def save_student(self, is_edit=False):
+         form = self.read_form()
++        row_id = form.get("id", "") if is_edit else ""
+ 
+         problems = []
+         if not form.get("student_id"):
+             problems.append("Student ID is required.")
+         if not form.get("full_name"):
+             problems.append("Full name is required.")
+         if not form.get("department"):
+             problems.append("Please choose a department.")
+         if not form.get("gender"):
+             problems.append("Please choose a gender.")
+         if form.get("email") and "@" not in form["email"]:
+             problems.append("The email address is not valid.")
+-        if form.get("student_id") and database.student_id_exists(form["student_id"]):
++        if form.get("student_id") and database.student_id_exists(
++            form["student_id"], ignore_row_id=row_id if is_edit else None
++        ):
+             problems.append("This student ID is already registered.")
+ 
+         if problems:
+             items = "".join("<li>" + esc(p) + "</li>" for p in problems)
+-            return self.page_form('<div class="alert"><ul>' + items + "</ul></div>", form)
++            return self.page_form(row_id, '<div class="alert"><ul>' + items + "</ul></div>", form)
+ 
+-        database.add_student(
++        values = (
+             form["student_id"], form["full_name"], form["department"],
+             form["gender"], form.get("email", ""), form.get("phone", ""),
+         )
++
++        if is_edit:
++            database.update_student(row_id, *values)
++        else:
++            database.add_student(*values)
++
+         self.redirect("/")
 ```
 
 <!-- collapse -->
@@ -3214,12 +3224,23 @@ eyes.
 In `database.py`, find `get_all_students`. Change **the search part** to this
 **dangerous** version:
 
-```python database.py
-        if search:
-            # ❌ dangerous — for this test only
-            sql = ("SELECT * FROM students WHERE full_name LIKE '%"
-                   + search + "%' ORDER BY id DESC")
-            return connection.execute(sql).fetchall()
+```diff database.py
+         if search:
+-            pattern = "%" + search + "%"
+-            return connection.execute(
+-                """
+-                SELECT * FROM students
+-                WHERE full_name  LIKE ?
+-                   OR student_id LIKE ?
+-                   OR department LIKE ?
+-                ORDER BY id DESC
+-                """,
+-                (pattern, pattern, pattern),
+-            ).fetchall()
++            # ❌ dangerous — for this test only
++            sql = ("SELECT * FROM students WHERE full_name LIKE '%"
++                   + search + "%' ORDER BY id DESC")
++            return connection.execute(sql).fetchall()
 ```
 
 Restart the server.
@@ -3259,19 +3280,23 @@ The user did not type data — they typed **part of the statement**.
 
 Delete the dangerous code and restore the version from Step 11:
 
-```python database.py
-        if search:
-            pattern = "%" + search + "%"
-            return connection.execute(
-                """
-                SELECT * FROM students
-                WHERE full_name  LIKE ?
-                   OR student_id LIKE ?
-                   OR department LIKE ?
-                ORDER BY id DESC
-                """,
-                (pattern, pattern, pattern),
-            ).fetchall()
+```diff database.py
+         if search:
+-            # ❌ dangerous — for this test only
+-            sql = ("SELECT * FROM students WHERE full_name LIKE '%"
+-                   + search + "%' ORDER BY id DESC")
+-            return connection.execute(sql).fetchall()
++            pattern = "%" + search + "%"
++            return connection.execute(
++                """
++                SELECT * FROM students
++                WHERE full_name  LIKE ?
++                   OR student_id LIKE ?
++                   OR department LIKE ?
++                ORDER BY id DESC
++                """,
++                (pattern, pattern, pattern),
++            ).fetchall()
 ```
 
 Restart the server and search for the same text again.
@@ -3290,10 +3315,11 @@ is `' OR '1'='1`. Nobody is called that.
 
 In `app.py`, find `esc` and change it to this:
 
-```python app.py
-def esc(value):
-    # ❌ dangerous — for this test only
-    return "" if value is None else str(value)
+```diff app.py
+ def esc(value):
+-    return html.escape("" if value is None else str(value))
++    # ❌ dangerous — for this test only
++    return "" if value is None else str(value)
 ```
 
 Restart the server.
