@@ -1061,7 +1061,7 @@ Students registered: 0
 ```
 Hello from my own page!
 Students registered: 0
--->                              ← ئەمە دەبێت نەبێت!
+-->                              ← ئەمە زیادە و دەبێت لابچێت
 Hello from my own page!          ← دوو جار!
 Students registered: 0
 ```
