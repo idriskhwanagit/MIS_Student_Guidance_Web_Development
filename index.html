@@ -776,7 +776,9 @@ body {
           inner = code.map(function (row) {
             var mark = row.charAt(0);
             var kind = mark === '+' ? 'add' : (mark === '-' ? 'del' : 'same');
-            return '<span class="' + kind + '">' + esc(row) + '</span>';
+            /* the marker is dropped — the colour says it, and dropping it
+               keeps the indentation lined up with the context lines */
+            return '<span class="' + kind + '">' + esc(row.slice(1)) + '</span>';
           }).join('');
           clean = code.filter(function (row) { return row.charAt(0) !== '-'; })
                       .map(function (row) { return row.replace(/^[+ ]/, ''); })
