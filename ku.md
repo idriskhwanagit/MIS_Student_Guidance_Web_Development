@@ -162,11 +162,22 @@ SQLite OK
 
 ## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
 
-ئەم دوو فەرمانە کاردەکەن و ئەنجام دەدەن:
+ئەم دوو فەرمانە کاردەکەن و ئەنجام دەدەن.
 
 ```bash
-python --version                                →  Python 3.x.x
-python -c "import sqlite3; print('SQLite OK')"  →  SQLite OK
+python --version
+```
+
+```
+Python 3.x.x
+```
+
+```bash
+python -c "import sqlite3; print('SQLite OK')"
+```
+
+```
+SQLite OK
 ```
 
 **هیچ فایلێکمان دروست نەکردووە، هیچ کۆدێکمان نەنووسیوە** — تەنها

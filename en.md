@@ -161,11 +161,22 @@ install anything else. No XAMPP, no MySQL, no phpMyAdmin.
 
 ## ✅ This step is finished when
 
-These two commands work and produce output:
+These two commands work and produce output.
 
 ```bash
-python --version                                →  Python 3.x.x
-python -c "import sqlite3; print('SQLite OK')"  →  SQLite OK
+python --version
+```
+
+```
+Python 3.x.x
+```
+
+```bash
+python -c "import sqlite3; print('SQLite OK')"
+```
+
+```
+SQLite OK
 ```
 
 **We have not created a single file and not written a single line of code** —
