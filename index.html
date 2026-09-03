@@ -570,6 +570,121 @@ body {
   text-align: center;
 }
 
+/* --- windows for the folder walkthrough --------------------------------- */
+.fx { inset: 1.25rem 2rem; }
+
+.fx-bar { background: #eef2f6; color: #4a5a6b; }
+.fx-bar i { background: #c3ccd6; }
+
+.fx-body { display: flex; height: calc(100% - 30px); }
+
+.fx-side {
+  width: 9rem;
+  padding: 10px 8px;
+  background: #f6f8fa;
+  border-right: 1px solid #e2e8ee;
+  font-size: 12px;
+}
+
+.fx-side span { display: block; padding: 4px 6px; border-radius: 4px; }
+.fx-side span.on { background: #dbeafe; color: #1d4ed8; font-weight: 600; }
+
+.fx-main { position: relative; flex: 1; padding: 12px; }
+
+.tile {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 6rem;
+  padding: 8px 4px;
+  border-radius: 6px;
+  font-size: 12px;
+  text-align: center;
+}
+
+.tile em { font-style: normal; font-size: 26px; line-height: 1; }
+.tile.sel { background: #dbeafe; box-shadow: 0 0 0 1px #93c5fd inset; }
+
+.tile .name {
+  padding: 1px 4px;
+  border-radius: 3px;
+  background: #fff;
+  box-shadow: 0 0 0 1px #2563eb;
+  font-family: var(--f-mono);
+  font-size: 11px;
+}
+
+/* a context menu, and the File menu */
+.menu {
+  position: absolute;
+  min-width: 10rem;
+  padding: 5px;
+  background: #fff;
+  border: 1px solid #dfe5ec;
+  border-radius: 7px;
+  box-shadow: 0 10px 26px -8px rgba(16, 32, 44, .4);
+  font-size: 12px;
+  z-index: 4;
+}
+
+.menu div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 8px;
+  border-radius: 4px;
+}
+
+.menu div.on { background: #2563eb; color: #fff; }
+.menu div.sep { padding: 0; margin: 4px 2px; height: 1px; background: #e2e8ee; }
+
+/* a dialog with a message and buttons */
+.ask { width: 24rem; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+
+.ask-body { padding: 16px; font-size: 12.5px; line-height: 1.6; }
+.ask-body b { display: block; margin-bottom: 6px; font-size: 13px; }
+
+.ask .btn3 {
+  padding: 7px 14px;
+  border-radius: 5px;
+  background: #2563eb;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* the VS Code explorer, with its icon strip */
+.vs-side .head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  font-size: 10.5px;
+  color: #6b7280;
+  letter-spacing: .04em;
+}
+
+.vs-side .icons { display: flex; gap: 5px; font-size: 12px; }
+.vs-side .icons span { padding: 1px 3px; border-radius: 3px; }
+.vs-side .icons span.on { background: #dbeafe; }
+
+.vs-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 0;
+  font-family: var(--f-mono);
+  font-size: 11px;
+}
+
+.vs-row .name {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: #fff;
+  box-shadow: 0 0 0 1px #2563eb;
+}
+
 /* --- the drawn walkthrough ------------------------------------------------
    A silent, drawn stand-in for a screen recording: mock windows, a cursor
    that moves and clicks, one caption per scene. Nothing is recorded and
@@ -1507,7 +1622,7 @@ body {
      once this one has been seen in class.                              */
   /* which steps get a code replay — the walkthrough covers step 1 */
   var PLAYER_STEPS = [];
-  var STAGE_STEP = 1;
+  var STAGE_STEPS = [1, 2];
 
   var player = document.getElementById("player");
   var playerWhere = player.querySelector(".where");
@@ -1691,13 +1806,15 @@ body {
     reader.querySelectorAll("h1").forEach(function (heading) {
       if (!framesFor(heading).length) { return; }
       step += 1;
-      var drawn = step === STAGE_STEP;
+      var drawn = STAGE_STEPS.indexOf(step) !== -1;
       if (!drawn && PLAYER_STEPS.indexOf(step) === -1) { return; }
       var button = document.createElement("button");
       button.type = "button";
       button.className = "show-me";
       button.textContent = "▶  " + UI[state.lang].showMe;
-      var open = drawn ? openStage : function () { openPlayer(heading); };
+      var walk = step;
+      var open = drawn ? function () { openStage(walk); }
+                       : function () { openPlayer(heading); };
       button.addEventListener("click", open);
       heading.parentNode.insertBefore(button, heading.nextSibling);
     });
@@ -1745,7 +1862,9 @@ body {
       pathRow(on, ring) + '</div>';
   }
 
-  var SCENES = [
+  var WALKS = {};
+
+  WALKS[1] = [
     { ku: "وێبگەڕێک بکەرەوە و ئەم ناونیشانە بنووسە",
       en: "Open a browser and type this address",
       screen: function () {
@@ -1840,6 +1959,142 @@ body {
       type: true, hold: 2400 }
   ];
 
+  /* ---- step 2: making the project folder --------------------------------- */
+
+  function explorer(main) {
+    return '<div class="win fx"><div class="win-bar fx-bar">' + WIN +
+      '<span>Documents</span></div><div class="fx-body">' +
+      '<div class="fx-side"><span>Desktop</span><span class="on">Documents</span>' +
+      '<span>Downloads</span></div>' +
+      '<div class="fx-main">' + main + '</div></div></div>';
+  }
+
+  function vscode(side, main) {
+    return '<div class="win vs"><div class="win-bar vs-bar">' + WIN +
+      '<span>Visual Studio Code</span></div>' +
+      '<div class="vs-body"><div class="vs-side">' + side + '</div>' +
+      '<div class="vs-main">' + main + '</div></div></div>';
+  }
+
+  function sideHead(iconOn) {
+    return '<div class="head"><span>EXPLORER</span><span class="icons">' +
+      '<span' + (iconOn ? ' class="on" data-spot="newfolder"' : '') + '>📁+</span>' +
+      '<span>📄+</span><span>↻</span></div>';
+  }
+
+  WALKS[2] = [
+    { ku: "File Explorer بکەرەوە و بڕۆ بۆ Documents",
+      en: "Open File Explorer and go to Documents",
+      screen: function () { return explorer(""); },
+      hold: 1400 },
+
+    { ku: "کلیکی ڕاست لە شوێنێکی بەتاڵ بکە",
+      en: "Right-click an empty spot",
+      screen: function () {
+        return explorer('<div class="menu" style="left:70px;top:40px">' +
+          '<div>View<span>›</span></div><div>Sort by<span>›</span></div>' +
+          '<div class="sep"></div>' +
+          '<div class="on" data-spot="new">New<span>›</span></div>' +
+          '<div>Properties</div></div>');
+      },
+      spot: "new" },
+
+    { ku: "New → Folder",
+      en: "New → Folder",
+      screen: function () {
+        return explorer('<div class="menu" style="left:70px;top:40px">' +
+          '<div>View<span>›</span></div><div>Sort by<span>›</span></div>' +
+          '<div class="sep"></div><div class="on">New<span>›</span></div>' +
+          '<div>Properties</div></div>' +
+          '<div class="menu" style="left:220px;top:96px">' +
+          '<div class="on" data-spot="folder">📁  Folder</div>' +
+          '<div>📄  Text Document</div></div>');
+      },
+      spot: "folder" },
+
+    { ku: "ناوی لێبنێ: student-system",
+      en: "Name it: student-system",
+      screen: function () {
+        return explorer('<div class="tile sel"><em>📁</em>' +
+          '<span class="name" data-type="student-system"></span></div>');
+      },
+      type: true, hold: 1800 },
+
+    { ku: "VS Code بکەرەوە: File → Open Folder…",
+      en: "In VS Code: File → Open Folder…",
+      screen: function () {
+        return vscode('<div class="head"><span>EXPLORER</span></div>',
+          '<div class="menu" style="left:0;top:0">' +
+          '<div>New File…</div><div>Open File…</div>' +
+          '<div class="on" data-spot="openfolder">Open Folder…</div>' +
+          '<div class="sep"></div><div>Save</div></div>');
+      },
+      spot: "openfolder" },
+
+    { ku: "فۆڵدەرەکە هەڵبژێرە → Select Folder",
+      en: "Choose the folder → Select Folder",
+      screen: function () {
+        return '<div class="win ask" style="width:26rem">' +
+          '<div class="setup-title">Open Folder</div>' +
+          '<div class="ask-body"><div class="tile sel"><em>📁</em>' +
+          '<span>student-system</span></div></div>' +
+          '<div class="setup-foot"><span class="btn2">Cancel</span>' +
+          '<span class="btn3" data-spot="select">Select Folder</span></div></div>';
+      },
+      spot: "select" },
+
+    { ku: "پرسیارێک دەکات — Yes, I trust the authors",
+      en: "It asks — Yes, I trust the authors",
+      screen: function () {
+        return '<div class="win ask"><div class="setup-title">Do you trust the authors?</div>' +
+          '<div class="ask-body"><b>student-system</b>' +
+          'Code in this folder can read your files and run on your computer.' +
+          '</div><div class="setup-foot">' +
+          '<span class="btn2">No, I don\'t trust</span>' +
+          '<span class="btn3" data-spot="trust">Yes, I trust the authors</span></div></div>';
+      },
+      spot: "trust" },
+
+    { ku: "کلیک لە New Folder بکە (ئایکۆنی فۆڵدەر لەگەڵ +)",
+      en: "Click New Folder (the folder icon with a +)",
+      screen: function () {
+        return vscode(sideHead(true) + '<div class="vs-row">STUDENT-SYSTEM</div>',
+          'Terminal → New Terminal');
+      },
+      spot: "newfolder" },
+
+    { ku: "templates بنووسە و Enter لێبدە",
+      en: "Type templates and press Enter",
+      screen: function () {
+        return vscode(sideHead(false) + '<div class="vs-row">STUDENT-SYSTEM</div>' +
+          '<div class="vs-row">📁 <span class="name" data-type="templates"></span></div>',
+          "");
+      },
+      type: true },
+
+    { ku: "دیسان New Folder — ئەم جارە static",
+      en: "New Folder again — this time static",
+      screen: function () {
+        return vscode(sideHead(false) + '<div class="vs-row">STUDENT-SYSTEM</div>' +
+          '<div class="vs-row">📁 templates</div>' +
+          '<div class="vs-row">📁 <span class="name" data-type="static"></span></div>',
+          "");
+      },
+      type: true },
+
+    { ku: "لە تێرمیناڵدا بپشکنە: dir",
+      en: "Check it in the terminal: dir",
+      screen: function () {
+        return '<div class="win term"><div class="win-bar term-bar">' + WIN +
+          '<span>Terminal — student-system</span></div>' +
+          '<div class="term-body">&gt; <span data-type="dir"></span>' +
+          '<span class="ans" data-after="' + NL + 'd-----    static' +
+          NL + 'd-----    templates"></span></div></div>';
+      },
+      type: true, hold: 2400 }
+  ];
+
+
   var stage = document.getElementById("stage");
   var stageCap = stage.querySelector(".stage-caption span:last-child");
   var stageNum = stage.querySelector(".stage-caption .num");
@@ -1849,7 +2104,7 @@ body {
   var stageToggle = stage.querySelector('[data-act="toggle"]');
   var stageSpeed = stage.querySelector('[data-act="speed"]');
 
-  var show = { at: 0, playing: false, rate: 1, timers: [] };
+  var show = { list: [], at: 0, playing: false, rate: 1, timers: [] };
 
   function clearTimers() {
     show.timers.forEach(clearTimeout);
@@ -1872,17 +2127,17 @@ body {
 
   function drawScene(index, animate) {
     clearTimers();
-    show.at = Math.max(0, Math.min(SCENES.length - 1, index));
-    var scene = SCENES[show.at];
+    show.at = Math.max(0, Math.min(show.list.length - 1, index));
+    var scene = show.list[show.at];
 
-    stageNum.textContent = (show.at + 1) + "/" + SCENES.length;
+    stageNum.textContent = (show.at + 1) + "/" + show.list.length;
     stageCap.textContent = scene[state.lang] || scene.en;
     stageScreen.innerHTML = scene.screen() +
       '<div class="pointer">' + stagePointer.innerHTML + '</div>';
     stagePointer = stageScreen.querySelector(".pointer");
 
     stageDots.innerHTML = "";
-    SCENES.forEach(function (_, n) {
+    show.list.forEach(function (_, n) {
       var dot = document.createElement("i");
       if (n === show.at) { dot.className = "on"; }
       stageDots.appendChild(dot);
@@ -1898,7 +2153,7 @@ body {
       if (!show.playing) { return; }
       later(function () {
         if (!show.playing) { return; }
-        if (show.at + 1 >= SCENES.length) { setShowing(false); return; }
+        if (show.at + 1 >= show.list.length) { setShowing(false); return; }
         drawScene(show.at + 1, true);
       }, scene.hold || 1200);
     }
@@ -1937,7 +2192,9 @@ body {
     drawScene(show.at, true);
   }
 
-  function openStage() {
+  function openStage(step) {
+    show.list = WALKS[step] || [];
+    if (!show.list.length) { return; }
     stage.hidden = false;
     stage.removeAttribute("aria-hidden");
     show.at = 0;
