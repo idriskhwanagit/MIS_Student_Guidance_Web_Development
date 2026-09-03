@@ -275,7 +275,9 @@ body {
 .rail {
   position: sticky;
   top: 4.5rem;
-  max-height: calc(100vh - 6rem);
+  align-self: start;
+  height: fit-content;
+  max-height: calc(100vh - 7rem);
   overflow-y: auto;
   padding-inline-end: .5rem;
 }
@@ -869,15 +871,30 @@ body {
 
   /* ---- which section am I in? ------------------------------------------- */
   var spyTimer = null;
+  var shown = null;
   function spy() {
     var links = toc.querySelectorAll("a");
     var current = null;
     reader.querySelectorAll("h1, h2, h3").forEach(function (h) {
       if (h.getBoundingClientRect().top < 120) { current = h.id; }
     });
+    var active = null;
     links.forEach(function (a) {
-      a.classList.toggle("here", a.getAttribute("href") === "#" + current);
+      var here = a.getAttribute("href") === "#" + current;
+      a.classList.toggle("here", here);
+      if (here) { active = a; }
     });
+
+    /* the rail scrolls on its own once the guide is long, so bring the
+       current entry into view instead of leaving the reader to hunt */
+    if (active && active !== shown) {
+      shown = active;
+      var box = toc.parentElement.getBoundingClientRect();
+      var link = active.getBoundingClientRect();
+      if (link.top < box.top + 8 || link.bottom > box.bottom - 8) {
+        active.scrollIntoView({ block: "nearest" });
+      }
+    }
   }
 
   window.addEventListener("scroll", function () {
