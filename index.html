@@ -444,7 +444,8 @@ body {
    Removed lines are struck through, added lines are marked. The copy
    button hands over the result, not the diff.
    ------------------------------------------------------------------------ */
-.block pre code span { display: block; }
+/* a blank line still occupies one, so an added empty line is visible */
+.block pre code span { display: block; min-height: 1.65em; }
 
 .block pre code .add {
   background: rgba(87, 197, 148, .16);
