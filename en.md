@@ -46,9 +46,7 @@ For a student who:
 | 10 | **D** — deleting | ✅ |
 | 11 | Search | ✅ |
 | 12 | Security — SQL Injection and XSS | ✅ |
-| 13 | Final testing and `run.bat` | ⏳ |
-
-> ⏳ = not written yet. This document is completed step by step.
+| 13 | Final testing and `run.bat` | ✅ |
 
 ---
 
@@ -3315,4 +3313,195 @@ in.
 
 ---
 
-> Step 13 will be added here.
+# Step 13 — The final test
+
+> The last step. We get the project ready for other people to use.
+
+## What we do
+
+Add a file that starts the project with a double-click, then test
+**everything**.
+
+---
+
+## 13.1 — `run.bat`
+
+Until now you have had to open a terminal and type a command every time. For
+somebody who does not know Python, that is a barrier.
+
+Create a new file called `run.bat`, beside `app.py`:
+
+```bat run.bat
+@echo off
+cd /d "%~dp0"
+start "" http://localhost:8000
+python app.py
+pause
+```
+
+<!-- collapse -->
+### What does this file do?
+
+| Line | What it does |
+| ---- | ------------ |
+| `@echo off` | Do not print the commands themselves, only their output |
+| `cd /d "%~dp0"` | Go to the folder this file is in |
+| `%~dp0` | "the path of this file" — so it works from anywhere |
+| `start "" http://...` | Open the browser |
+| `python app.py` | Start the server |
+| `pause` | Keep the window open if something goes wrong |
+
+> **Why does `cd /d "%~dp0"` matter?** Without it, if somebody opens the file
+> from elsewhere, `python app.py` cannot find the file. The same problem as
+> Step 3.
+>
+> **Why `pause`?** If there is an error, the window would close instantly and
+> you would see nothing. `pause` waits for a key.
+
+**Test it:** stop the server, then double-click `run.bat` in File Explorer.
+
+The browser should open and the project should work.
+
+---
+
+## 13.2 — The complete test
+
+Now test everything. **All of these must work:**
+
+| # | Test | What should happen |
+| - | ---- | ------------------ |
+| 1 | Double-click `run.bat` | The browser opens and the list appears |
+| 2 | An empty database | *No student is registered yet.* |
+| 3 | Register a student | Back to the list, the student at the top |
+| 4 | Submit an empty form | Four error messages |
+| 5 | A bad email | *The email address is not valid.* |
+| 6 | A duplicate number | *This student ID is already registered.* |
+| 7 | After an error | What you typed is still there |
+| 8 | `F5` after registering | Nothing is registered twice |
+| 9 | Click *Edit* | A prefilled form |
+| 10 | Change only the phone | It saves (their own number does not block them) |
+| 11 | Another student's number | Refused |
+| 12 | Click *Delete* → Cancel | Nothing happens |
+| 13 | Click *Delete* → OK | Removed |
+| 14 | Search by name | Only those appear |
+| 15 | Search by department | Works |
+| 16 | A search with no results | *No student matches "..."* |
+| 17 | *Reset* | Everyone comes back |
+| 18 | `/nothing` | `404` |
+| 19 | `/edit?id=9999` | `404` |
+| 20 | `/delete?id=1` in the browser | `404`, nothing deleted |
+| 21 | A student named `<script>alert(1)</script>` | Shown as text |
+| 22 | Searching for `' OR '1'='1` | Finds nothing |
+
+> **If any one of them fails**, go back to the step it belongs to. The error
+> table at the end of each step will help.
+
+---
+
+## 13.3 — Starting from a clean slate
+
+Before handing the project in, it is worth testing it with a fresh database:
+
+**1.** Stop the server (`Ctrl + C`)
+**2.** Delete `students.db`
+**3.** Open `run.bat` again
+
+A new database should be built and *No student is registered yet.* should
+appear.
+
+> This proves the project also works on somebody else's computer — where
+> there is no `students.db`.
+
+---
+
+## 13.4 — The finished structure
+
+```
+student-system/
+├── app.py              the server, the routes, validation
+├── database.py         the table and the CRUD operations
+├── run.bat             double-click to start
+├── students.db         the database (automatic)
+├── templates/
+│   ├── layout.html     the shared frame
+│   ├── home.html       search + table
+│   ├── list.html       the students table
+│   └── form.html       adding and editing
+└── static/
+    └── style.css       all the design
+```
+
+**Seven files.** The whole project.
+
+<!-- collapse -->
+### How many lines is each file?
+
+| File | About |
+| ---- | ----- |
+| `app.py` | 150 lines |
+| `database.py` | 90 lines |
+| `style.css` | 120 lines |
+| `templates/` | 100 lines together |
+
+> Around **460 lines**. A complete CRUD system, with no external libraries.
+>
+> For comparison: the same thing in Django or Laravel takes less code — but
+> much of the work is hidden inside the framework. You wrote **every line**
+> and you know what it does.
+
+---
+
+## 13.5 — What you learned
+
+| Subject | Where |
+| ------- | ----- |
+| HTML: forms, tables, tags | Steps 5, 7, 8 |
+| CSS: colour, Flexbox, layout | Steps 6, 8 |
+| SQL: `CREATE`, `INSERT`, `SELECT`, `UPDATE`, `DELETE`, `LIKE` | Steps 4, 7–11 |
+| Python: functions, classes, lists, dictionaries | All of them |
+| HTTP: `GET`, `POST`, `303`, `404` | Steps 6, 8, 10 |
+| Security: SQL Injection, XSS, path traversal | Step 12 |
+| Separation of concerns (MVC) | Steps 4, 5 |
+
+---
+
+## 13.6 — For those who want to go further
+
+In order of difficulty:
+
+1. **A new column** — add `stage` (year of study). Remember to delete
+   `students.db`.
+2. **Sort by name** — `ORDER BY full_name` instead of `id DESC`.
+3. **Count male and female** —
+   `SELECT gender, COUNT(*) FROM students GROUP BY gender`
+4. **A page for one student** — `/student?id=2` showing all their details.
+5. **Filter by department** — a dropdown beside the search box.
+6. **Export to CSV** — `/export` that sends a CSV file.
+
+> Every one of them builds on what you already know. None needs anything new.
+
+---
+
+## 🎉 Well done
+
+You have built a complete information system — from an empty folder to a
+working program.
+
+**What matters is not that the project works.** It is that you know **why**
+every line is in it.
+
+---
+
+## If you get an error
+
+| Problem | Fix |
+| ------- | --- |
+| `run.bat` closes instantly | The `pause` at the end is missing |
+| `python` is not found by `run.bat` | Step 1.3 — PATH |
+| The browser opens too early and shows nothing | Wait a second and press `F5` |
+| An error after deleting `students.db` | Make sure `database.init_db()` is in `app.py` |
+
+---
+
+**The guide ends here.** If you forget something, each step reads on its own
+— use the contents list beside the page.
