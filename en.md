@@ -1746,6 +1746,9 @@ A new file in the `templates` folder:
 
 `<tbody>` is empty — the rows come from Python.
 
+> **Nothing changes yet.** The file exists, but nothing calls it — we do
+> that in 7.6. Press `F5` now and the page looks exactly the same.
+
 ## 7.4 — Change `templates/home.html`
 
 ```diff templates/home.html
@@ -1754,6 +1757,26 @@ A new file in the `templates` folder:
 +
 +{{ table }}
 ```
+
+## What you should see
+
+**Do not restart the server.** Just press `F5` in the browser.
+
+> Remember from Step 5: a template file is read on **every request**, so a
+> change inside one shows up immediately.
+
+The line **Students registered: 0** is **gone**. Only this is left:
+
+```
+Welcome to the Student Registration System.
+```
+
+**Why?** We removed `{{ total }}`, and nothing has been passed to the new
+`{{ table }}` yet. When `render()` meets a name it was given no value for,
+it puts **an empty string** there — it does not raise an error.
+
+> The page is nearly bare now. That is deliberate, and it is **the sign
+> that your change worked**. We fill `table` in 7.6.
 
 ## 7.5 — Two functions for `app.py`
 
@@ -1825,6 +1848,35 @@ between functions — that is how Python code is written.
 | `"""...""".format(...)` | A small template for each row |
 | `"".join(rows)` | Joins every row into one piece of text |
 | **`esc(...)`** | Makes the text safe — see below |
+
+## What you should see
+
+Press `Ctrl + S`, then restart the server:
+
+```bash
+python app.py
+```
+
+```
+Server running at http://localhost:8000
+```
+
+**The page does not change** — and that is right. The two functions are
+written, but **nothing calls them yet**. We call them in 7.6.
+
+**So what is the result of this section?** That the server **starts**. If
+your indentation were wrong, it would show here — not two sections later.
+
+| If you see | It means |
+| ---------- | -------- |
+| `Server running at ...` | Everything is right ✅ |
+| `IndentationError` | There is a space before `def` — it must start at the far left |
+| `SyntaxError` | A `)` or a `"""` was never closed. The line number is in the message |
+| `unexpected indent` | The lines inside the function do not line up — use 4 spaces |
+
+> **Do not forget `import html`.** If you left it out, the server still
+> starts fine — because `esc()` has not been called yet. The error only
+> appears in 7.8, as `NameError: name 'html' is not defined`.
 
 ## 7.6 — Change `page_home`
 
