@@ -1037,22 +1037,78 @@ on the other hand, is read once, when the server starts.
 
 ## ⚠️ A bug that really happened
 
-While this project was being built, `layout.html` contained a comment:
+Do not read about it — **see it**. Two small changes, then we undo them.
 
-```html
-<!-- The changing part goes where {{ content }} is -->
+**1.** Add a comment line at the top of `templates/home.html`:
+
+```diff templates/home.html
++<!-- the home page -->
+ <p>Hello from my own page!</p>
+ <p>Students registered: {{ total }}</p>
 ```
 
-**The result:** the whole page appeared **twice**.
+**2.** And one in `templates/layout.html`, just above `{{ content }}`:
 
-**Why?** `render()` does **not** know the difference between a comment and
-real HTML. It only looks for `{{ }}`. So it replaced the one inside the
-comment too.
+```diff templates/layout.html
+   <h1>{{ title }}</h1>
++  <!-- the content goes here: {{ content }} -->
+   {{ content }}
+```
+
+Save both and press `F5` in the browser. (Do not restart the server — the
+rule from 5.7.)
+
+### What you should see
+
+```
+Hello from my own page!
+Students registered: 0
+-->                              <- this should not be there!
+Hello from my own page!          <- twice!
+Students registered: 0
+```
+
+**The page is broken.** The content appears twice, and a stray `-->` has
+turned up in the middle of it.
+
+### Why? Three points
+
+**1.** `render()` does not know what a comment is — it only looks for
+`{{ }}`. So it replaced the one **inside the comment** as well.
+
+**2.** A comment ends at the **first** `-->`.
+
+**3.** The content that went into the comment has a `-->` of its own,
+because `home.html` now has a comment.
+
+That `-->` **closed the comment early**. Everything after it was no longer
+hidden — so it showed.
+
+```
+<!-- the content goes here: <!-- the home page --> <p>Hello...</p> -->
+                                                 ^
+                                     the comment ends here
+                                                   ^
+                                          and this shows
+```
+
+Then further down, the real `{{ content }}` put the same thing in again.
+
+### Now fix it
+
+Just take the `{{ content }}` out of the comment — keep the words:
+
+```diff templates/layout.html
+-  <!-- the content goes here: {{ content }} -->
++  <!-- the content goes here -->
+```
+
+`F5` → the page is right again.
 
 > **The rule:** never write `{{ }}` inside a comment.
 >
-> The same is true in PHP, Django and Laravel — a template processor looks at
-> the **text**, not at the meaning of the HTML.
+> The same happens in PHP, Django and Laravel — a template processor looks
+> at the **text**, not at the meaning of the HTML.
 
 ---
 
