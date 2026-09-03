@@ -375,6 +375,7 @@ server.serve_forever()
 > ⚠️ VS Code does **not** save on its own. A white dot ● in the tab name means
 > the file is not saved yet.
 
+<!-- collapse -->
 ## 3.3 — What does this code do?
 
 | Line | What it does |
@@ -571,6 +572,7 @@ def init_db():
 
 Save with `Ctrl + S`.
 
+<!-- collapse -->
 ## 4.3 — What does this code do?
 
 | Part | What it does |
@@ -589,6 +591,7 @@ Save with `Ctrl + S`.
 > error: there is a database, but it is empty — because it is a different file
 > with the same name.
 
+<!-- collapse -->
 ## 4.4 — The columns
 
 | Column | Type | Meaning |
@@ -850,6 +853,7 @@ class StudentAppHandler(BaseHTTPRequestHandler):
 1. Fill in `home.html` → that becomes the content
 2. Put that content into `layout.html` → that becomes the whole page
 
+<!-- collapse -->
 ## 5.5 — How does this code work?
 
 | Part | What it does |
@@ -1042,6 +1046,22 @@ h1 {
 > `var(--brand)`. If one day you want to change the main colour, you change
 > **one line** instead of twenty.
 
+<!-- collapse -->
+## 6.1.1 — What does this CSS do?
+
+| Rule | What it does |
+| ---- | ------------ |
+| `:root { --brand: ... }` | Names a colour, so it can be changed in one place |
+| `* { box-sizing: border-box }` | Widths count the padding and border — without it layouts break |
+| `body { margin: 0 }` | Removes the margin the browser adds by default |
+| `padding: 24px` | Space between the content and the edge of the window |
+| `background: var(--background)` | Uses the colour we named in `:root` |
+| `font-family: "Segoe UI", Tahoma, Arial` | A fallback list: if the first is missing, the second |
+| `line-height: 1.6` | Space between lines — it makes reading easier |
+| `h1 { color: var(--brand) }` | The heading in the main colour |
+| `.card { max-width: 700px }` | The box never grows wider than 700 pixels |
+| `border-radius: 10px` | Rounds the corners |
+
 ## 6.2 — Link it from `layout.html`
 
 Open `templates/layout.html` and make two changes:
@@ -1142,6 +1162,7 @@ class StudentAppHandler(BaseHTTPRequestHandler):
         self.wfile.write(body)
 ```
 
+<!-- collapse -->
 ## 6.5 — What does this code do?
 
 | Part | What it does |
@@ -1303,6 +1324,9 @@ def get_all_students():
         ).fetchall()
 ```
 
+<!-- collapse -->
+## 7.1.1 — What does this code do?
+
 | Part | What it does |
 | ---- | ------------ |
 | `INSERT INTO ... VALUES (?, ?, ...)` | Adds a new row |
@@ -1407,6 +1431,9 @@ def build_table_rows(students):
     return "".join(rows)
 ```
 
+<!-- collapse -->
+## 7.5.1 — What does this code do?
+
 | Part | What it does |
 | ---- | ------------ |
 | `enumerate(students, start=1)` | Numbers the rows: 1, 2, 3 … |
@@ -1468,6 +1495,19 @@ tbody tr:last-child td {
   border-bottom: none;
 }
 ```
+
+<!-- collapse -->
+## 7.7.1 — What does this CSS do?
+
+| Rule | What it does |
+| ---- | ------------ |
+| `width: 100%` | The table takes the full width |
+| `border-collapse: collapse` | Merges the lines between cells — without it you get two side by side |
+| `padding: 8px 12px` | Space inside the cells: 8 top and bottom, 12 at the sides |
+| `border-bottom` | One line under each row, rather than a full grid |
+| `text-align: left` | The text starts from the left |
+| `thead th { text-transform: uppercase }` | The headings in capitals |
+| `tbody tr:last-child td { border-bottom: none }` | The last row has no line under it |
 
 ---
 

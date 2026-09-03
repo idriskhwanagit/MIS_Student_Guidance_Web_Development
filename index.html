@@ -385,6 +385,43 @@ body {
   unicode-bidi: embed;
 }
 
+/* --- collapsed explanations ----------------------------------------------
+   A reader who already follows the code walks straight past these; one who
+   does not opens them. Closed by default so the page stays short.
+   ------------------------------------------------------------------------ */
+.explain {
+  margin: 0 0 1.25rem;
+  border: 1px solid var(--rule);
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.explain > summary {
+  padding: .7rem 1rem;
+  color: var(--accent-ink);
+  font-family: var(--f-ui);
+  font-size: .92rem;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.explain > summary::-webkit-details-marker { display: none; }
+
+.explain > summary::before {
+  content: "▸";
+  margin-inline-end: .55rem;
+  font-size: .85em;
+}
+
+[dir="rtl"] .explain > summary::before { content: "◂"; }
+
+.explain[open] > summary::before,
+[dir="rtl"] .explain[open] > summary::before { content: "▾"; }
+
+.explain > :not(summary) { margin-inline: 1rem; }
+.explain > :last-child { margin-bottom: 1rem; }
+
 /* --- code blocks --------------------------------------------------------- */
 .block {
   position: relative;
@@ -543,6 +580,9 @@ body {
 
 @media print {
   .topbar, .rail, .copy, .toast { display: none !important; }
+  .explain { border: 0; background: none; }
+  .explain > summary { padding-inline: 0; color: var(--ink); }
+  .explain > :not(summary) { margin-inline: 0; }
   .notice { margin-bottom: 1.25rem; border-color: #b8791f; color: #8a5a12; background: #fbf3e6; }
   .watermark { opacity: .05; color: #12303a; }
   body { background: #fff; }
@@ -724,6 +764,30 @@ body {
         headings.push({ id: id, level: level, text: h[2].replace(/[*`]/g, "") });
         out.push("<h" + level + ' id="' + id + '">' + inline(h[2]) + "</h" + level + ">");
         i++;
+        continue;
+      }
+
+      /* an explanation the reader opens if they want it — the heading after
+         the marker becomes the summary, and everything under it the body */
+      if (/^<!--\s*collapse\s*-->\s*$/.test(line)) {
+        flushPara();
+        i++;
+        var mark = /^(#{1,6})\s+(.*)$/.exec(lines[i] || "");
+        if (!mark) { continue; }
+        var depth = mark[1].length;
+        var boxId = "h" + headings.length;
+        headings.push({ id: boxId, level: depth, text: mark[2].replace(/[*`]/g, "") });
+        i++;
+        var inside = [];
+        while (i < lines.length) {
+          var ahead = /^(#{1,6})\s+/.exec(lines[i]);
+          if (ahead && ahead[1].length <= depth) { break; }
+          inside.push(lines[i]);
+          i++;
+        }
+        out.push('<details class="explain" id="' + boxId + '"><summary>' +
+          inline(mark[2]) + "</summary>" + render(inside.join("\n"), headings) +
+          "</details>");
         continue;
       }
 
@@ -911,6 +975,13 @@ body {
     paint();
   });
 
+  toc.addEventListener("click", function (e) {
+    var link = e.target.closest("a");
+    if (!link) { return; }
+    var target = document.getElementById(link.getAttribute("href").slice(1));
+    if (target && target.tagName === "DETAILS") { target.open = true; }
+  });
+
   document.getElementById("themeBtn").addEventListener("click", function () {
     var now = document.documentElement.getAttribute("data-theme");
     var dark = now
@@ -974,6 +1045,21 @@ body {
   document.addEventListener("contextmenu", function (e) {
     e.preventDefault();
     hint(UI[state.lang].keep);
+  });
+
+  /* ---- a printout is not interactive, so nothing may stay folded away ---- */
+  window.addEventListener("beforeprint", function () {
+    reader.querySelectorAll("details:not([open])").forEach(function (box) {
+      box.dataset.wasClosed = "1";
+      box.open = true;
+    });
+  });
+
+  window.addEventListener("afterprint", function () {
+    reader.querySelectorAll("details[data-was-closed]").forEach(function (box) {
+      box.open = false;
+      delete box.dataset.wasClosed;
+    });
   });
 
   /* ---- copied Kurdish text carries the notice with it --------------------
