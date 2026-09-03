@@ -472,12 +472,50 @@ Because the server still has the old code in memory. You have to:
 | ------------- | --- |
 | `can't open file 'app.py'` | You are in the wrong folder. Close the terminal and do **File → Open Folder** again |
 | `[WinError 10048]` or `address already in use` | A server is already running. Find the old terminal and press `Ctrl + C` |
+| The server says *Server running*, but the browser says `ERR_CONNECTION_REFUSED` | Two servers on one port. See below |
 | `IndentationError` | The spacing at the start of the lines is uneven. Python is strict — use 4 spaces, not a Tab |
 | `SyntaxError` | A character or a bracket is missing. Check the line named in the message |
 | **This site can't be reached** | The server is not running. Look at the terminal |
 | Kurdish letters show as `Ø¨Ø§` | `charset=utf-8` is missing from the `Content-Type` |
 | My change does not show | You did not restart the server (see 3.7) |
 | A white dot ● in the tab | The file is not saved. `Ctrl + S` |
+
+---
+
+## ⚠️ A server that runs but does not answer
+
+This is the most common problem in this project, and it comes with **no
+error at all** — which is what makes it hard to find.
+
+**The sign:** the terminal says *Server running at http://localhost:8000*,
+but the browser says `ERR_CONNECTION_REFUSED`.
+
+**The cause:** an old Python process still holds port 8000. When you press
+`Ctrl + C`, the process sometimes does not die straight away. The new server
+then starts and **takes the same port** — and neither of them answers.
+
+**Check:**
+
+```bash
+netstat -ano | findstr :8000
+```
+
+If **more than one line** appears, that is the problem.
+
+**Fix:**
+
+```bash
+taskkill /IM python.exe /F
+```
+
+> This kills every Python process. While working on this project that is
+> safe — this server is the only one running.
+
+Then `python app.py` again.
+
+> **Avoiding it:** after `Ctrl + C`, wait for the `>` to come back before
+> starting the server again. And do not open **two terminals** for one
+> project.
 
 ---
 
