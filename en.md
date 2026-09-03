@@ -1094,16 +1094,27 @@ hidden — so it showed.
 
 Then further down, the real `{{ content }}` put the same thing in again.
 
-### Now fix it
+### Now delete both comments **completely**
 
-Just take the `{{ content }}` out of the comment — keep the words:
+Those two lines were only for the test. Take them both out:
 
 ```diff templates/layout.html
+   <h1>{{ title }}</h1>
 -  <!-- the content goes here: {{ content }} -->
-+  <!-- the content goes here -->
+   {{ content }}
+```
+
+```diff templates/home.html
+-<!-- the home page -->
+ <p>Hello from my own page!</p>
+ <p>Students registered: {{ total }}</p>
 ```
 
 `F5` → the page is right again.
+
+> ⚠️ **Both of them matter.** If they stay, your files will not match the
+> ones in the guide from here on, and the changes shown in later steps will
+> not line up.
 
 > **The rule:** never write `{{ }}` inside a comment.
 >
