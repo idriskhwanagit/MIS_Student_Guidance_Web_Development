@@ -1403,6 +1403,38 @@ then `http://localhost:8000` — and this time press `Ctrl + Shift + R`.
 
 **The design works.**
 
+## 6.6.1 — What does each rule do? See for yourself
+
+The table in 6.1.1 describes each rule. But **seeing beats reading**.
+
+**Right-click** on the page → **Inspect**
+
+A panel opens at the bottom or the side. In the **Styles** section, each CSS
+rule has a small **checkbox** beside it.
+
+Click `<div class="card">` in the HTML part, then switch these three rules
+**off** one at a time — and watch the page:
+
+| Switch this off | What happens |
+| --------------- | ------------ |
+| `background` | The white box **disappears** — the page background shows through |
+| `border-radius` | The corners turn **sharp** |
+| `padding` | The text **sticks** to the edge |
+
+`padding` is the clearest of the three. The moment it is off, you can see
+why it is there.
+
+> ### 🤔 Have I broken my file?
+>
+> **No.** `style.css` was **never changed**. Those changes live only in the
+> **browser's memory**.
+>
+> Press **`F5`** → everything comes back.
+
+> **This is a working tool, not just a teaching one.** Everybody who builds
+> for the web tries their CSS here first, and writes into the file only what
+> worked.
+
 ## 6.7 — Two more checks
 
 **1. Look at the CSS directly:**
