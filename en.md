@@ -653,25 +653,25 @@ Save with `Ctrl + S`.
 `database.py` does nothing on its own — nobody has called it. Add **two
 lines** to `app.py`:
 
-```python app.py
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-import database                                    # <- new
-
-
-class StudentAppHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
-
-
-database.init_db()                                 # <- new
-server = HTTPServer(("localhost", 8000), StudentAppHandler)
-print("Server running at http://localhost:8000")
-print("Press Ctrl + C to stop.")
-server.serve_forever()
+```diff app.py
+ from http.server import BaseHTTPRequestHandler, HTTPServer
++
++import database
+ 
+ 
+ class StudentAppHandler(BaseHTTPRequestHandler):
+     def do_GET(self):
+         self.send_response(200)
+         self.send_header("Content-Type", "text/html; charset=utf-8")
+         self.end_headers()
+         self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
+ 
+ 
++database.init_db()
+ server = HTTPServer(("localhost", 8000), StudentAppHandler)
+ print("Server running at http://localhost:8000")
+ print("Press Ctrl + C to stop.")
+ server.serve_forever()
 ```
 
 Save both files with `Ctrl + S`.
@@ -888,26 +888,26 @@ those are in `layout.html`.
 
 Add this to `app.py`. First at the top:
 
-```python app.py
-import os
-import re
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-import database
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
-
-
-def render(template_name, **values):
-    path = os.path.join(TEMPLATE_DIR, template_name)
-    with open(path, encoding="utf-8") as file:
-        page = file.read()
-
-    def replace(match):
-        return str(values.get(match.group(1), ""))
-
-    return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
+```diff app.py
++import os
++import re
+ from http.server import BaseHTTPRequestHandler, HTTPServer
+ 
+ import database
++
++BASE_DIR = os.path.dirname(os.path.abspath(__file__))
++TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
++
++
++def render(template_name, **values):
++    path = os.path.join(TEMPLATE_DIR, template_name)
++    with open(path, encoding="utf-8") as file:
++        page = file.read()
++
++    def replace(match):
++        return str(values.get(match.group(1), ""))
++
++    return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
 ```
 
 ## 5.4 — Use it
@@ -1500,7 +1500,15 @@ A new file in the `templates` folder:
 
 ## 7.5 — Two functions for `app.py`
 
-Add `import html` at the top, then these two functions beside `render()`:
+First at the top of the file:
+
+```diff app.py
++import html
+ import os
+ import re
+```
+
+Then add these **two new functions** beside `render()`:
 
 ```python app.py
 def esc(value):
@@ -2508,19 +2516,39 @@ Delete the `save_student` function **completely** and put this in its place:
 
 ## 9.6 — The routes
 
-In `do_GET`, after `/add`:
+In `do_GET`:
 
-```python app.py
-        elif url.path == "/edit":
-            query = urllib.parse.parse_qs(url.query)
-            self.page_form(query.get("id", [""])[0])
+```diff app.py
+     def do_GET(self):
+         url = urllib.parse.urlparse(self.path)
+ 
+         if url.path == "/":
+             self.page_home()
+         elif url.path == "/add":
+             self.page_form()
++        elif url.path == "/edit":
++            query = urllib.parse.parse_qs(url.query)
++            self.page_form(query.get("id", [""])[0])
+         elif url.path.startswith("/static/"):
+             self.send_static(url.path[len("/static/"):])
+         else:
+             self.send_response(404)
+             self.end_headers()
 ```
 
-In `do_POST`, after `/add`:
+and in `do_POST`:
 
-```python app.py
-        elif url.path == "/edit":
-            self.save_student(is_edit=True)
+```diff app.py
+     def do_POST(self):
+         url = urllib.parse.urlparse(self.path)
+ 
+         if url.path == "/add":
+             self.save_student()
++        elif url.path == "/edit":
++            self.save_student(is_edit=True)
+         else:
+             self.send_response(404)
+             self.end_headers()
 ```
 
 <!-- collapse -->
@@ -2769,13 +2797,23 @@ Change `build_table_rows` again — the `Actions` column now holds two things:
 
 ## 10.3 — The delete route
 
-In `do_POST`, after `/edit`:
+In `do_POST`:
 
-```python app.py
-        elif url.path == "/delete":
-            form = self.read_form()
-            database.delete_student(form.get("id"))
-            self.redirect("/")
+```diff app.py
+     def do_POST(self):
+         url = urllib.parse.urlparse(self.path)
+ 
+         if url.path == "/add":
+             self.save_student()
+         elif url.path == "/edit":
+             self.save_student(is_edit=True)
++        elif url.path == "/delete":
++            form = self.read_form()
++            database.delete_student(form.get("id"))
++            self.redirect("/")
+         else:
+             self.send_response(404)
+             self.end_headers()
 ```
 
 > It is only in `do_POST` — **not** in `do_GET`. That is the rule we just

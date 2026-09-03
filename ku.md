@@ -653,25 +653,25 @@ def init_db():
 `database.py` بە تەنها هیچ ناکات — کەس بانگی نەکردووە. لە `app.py`دا
 **دوو دێڕ** زیاد بکە:
 
-```python app.py
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-import database                                    # ← نوێ
-
-
-class StudentAppHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.end_headers()
-        self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
-
-
-database.init_db()                                 # ← نوێ
-server = HTTPServer(("localhost", 8000), StudentAppHandler)
-print("Server running at http://localhost:8000")
-print("Press Ctrl + C to stop.")
-server.serve_forever()
+```diff app.py
+ from http.server import BaseHTTPRequestHandler, HTTPServer
++
++import database
+ 
+ 
+ class StudentAppHandler(BaseHTTPRequestHandler):
+     def do_GET(self):
+         self.send_response(200)
+         self.send_header("Content-Type", "text/html; charset=utf-8")
+         self.end_headers()
+         self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
+ 
+ 
++database.init_db()
+ server = HTTPServer(("localhost", 8000), StudentAppHandler)
+ print("Server running at http://localhost:8000")
+ print("Press Ctrl + C to stop.")
+ server.serve_forever()
 ```
 
 `Ctrl + S` هەردوو فایلەکە پاشەکەوت بکە.
@@ -886,26 +886,26 @@ layout.html
 
 لە `app.py`دا، ئەمانە زیاد بکە. سەرەتا لە سەرەوە:
 
-```python app.py
-import os
-import re
-from http.server import BaseHTTPRequestHandler, HTTPServer
-
-import database
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
-
-
-def render(template_name, **values):
-    path = os.path.join(TEMPLATE_DIR, template_name)
-    with open(path, encoding="utf-8") as file:
-        page = file.read()
-
-    def replace(match):
-        return str(values.get(match.group(1), ""))
-
-    return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
+```diff app.py
++import os
++import re
+ from http.server import BaseHTTPRequestHandler, HTTPServer
+ 
+ import database
++
++BASE_DIR = os.path.dirname(os.path.abspath(__file__))
++TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
++
++
++def render(template_name, **values):
++    path = os.path.join(TEMPLATE_DIR, template_name)
++    with open(path, encoding="utf-8") as file:
++        page = file.read()
++
++    def replace(match):
++        return str(values.get(match.group(1), ""))
++
++    return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
 ```
 
 ## ٥.٤ — بەکارهێنانی
@@ -1496,8 +1496,15 @@ python -c "import database; database.add_student(student_id='MIS-2025-002', full
 
 ## ٧.٥ — دوو فەنکشن بۆ `app.py`
 
-سەرەتا لە سەرەوە `import html` زیاد بکە، پاشان ئەم دوو فەنکشنە لەتەنیشت
-`render()`:
+سەرەتا لە سەرەوەی فایلەکە:
+
+```diff app.py
++import html
+ import os
+ import re
+```
+
+پاشان ئەم **دوو فەنکشنە نوێیە** لەتەنیشت `render()` زیاد بکە:
 
 ```python app.py
 def esc(value):
@@ -2503,19 +2510,39 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 ## ٩.٦ — ڕێڕەوەکان
 
-لە `do_GET`، دوای `/add`:
+لە `do_GET` دا:
 
-```python app.py
-        elif url.path == "/edit":
-            query = urllib.parse.parse_qs(url.query)
-            self.page_form(query.get("id", [""])[0])
+```diff app.py
+     def do_GET(self):
+         url = urllib.parse.urlparse(self.path)
+ 
+         if url.path == "/":
+             self.page_home()
+         elif url.path == "/add":
+             self.page_form()
++        elif url.path == "/edit":
++            query = urllib.parse.parse_qs(url.query)
++            self.page_form(query.get("id", [""])[0])
+         elif url.path.startswith("/static/"):
+             self.send_static(url.path[len("/static/"):])
+         else:
+             self.send_response(404)
+             self.end_headers()
 ```
 
-لە `do_POST`، دوای `/add`:
+و لە `do_POST` دا:
 
-```python app.py
-        elif url.path == "/edit":
-            self.save_student(is_edit=True)
+```diff app.py
+     def do_POST(self):
+         url = urllib.parse.urlparse(self.path)
+ 
+         if url.path == "/add":
+             self.save_student()
++        elif url.path == "/edit":
++            self.save_student(is_edit=True)
+         else:
+             self.send_response(404)
+             self.end_headers()
 ```
 
 <!-- collapse -->
@@ -2761,13 +2788,23 @@ def delete_student(row_id):
 
 ## ١٠.٣ — ڕێڕەوی سڕینەوە
 
-لە `do_POST`، دوای `/edit`:
+لە `do_POST` دا:
 
-```python app.py
-        elif url.path == "/delete":
-            form = self.read_form()
-            database.delete_student(form.get("id"))
-            self.redirect("/")
+```diff app.py
+     def do_POST(self):
+         url = urllib.parse.urlparse(self.path)
+ 
+         if url.path == "/add":
+             self.save_student()
+         elif url.path == "/edit":
+             self.save_student(is_edit=True)
++        elif url.path == "/delete":
++            form = self.read_form()
++            database.delete_student(form.get("id"))
++            self.redirect("/")
+         else:
+             self.send_response(404)
+             self.end_headers()
 ```
 
 > تەنها لە `do_POST`دایە — **نەک** لە `do_GET`. ئەمە ئەو یاسایەیە کە
