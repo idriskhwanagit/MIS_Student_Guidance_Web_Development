@@ -589,6 +589,84 @@ body {
   text-align: center;
 }
 
+/* --- an editor, and a plain page, for the code walkthroughs ------------- */
+.tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  background: #f3f6f9;
+  border-bottom: 1px solid #e2e8ee;
+  font-size: 11.5px;
+}
+
+.tabs .tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  background: #fff;
+  border: 1px solid #e2e8ee;
+  border-bottom: 0;
+  border-radius: 5px 5px 0 0;
+  font-family: var(--f-mono);
+}
+
+.tabs .tab .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #94a3b8;
+}
+
+.tabs .tab.saved .dot { background: transparent; }
+
+.editor {
+  height: 100%;
+  padding: 8px 12px;
+  overflow: hidden;
+  background: #fbfcfd;
+  color: #16202b;
+  font-family: var(--f-mono);
+  /* thirteen lines have to fit without scrolling */
+  font-size: 10.5px;
+  line-height: 1.5;
+  white-space: pre;
+}
+
+.editor .kw { color: #2563eb; }
+
+.vs-main.pad0 { padding: 0; }
+
+/* a page with nothing but a heading on it */
+.plain {
+  padding: 26px 20px;
+  background: #fff;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.plain h1 {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  color: #16202b;
+}
+
+.keys {
+  position: absolute;
+  left: 50%;
+  bottom: 14px;
+  transform: translateX(-50%);
+  padding: 6px 14px;
+  border-radius: 8px;
+  background: rgba(11, 35, 44, .92);
+  color: #cfe2e8;
+  font-family: var(--f-mono);
+  font-size: 12px;
+  letter-spacing: .04em;
+  z-index: 6;
+}
+
 /* --- windows for the folder walkthrough --------------------------------- */
 .fx { inset: 1.25rem 2rem; }
 
@@ -982,7 +1060,7 @@ body {
 .term-body .ans { color: #8fe3c8; }
 
 /* VS Code, drawn very roughly */
-.vs { inset: 2rem 2.5rem; }
+.vs { inset: 1.25rem 2.25rem; }
 .vs-bar { background: #2f3d4a; color: #cbd5e1; }
 .vs-bar i { background: #4a5a6b; }
 .vs-body { display: flex; height: calc(100% - 30px); }
@@ -1655,7 +1733,7 @@ body {
      once this one has been seen in class.                              */
   /* which steps get a code replay — the walkthrough covers step 1 */
   var PLAYER_STEPS = [];
-  var STAGE_STEPS = [1, 2];
+  var STAGE_STEPS = [1, 2, 3];
 
   var player = document.getElementById("player");
   var playerWhere = player.querySelector(".where");
@@ -2128,6 +2206,158 @@ body {
   ];
 
 
+  /* ---- step 3: the first server ------------------------------------------ */
+
+  var APP_CODE =
+    "from http.server import BaseHTTPRequestHandler, HTTPServer" + NL + NL + NL +
+    "class StudentAppHandler(BaseHTTPRequestHandler):" + NL +
+    "    def do_GET(self):" + NL +
+    "        self.send_response(200)" + NL +
+    '        self.send_header("Content-Type", "text/html; charset=utf-8")' + NL +
+    "        self.end_headers()" + NL +
+    '        self.wfile.write("<h1>Hello</h1>".encode("utf-8"))' + NL + NL + NL +
+    'server = HTTPServer(("localhost", 8000), StudentAppHandler)' + NL +
+    'print("Server running at http://localhost:8000")' + NL +
+    "server.serve_forever()";
+
+  function tree(rows, iconSpot) {
+    return '<div class="head"><span>EXPLORER</span><span class="icons">' +
+      '<span>📁+</span>' +
+      '<span' + (iconSpot ? ' class="on" data-spot="newfile"' : '') + '>📄+</span>' +
+      '<span>↻</span></div>' + rows;
+  }
+
+  var TREE2 = '<div class="vs-row">STUDENT-SYSTEM</div>' +
+    '<div class="vs-row">📁 templates</div>' +
+    '<div class="vs-row">📁 static</div>';
+
+  function editor(tabSaved, code) {
+    return '<div class="tabs"><span class="tab' + (tabSaved ? ' saved' : '') +
+      '"><span class="dot"></span>app.py</span></div>' +
+      '<div class="editor">' + code + '</div>';
+  }
+
+  function keys(text) {
+    return '<div class="keys">' + text + '</div>';
+  }
+
+  function plainPage(head) {
+    return '<div class="win browser"><div class="win-bar">' + WIN +
+      '<span class="addr">localhost:8000</span></div>' +
+      '<div class="plain"><h1>' + head + '</h1></div></div>';
+  }
+
+  WALKS[3] = [
+    { ku: "کلیک لە New File بکە (ئایکۆنی کاغەز لەگەڵ +)",
+      en: "Click New File (the page icon with a +)",
+      screen: function () { return vscode(tree(TREE2, true), "") },
+      spot: "newfile" },
+
+    { ku: "ناوی لێبنێ: app.py — پاشان Enter",
+      en: "Name it app.py — then press Enter",
+      screen: function () {
+        return vscode(tree(TREE2 + '<div class="vs-row">📄 ' +
+          '<span class="name" data-type="app.py"></span></div>', false), "");
+      },
+      type: true },
+
+    { ku: "کۆدەکە بنووسە",
+      en: "Type the code",
+      screen: function () {
+        return '<div class="win vs"><div class="win-bar vs-bar">' + WIN +
+          '<span>app.py — student-system</span></div>' +
+          '<div class="vs-body"><div class="vs-main pad0">' +
+          '<div class="tabs"><span class="tab"><span class="dot"></span>app.py</span></div>' +
+          '<div class="editor" data-type-into="1"><span data-type="' +
+          APP_CODE.replace(/"/g, "&quot;") + '"></span></div>' +
+          '</div></div></div>';
+      },
+      type: true, hold: 900 },
+
+    { ku: "Ctrl + S — خاڵە سپییەکەی سەر تابەکە دەڕوات",
+      en: "Ctrl + S — the white dot on the tab goes away",
+      screen: function () {
+        return '<div class="win vs"><div class="win-bar vs-bar">' + WIN +
+          '<span>app.py — student-system</span></div>' +
+          '<div class="vs-body"><div class="vs-main pad0">' +
+          editor(true, APP_CODE.replace(/&/g, "&amp;").replace(/</g, "&lt;")) +
+          '</div></div></div>' + keys("Ctrl + S");
+      },
+      hold: 1600 },
+
+    { ku: "لە تێرمیناڵدا: python app.py",
+      en: "In the terminal: python app.py",
+      screen: function () {
+        return '<div class="win term"><div class="win-bar term-bar">' + WIN +
+          '<span>Terminal — student-system</span></div>' +
+          '<div class="term-body">&gt; <span data-type="python app.py"></span>' +
+          '<span class="ans" data-after="' + NL +
+          'Server running at http://localhost:8000' + NL +
+          'Press Ctrl + C to stop."></span></div></div>';
+      },
+      type: true, hold: 1600 },
+
+    { ku: "تێرمیناڵ ناجوڵێت — ئەمە هەڵە نییە، سێرڤەرەکە کاردەکات",
+      en: "The terminal stops responding — that is the server running, not a fault",
+      screen: function () {
+        return '<div class="win term"><div class="win-bar term-bar">' + WIN +
+          '<span>Terminal — student-system</span></div>' +
+          '<div class="term-body">&gt; python app.py' + NL +
+          '<span class="ans">Server running at http://localhost:8000' + NL +
+          'Press Ctrl + C to stop.</span>' + NL + '<span class="caret"></span>' +
+          '</div></div>';
+      },
+      hold: 2400 },
+
+    { ku: "وێبگەڕ بکەرەوە: localhost:8000",
+      en: "Open the browser: localhost:8000",
+      screen: function () { return plainPage("Hello"); },
+      hold: 2200 },
+
+    { ku: "بۆ وەستاندن: Ctrl + C",
+      en: "To stop it: Ctrl + C",
+      screen: function () {
+        return '<div class="win term"><div class="win-bar term-bar">' + WIN +
+          '<span>Terminal</span></div>' +
+          '<div class="term-body">&gt; python app.py' + NL +
+          '<span class="ans">Server running at http://localhost:8000</span>' + NL +
+          '^C' + NL + '&gt; <span class="caret"></span></div></div>' +
+          keys("Ctrl + C");
+      },
+      hold: 1600 },
+
+    { ku: "ئێستا تاقیکردنەوەکە: Hello بگۆڕە بۆ ناوی خۆت",
+      en: "Now the test: change Hello to your own name",
+      screen: function () {
+        return '<div class="win vs"><div class="win-bar vs-bar">' + WIN +
+          '<span>app.py</span></div><div class="vs-body">' +
+          '<div class="vs-main pad0">' +
+          editor(true, '        self.wfile.write(&quot;&lt;h1&gt;' +
+            '<span class="name">Ahmad</span>&lt;/h1&gt;&quot;.encode(&quot;utf-8&quot;))') +
+          '</div></div></div>' + keys("Ctrl + S");
+      },
+      hold: 1800 },
+
+    { ku: "F5 لە وێبگەڕدا — هێشتا Hello! گۆڕانکارییەکە دەرنەکەوت",
+      en: "F5 in the browser — still Hello! The change did not show",
+      screen: function () { return plainPage("Hello") + keys("F5"); },
+      hold: 2400 },
+
+    { ku: "سێرڤەرەکە دووبارە بکەرەوە — ئێستا گۆڕا",
+      en: "Restart the server — now it changed",
+      screen: function () {
+        return '<div class="win term" style="inset:2rem 3rem 55% 3rem">' +
+          '<div class="win-bar term-bar">' + WIN + '<span>Terminal</span></div>' +
+          '<div class="term-body">^C' + NL + '&gt; python app.py' + NL +
+          '<span class="ans">Server running…</span></div></div>' +
+          '<div class="win browser" style="inset:55% 3rem 2rem 3rem">' +
+          '<div class="win-bar">' + WIN +
+          '<span class="addr">localhost:8000</span></div>' +
+          '<div class="plain"><h1>Ahmad</h1></div></div>';
+      },
+      hold: 2600 }
+  ];
+
   var stage = document.getElementById("stage");
   var stageCap = stage.querySelector(".stage-caption span:last-child");
   var stageNum = stage.querySelector(".stage-caption .num");
@@ -2149,12 +2379,18 @@ body {
   }
 
   function typeInto(node, text, done) {
+    /* a whole file would take half a minute one letter at a time */
+    var long = text.length > 90;
+    var step = long ? 3 : 1;
+    var wait = long ? 16 : 55;
     var at = 0;
     (function tick() {
       node.textContent = text.slice(0, at);
+      var pane = node.closest(".editor") || node.closest(".term-body");
+      if (pane) { pane.scrollTop = pane.scrollHeight; }
       if (at >= text.length) { return done && done(); }
-      at += 1;
-      later(tick, 55);
+      at = Math.min(text.length, at + step);
+      later(tick, wait);
     })();
   }
 
