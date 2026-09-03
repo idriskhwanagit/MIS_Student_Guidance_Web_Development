@@ -1709,35 +1709,55 @@ First at the top of the file:
  import re
 ```
 
-Then add these **two new functions** beside `render()`:
+Then add these **two new functions**.
 
-```python app.py
-def esc(value):
-    return html.escape("" if value is None else str(value))
+**Where exactly?** Between two fixed points:
 
+- **After** the end of the `render()` function — the line ending in
+  `return re.sub(...)`
+- **Before** the line that starts with `class StudentAppHandler`
 
-def build_table_rows(students):
-    rows = []
-    for number, student in enumerate(students, start=1):
-        rows.append(
-            """
-            <tr>
-              <td>{number}</td>
-              <td>{student_id}</td>
-              <td>{full_name}</td>
-              <td>{department}</td>
-              <td>{created_at}</td>
-            </tr>
-            """.format(
-                number=number,
-                student_id=esc(student["student_id"]),
-                full_name=esc(student["full_name"]),
-                department=esc(student["department"]),
-                created_at=esc(student["created_at"]),
-            )
-        )
-    return "".join(rows)
+That is, in the gap that already sits between them. Leave two blank lines
+between functions — that is how Python code is written.
+
+```diff app.py
+     return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
+ 
+ 
++def esc(value):
++    return html.escape("" if value is None else str(value))
++
++
++def build_table_rows(students):
++    rows = []
++    for number, student in enumerate(students, start=1):
++        rows.append(
++            """
++            <tr>
++              <td>{number}</td>
++              <td>{student_id}</td>
++              <td>{full_name}</td>
++              <td>{department}</td>
++              <td>{created_at}</td>
++            </tr>
++            """.format(
++                number=number,
++                student_id=esc(student["student_id"]),
++                full_name=esc(student["full_name"]),
++                department=esc(student["department"]),
++                created_at=esc(student["created_at"]),
++            )
++        )
++    return "".join(rows)
++
++
+ class StudentAppHandler(BaseHTTPRequestHandler):
 ```
+
+> A new function must start **at the far left, with no indentation** — just
+> like `render()` itself. If you indent the `def` by mistake, Python thinks
+> it belongs inside another function and reports an error.
+
 
 <!-- collapse -->
 ## 7.5.1 — What does this code do?

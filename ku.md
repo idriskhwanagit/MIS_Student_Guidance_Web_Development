@@ -1706,35 +1706,55 @@ python -c "import database; database.add_student(student_id='MIS-2025-002', full
  import re
 ```
 
-پاشان ئەم **دوو فەنکشنە نوێیە** لەتەنیشت `render()` زیاد بکە:
+پاشان ئەم **دوو فەنکشنە نوێیە** زیاد بکە.
 
-```python app.py
-def esc(value):
-    return html.escape("" if value is None else str(value))
+**لە کوێ بیاننووسم؟** لە نێوان دوو شوێنی دیاریکراودا:
 
+- **دوای** کۆتایی فەنکشنی `render()` — ئەو دێڕەی بە `return re.sub(...)`
+  کۆتایی دێت
+- **پێش** ئەو دێڕەی بە `class StudentAppHandler` دەست پێدەکات
 
-def build_table_rows(students):
-    rows = []
-    for number, student in enumerate(students, start=1):
-        rows.append(
-            """
-            <tr>
-              <td>{number}</td>
-              <td>{student_id}</td>
-              <td>{full_name}</td>
-              <td>{department}</td>
-              <td>{created_at}</td>
-            </tr>
-            """.format(
-                number=number,
-                student_id=esc(student["student_id"]),
-                full_name=esc(student["full_name"]),
-                department=esc(student["department"]),
-                created_at=esc(student["created_at"]),
-            )
-        )
-    return "".join(rows)
+واتە لەو بۆشاییەدا کە ئێستا لە نێوانیاندایە. دوو دێڕی بەتاڵ لە نێوان هەر
+دوو فەنکشنێکدا بەجێبهێڵە — ئەمە شێوازی نووسینی Pythonـە.
+
+```diff app.py
+     return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
+ 
+ 
++def esc(value):
++    return html.escape("" if value is None else str(value))
++
++
++def build_table_rows(students):
++    rows = []
++    for number, student in enumerate(students, start=1):
++        rows.append(
++            """
++            <tr>
++              <td>{number}</td>
++              <td>{student_id}</td>
++              <td>{full_name}</td>
++              <td>{department}</td>
++              <td>{created_at}</td>
++            </tr>
++            """.format(
++                number=number,
++                student_id=esc(student["student_id"]),
++                full_name=esc(student["full_name"]),
++                department=esc(student["department"]),
++                created_at=esc(student["created_at"]),
++            )
++        )
++    return "".join(rows)
++
++
+ class StudentAppHandler(BaseHTTPRequestHandler):
 ```
+
+> فەنکشنێکی نوێ دەبێت **لە چەپەوە بەبێ بۆشایی** دەست پێبکات — وەک
+> `render()` خۆی. ئەگەر بە هەڵە بۆشاییت لەپێش `def`ـەکە دانا، Python وا
+> تێدەگات کە ئەمە لەناو فەنکشنێکی تردایە و هەڵە دەدات.
+
 
 <!-- collapse -->
 ## ٧.٥.١ — ئەم کۆدە چی دەکات؟
