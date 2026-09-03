@@ -430,6 +430,34 @@ And then **nothing**. The terminal is stuck and you cannot type anything else.
 >
 > A server never "finishes". It runs until you stop it.
 
+## 3.4.1 — Want your terminal back?
+
+While the server runs it holds the terminal. Try these in order:
+
+| # | What to do |
+| - | ---------- |
+| 1 | **Click inside the terminal**, then press `Ctrl + C` |
+| 2 | If nothing happens, press `Ctrl + C` two or three times |
+| 3 | Kill the terminal — the **🗑** icon at the top of the panel |
+| 4 | Open a new terminal (`+`) and run `taskkill /IM python.exe /F` |
+
+> **The first one matters most.** `Ctrl + C` often does nothing because the
+> focus is on the editor rather than on the terminal.
+
+### The better way: two terminals
+
+You do not have to stop the server to run another command.
+
+Click **`+`** at the top of the terminal panel:
+
+```
+Terminal 1:  python app.py      <- the server, leave it running
+Terminal 2:  anything else
+```
+
+> ⚠️ But do **not** run `python app.py` again in the second terminal — two
+> servers on one port cause trouble (see the end of this step).
+
 ## 3.5 — Open it in the browser
 
 Open a browser and type:
