@@ -41,7 +41,7 @@ For a student who:
 | 5 | Templates and the `render()` function | ✅ |
 | 6 | CSS — designing the pages | ✅ |
 | 7 | **R** — showing the student list | ✅ |
-| 8 | **C** — the registration form + validation | ⏳ |
+| 8 | **C** — the registration form + validation | ✅ |
 | 9 | **U** — editing | ⏳ |
 | 10 | **D** — deleting | ⏳ |
 | 11 | Search | ⏳ |
@@ -1654,4 +1654,494 @@ can be added without the terminal.
 
 ---
 
-> Step 8 will be added here.
+# Step 8 — **C** in CRUD: the registration form
+
+> The biggest step. Here a student sends something **from the browser into
+> the database** for the first time.
+
+## What we do
+
+Build a form that registers a new student — without the terminal.
+
+## Why this one is different
+
+Everything so far has been **reading** (`GET`). Now we are **changing**
+(`POST`). Three new things are needed:
+
+| Needed | Why |
+| ------ | --- |
+| `do_POST` | A `POST` request is handled separately from a `GET` |
+| Validation | Users make mistakes — bad data must not reach the database |
+| A redirect | So that `F5` does not register the student twice |
+
+---
+
+## 8.1 — A new function for `database.py`
+
+Before registering, we need to know whether that number is already taken:
+
+```python database.py
+def student_id_exists(student_id):
+    with get_connection() as connection:
+        row = connection.execute(
+            "SELECT id FROM students WHERE student_id = ?", (student_id,)
+        ).fetchone()
+        return row is not None
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `SELECT id FROM students WHERE student_id = ?` | Looks for that number |
+| `.fetchone()` | Just one row — we do not need more |
+| `row is not None` | If it found something, it is already taken |
+
+> **But the database already has `UNIQUE` — why this?**
+> So that we can show a clear message rather than a hard failure. The
+> database refuses; we explain **why**.
+
+---
+
+## 8.2 — `templates/form.html`
+
+A new file:
+
+```html templates/form.html
+<h2>{{ heading }}</h2>
+
+{{ errors }}
+
+<form method="POST" action="/add" class="student-form">
+
+  <label class="field">
+    <span>Student ID *</span>
+    <input type="text" name="student_id" value="{{ student_id }}" required>
+  </label>
+
+  <label class="field">
+    <span>Full name *</span>
+    <input type="text" name="full_name" value="{{ full_name }}" required>
+  </label>
+
+  <label class="field">
+    <span>Department *</span>
+    <select name="department" required>
+      <option value="">-- Choose a department --</option>
+      {{ departments }}
+    </select>
+  </label>
+
+  <div class="field">
+    <span>Gender *</span>
+    <div class="radio-row">
+      <label><input type="radio" name="gender" value="Male" required> Male</label>
+      <label><input type="radio" name="gender" value="Female"> Female</label>
+    </div>
+  </div>
+
+  <label class="field">
+    <span>Email</span>
+    <input type="email" name="email" value="{{ email }}">
+  </label>
+
+  <label class="field">
+    <span>Phone</span>
+    <input type="text" name="phone" value="{{ phone }}">
+  </label>
+
+  <div class="form-actions">
+    <button type="submit">Register student</button>
+    <a href="/">Cancel</a>
+  </div>
+
+</form>
+```
+
+<!-- collapse -->
+### What does this HTML do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `method="POST"` | Sends the data as a `POST`, not a `GET` |
+| `action="/add"` | Which path it is sent to |
+| `name="student_id"` | The name the server reads — it **must match** |
+| `value="{{ student_id }}"` | If something is wrong, the typing is not lost |
+| `required` | The browser itself refuses an empty field |
+| `<select>` and `<option>` | A list to choose from |
+| `type="radio"` with the same `name` | Only one can be chosen |
+| `type="email"` | The browser checks the shape of the address |
+
+> ⚠️ `required` and `type="email"` are **on the client** — they can be
+> removed with `F12`. That is why step 8.5 checks the same things **on the
+> server**.
+
+## 8.3 — The list of departments
+
+At the top of `app.py`, under `STATIC_DIR`:
+
+```python app.py
+DEPARTMENTS = [
+    "Management Information Systems",
+    "Accounting",
+    "Business Administration",
+    "Computer Science",
+    "Statistics",
+]
+
+
+def build_department_options(selected):
+    parts = []
+    for name in DEPARTMENTS:
+        chosen = " selected" if name == selected else ""
+        parts.append('<option value="%s"%s>%s</option>' % (esc(name), chosen, esc(name)))
+    return "\n".join(parts)
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `DEPARTMENTS` | The departments in one place — easy to change |
+| `selected` | The department already chosen |
+| `" selected"` | If they match, that `<option>` is selected |
+| `esc(name)` | The same protection as Step 7 |
+
+---
+
+## 8.4 — Three helpers for the class
+
+Add these inside `StudentAppHandler`:
+
+```python app.py
+    def send_html(self, content, status=200):
+        body = content.encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def redirect(self, location):
+        self.send_response(303)
+        self.send_header("Location", location)
+        self.end_headers()
+
+    def read_form(self):
+        length = int(self.headers.get("Content-Length", 0))
+        raw = self.rfile.read(length).decode("utf-8")
+        data = urllib.parse.parse_qs(raw)
+        return {key: value[0].strip() for key, value in data.items()}
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `send_html` | The three lines that kept repeating, now in one place |
+| `redirect` | Tells the browser to go to another path |
+| `303` | The code for "it is over there" — used after a `POST` |
+| `Content-Length` | How many bytes of data are coming |
+| `self.rfile.read(...)` | Reads the body of the request |
+| `parse_qs(raw)` | Turns `a=1&b=2` into `{"a": ["1"], "b": ["2"]}` |
+| `value[0].strip()` | The first value, without spaces around it |
+
+## 8.5 — Two new pages
+
+Add these as well:
+
+```python app.py
+    def page_form(self, errors="", values=None):
+        values = values or {}
+        body = render(
+            "form.html",
+            heading="Register a new student",
+            errors=errors,
+            student_id=esc(values.get("student_id", "")),
+            full_name=esc(values.get("full_name", "")),
+            email=esc(values.get("email", "")),
+            phone=esc(values.get("phone", "")),
+            departments=build_department_options(values.get("department", "")),
+        )
+        self.send_html(render("layout.html", title="New student", content=body))
+
+    def save_student(self):
+        form = self.read_form()
+
+        problems = []
+        if not form.get("student_id"):
+            problems.append("Student ID is required.")
+        if not form.get("full_name"):
+            problems.append("Full name is required.")
+        if not form.get("department"):
+            problems.append("Please choose a department.")
+        if not form.get("gender"):
+            problems.append("Please choose a gender.")
+        if form.get("email") and "@" not in form["email"]:
+            problems.append("The email address is not valid.")
+        if form.get("student_id") and database.student_id_exists(form["student_id"]):
+            problems.append("This student ID is already registered.")
+
+        if problems:
+            items = "".join("<li>" + esc(p) + "</li>" for p in problems)
+            return self.page_form('<div class="alert"><ul>' + items + "</ul></div>", form)
+
+        database.add_student(
+            form["student_id"], form["full_name"], form["department"],
+            form["gender"], form.get("email", ""), form.get("phone", ""),
+        )
+        self.redirect("/")
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `values or {}` | If nothing was passed, an empty dictionary |
+| `problems = []` | The list of errors — we show them all together |
+| `if not form.get(...)` | An empty field |
+| `"@" not in email` | A simple check on the address |
+| `student_id_exists(...)` | A duplicate number |
+| `return self.page_form(errors, form)` | The same form, **with the data** |
+| `self.redirect("/")` | After success, go to the list |
+
+> ### ⚠️ The most important line
+>
+> ```python
+> return self.page_form('<div class="alert">...', form)
+> ```
+>
+> That second `form` means: **give back what the user typed**.
+>
+> Without it, a student fills in every field, makes one small mistake, and
+> **loses all of it**. It is the most common reason people give up on a form.
+
+## 8.6 — The routes
+
+Change `do_GET` and add `do_POST`:
+
+```python app.py
+    def do_GET(self):
+        url = urllib.parse.urlparse(self.path)
+
+        if url.path == "/":
+            self.page_home()
+        elif url.path == "/add":
+            self.page_form()
+        elif url.path.startswith("/static/"):
+            self.send_static(url.path[len("/static/"):])
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_POST(self):
+        url = urllib.parse.urlparse(self.path)
+
+        if url.path == "/add":
+            self.save_student()
+        else:
+            self.send_response(404)
+            self.end_headers()
+```
+
+> **`/add` appears twice — but they are two different things:**
+>
+> | | What it does |
+> |---|-------------|
+> | `GET /add` | Shows the empty form |
+> | `POST /add` | Takes the data and saves it |
+>
+> This is the ordinary shape of the web: one path, two actions.
+
+## 8.7 — A link to the form
+
+Change `templates/home.html`:
+
+```html templates/home.html
+<p><a href="/add">+ Register a new student</a></p>
+
+{{ table }}
+```
+
+## 8.8 — Style the form
+
+At the end of `static/style.css`:
+
+```css static/style.css
+.student-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field > span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field input,
+.field select {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.radio-row {
+  display: flex;
+  gap: 18px;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+button {
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.alert {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.alert ul {
+  margin: 0;
+  padding-left: 20px;
+}
+```
+
+<!-- collapse -->
+### What does this CSS do?
+
+| Rule | What it does |
+| ---- | ------------ |
+| `display: flex; flex-direction: column` | The fields stack, rather than sitting side by side |
+| `gap: 16px` | Space between the fields — without margins |
+| `max-width: 480px` | The form never gets too wide to read |
+| `.field > span` | The field's name, small and bold |
+| `font-family: inherit` | Otherwise the inputs use a different font |
+| `.radio-row { display: flex }` | Male and Female next to each other |
+| `.alert` | The red box holding the errors |
+
+---
+
+## 8.9 — Test it
+
+Restart the server, then `Ctrl + Shift + R`.
+
+**1. Open the form** — click **+ Register a new student**
+
+**2. Submit it empty** — click **Register student** without filling anything
+in. The browser itself refuses (`required`).
+
+**3. Test the server's own checks:**
+- Fill in `student_id` and `full_name`
+- Choose a department and a gender
+- In the email field type: `abc`
+
+If the browser refuses, change `type="email"` to `type="text"` for the test.
+You should see the red **The email address is not valid.** — and
+**everything you typed is still there**.
+
+**4. Register a student** — fill it in properly and submit. You should come
+back to the list with the student at the top.
+
+**5. Submit it again** — register the same `student_id` twice.
+The message **This student ID is already registered.**
+
+---
+
+## 8.10 — The `F5` test
+
+This is the most important test in this step.
+
+After a successful registration, press **`F5`** on the list page.
+
+**Nothing happens** — the list simply reloads.
+
+**Why?** Because of this line:
+
+```python app.py
+self.redirect("/")
+```
+
+After the `POST`, the server does not say "done" — it says **"go to `/`"**.
+So the page in front of you is a `GET /`, not a `POST /add`.
+
+> **What would happen without that line?** `F5` would **send the `POST`
+> again**, and the browser would ask "resend?". Every student who pressed
+> `F5` would be registered twice.
+>
+> The pattern is called **PRG** — Post, Redirect, Get. It is covered in the
+> theory lesson.
+
+---
+
+## If you get an error
+
+| Problem | Fix |
+| ------- | --- |
+| `501 Unsupported method ('POST')` | You have not added `do_POST` |
+| The form returns `404` | `elif url.path == "/add"` is missing from `do_GET` |
+| `KeyError: 'student_id'` | The `name="student_id"` in the HTML does not match the code |
+| My data is lost after an error | You did not pass `form` to `page_form` (see 8.5) |
+| `F5` registers again | You are missing `self.redirect("/")` |
+| The error message does not show | `{{ errors }}` is missing from `form.html` |
+| `UnicodeDecodeError` | `.decode("utf-8")` is missing from `read_form` |
+| The departments do not appear | Check `{{ departments }}` or `build_department_options` |
+
+---
+
+## ✅ This step is finished when
+
+```
+student-system/
+├── app.py              <- do_POST, validation, redirect
+├── database.py         <- student_id_exists()
+├── students.db
+├── templates/
+│   ├── layout.html
+│   ├── home.html       <- a link to the form
+│   ├── list.html
+│   └── form.html       <- new
+└── static/
+    └── style.css       <- the form styling
+```
+
+- A student can be registered from the browser
+- Empty fields and a bad email are refused
+- A duplicate number is refused
+- After an error, the typing is not lost
+- `F5` does not register twice
+
+**Two of four are done.** In the next step, **U** — editing, which reuses the
+same form.
+
+---
+
+> Step 9 will be added here.

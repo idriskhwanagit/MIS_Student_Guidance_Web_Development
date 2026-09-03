@@ -42,7 +42,7 @@
 | ٥ | Templates و فەنکشنی `render()` | ✅ |
 | ٦ | CSS — دیزاینی پەڕەکان | ✅ |
 | ٧ | **R** — پیشاندانی لیستی قوتابیان | ✅ |
-| ٨ | **C** — فۆڕمی تۆمارکردن + پشکنین | ⏳ |
+| ٨ | **C** — فۆڕمی تۆمارکردن + پشکنین | ✅ |
 | ٩ | **U** — دەستکاریکردن | ⏳ |
 | ١٠ | **D** — سڕینەوە | ⏳ |
 | ١١ | گەڕان | ⏳ |
@@ -1650,4 +1650,493 @@ student-system/
 
 ---
 
-> هەنگاوی ٨ لێرە زیاد دەکرێت.
+# هەنگاوی ٨ — **C** لە CRUD: فۆڕمی تۆمارکردن
+
+> گەورەترین هەنگاوە. لێرەدا قوتابی یەکەم جار **شتێک لە وێبگەڕەوە دەنێرێت
+> بۆ داتابەیس**.
+
+## چی دەکەین
+
+فۆڕمێک دروست دەکەین کە قوتابی نوێی پێ تۆمار بکرێت — بەبێ تێرمیناڵ.
+
+## بۆچی ئەمە جیاوازە
+
+تا ئێستا هەموو شتێک **خوێندنەوە** بوو (`GET`). ئێستا **گۆڕین** دەکەین
+(`POST`). سێ شتی نوێمان دەوێت:
+
+| پێویستی | بۆچی |
+|---------|------|
+| `do_POST` | داواکاری `POST` جیایە لە `GET` |
+| پشکنینی داتا | بەکارهێنەر هەڵە دەکات — نابێت داتای خراپ بچێتە داتابەیس |
+| ناردنەوە (redirect) | تاکو `F5` دووبارە تۆمار نەکات |
+
+---
+
+## ٨.١ — فەنکشنێکی نوێ بۆ `database.py`
+
+پێش تۆمارکردن، دەبێت بزانین ئایا ئەم ژمارەیە پێشتر هەیە:
+
+```python database.py
+def student_id_exists(student_id):
+    with get_connection() as connection:
+        row = connection.execute(
+            "SELECT id FROM students WHERE student_id = ?", (student_id,)
+        ).fetchone()
+        return row is not None
+```
+
+<!-- collapse -->
+### ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `SELECT id FROM students WHERE student_id = ?` | بەدوای ئەو ژمارەیەدا دەگەڕێت |
+| `.fetchone()` | تەنها یەک ڕیز — چونکە زیاترمان ناوێت |
+| `row is not None` | ئەگەر شتێکی دۆزییەوە، واتە پێشتر هەیە |
+
+> **بەڵام داتابەیسەکە خۆی `UNIQUE`ـی هەیە — بۆچی ئەمە؟**
+> بۆ ئەوەی پەیامێکی ڕوون پیشان بدەین، نەک شکستێکی توند. داتابەیس ڕێگری
+> دەکات؛ ئێمە **ڕوونی دەکەینەوە بۆچی**.
+
+---
+
+## ٨.٢ — `templates/form.html`
+
+فایلێکی نوێ:
+
+```html templates/form.html
+<h2>{{ heading }}</h2>
+
+{{ errors }}
+
+<form method="POST" action="/add" class="student-form">
+
+  <label class="field">
+    <span>Student ID *</span>
+    <input type="text" name="student_id" value="{{ student_id }}" required>
+  </label>
+
+  <label class="field">
+    <span>Full name *</span>
+    <input type="text" name="full_name" value="{{ full_name }}" required>
+  </label>
+
+  <label class="field">
+    <span>Department *</span>
+    <select name="department" required>
+      <option value="">-- Choose a department --</option>
+      {{ departments }}
+    </select>
+  </label>
+
+  <div class="field">
+    <span>Gender *</span>
+    <div class="radio-row">
+      <label><input type="radio" name="gender" value="Male" required> Male</label>
+      <label><input type="radio" name="gender" value="Female"> Female</label>
+    </div>
+  </div>
+
+  <label class="field">
+    <span>Email</span>
+    <input type="email" name="email" value="{{ email }}">
+  </label>
+
+  <label class="field">
+    <span>Phone</span>
+    <input type="text" name="phone" value="{{ phone }}">
+  </label>
+
+  <div class="form-actions">
+    <button type="submit">Register student</button>
+    <a href="/">Cancel</a>
+  </div>
+
+</form>
+```
+
+<!-- collapse -->
+### ئەم HTMLـە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `method="POST"` | داتاکە بە `POST` دەنێرێت، نەک `GET` |
+| `action="/add"` | بۆ کام ڕێڕەو بنێردرێت |
+| `name="student_id"` | ئەم ناوە لای سێرڤەر بەکاردێت — **دەبێت ڕێک بێت** |
+| `value="{{ student_id }}"` | ئەگەر هەڵە ڕوویدا، ئەوەی نووسیویەتی نافەوتێت |
+| `required` | وێبگەڕ خۆی ڕێگری لە خانەی بەتاڵ دەکات |
+| `<select>` و `<option>` | لیستی هەڵبژاردن |
+| `type="radio"` بە هەمان `name` | تەنها یەکێکیان هەڵدەبژێردرێت |
+| `type="email"` | وێبگەڕ شێوەی ئیمەیل دەپشکنێت |
+
+> ⚠️ `required` و `type="email"` **لای کڵاینتن** — بە `F12` لادەبرێن.
+> بۆیە لە خاڵی ٨.٥دا هەمان پشکنین **لای سێرڤەریش** دەکەین.
+
+## ٨.٣ — لیستی بەشەکان
+
+لە سەرەوەی `app.py`، لەژێر `STATIC_DIR`:
+
+```python app.py
+DEPARTMENTS = [
+    "Management Information Systems",
+    "Accounting",
+    "Business Administration",
+    "Computer Science",
+    "Statistics",
+]
+
+
+def build_department_options(selected):
+    parts = []
+    for name in DEPARTMENTS:
+        chosen = " selected" if name == selected else ""
+        parts.append('<option value="%s"%s>%s</option>' % (esc(name), chosen, esc(name)))
+    return "\n".join(parts)
+```
+
+<!-- collapse -->
+### ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `DEPARTMENTS` | لیستی بەشەکان لە یەک شوێندا — گۆڕینیان ئاسانە |
+| `selected` | ئەو بەشەی پێشتر هەڵبژێردراوە |
+| `" selected"` | ئەگەر یەک بگرنەوە، ئەو `<option>`ـە هەڵدەبژێردرێت |
+| `esc(name)` | هەمان پاراستنی هەنگاوی ٧ |
+
+---
+
+## ٨.٤ — سێ یارمەتیدەر بۆ کلاسەکە
+
+ئەمانە زیاد بکە بۆ ناو `StudentAppHandler`:
+
+```python app.py
+    def send_html(self, content, status=200):
+        body = content.encode("utf-8")
+        self.send_response(status)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.end_headers()
+        self.wfile.write(body)
+
+    def redirect(self, location):
+        self.send_response(303)
+        self.send_header("Location", location)
+        self.end_headers()
+
+    def read_form(self):
+        length = int(self.headers.get("Content-Length", 0))
+        raw = self.rfile.read(length).decode("utf-8")
+        data = urllib.parse.parse_qs(raw)
+        return {key: value[0].strip() for key, value in data.items()}
+```
+
+<!-- collapse -->
+### ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `send_html` | ئەو سێ دێڕەی دووبارە دەبوونەوە، ئێستا لە یەک شوێندان |
+| `redirect` | بە وێبگەڕ دەڵێت: بڕۆ بۆ ڕێڕەوێکی تر |
+| `303` | کۆدی «ئەم شتە لەوێیە» — دوای `POST` بەکاردێت |
+| `Content-Length` | چەند بایت داتا دێت |
+| `self.rfile.read(...)` | ناوەڕۆکی داواکارییەکە دەخوێنێتەوە |
+| `parse_qs(raw)` | `a=1&b=2` دەکاتە `{"a": ["1"], "b": ["2"]}` |
+| `value[0].strip()` | یەکەم نرخ، بەبێ بۆشایی سەرەوە و خوارەوە |
+
+## ٨.٥ — دوو پەڕەی نوێ
+
+ئەمانەش زیاد بکە:
+
+```python app.py
+    def page_form(self, errors="", values=None):
+        values = values or {}
+        body = render(
+            "form.html",
+            heading="Register a new student",
+            errors=errors,
+            student_id=esc(values.get("student_id", "")),
+            full_name=esc(values.get("full_name", "")),
+            email=esc(values.get("email", "")),
+            phone=esc(values.get("phone", "")),
+            departments=build_department_options(values.get("department", "")),
+        )
+        self.send_html(render("layout.html", title="New student", content=body))
+
+    def save_student(self):
+        form = self.read_form()
+
+        problems = []
+        if not form.get("student_id"):
+            problems.append("Student ID is required.")
+        if not form.get("full_name"):
+            problems.append("Full name is required.")
+        if not form.get("department"):
+            problems.append("Please choose a department.")
+        if not form.get("gender"):
+            problems.append("Please choose a gender.")
+        if form.get("email") and "@" not in form["email"]:
+            problems.append("The email address is not valid.")
+        if form.get("student_id") and database.student_id_exists(form["student_id"]):
+            problems.append("This student ID is already registered.")
+
+        if problems:
+            items = "".join("<li>" + esc(p) + "</li>" for p in problems)
+            return self.page_form('<div class="alert"><ul>' + items + "</ul></div>", form)
+
+        database.add_student(
+            form["student_id"], form["full_name"], form["department"],
+            form["gender"], form.get("email", ""), form.get("phone", ""),
+        )
+        self.redirect("/")
+```
+
+<!-- collapse -->
+### ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `values or {}` | ئەگەر هیچ نەنێردرا، وشەنامەیەکی بەتاڵ |
+| `problems = []` | لیستی هەڵەکان — هەموویان پێکەوە پیشان دەدەین |
+| `if not form.get(...)` | خانەی بەتاڵ |
+| `"@" not in email` | پشکنینێکی سادەی ئیمەیل |
+| `student_id_exists(...)` | ژمارە دووبارە |
+| `return self.page_form(errors, form)` | هەمان فۆڕم، **بە داتاکەیەوە** |
+| `self.redirect("/")` | دوای سەرکەوتن، بڕۆ بۆ لیستەکە |
+
+> ### ⚠️ گرنگترین دێڕ
+>
+> ```python
+> return self.page_form('<div class="alert">...', form)
+> ```
+>
+> ئەو `form`ـەی دووەم واتای: **ئەوەی بەکارهێنەر نووسیویەتی بیگەڕێنەرەوە**.
+>
+> بەبێ ئەو، قوتابی هەموو خانەکان پڕ دەکاتەوە، یەک هەڵەی بچووک دەکات، و
+> **هەموویان لەدەست دەدات**. ئەمە باوترین هۆکاری تووڕەبوونی بەکارهێنەرە.
+
+## ٨.٦ — ڕێڕەوەکان
+
+`do_GET` بگۆڕە و `do_POST` زیاد بکە:
+
+```python app.py
+    def do_GET(self):
+        url = urllib.parse.urlparse(self.path)
+
+        if url.path == "/":
+            self.page_home()
+        elif url.path == "/add":
+            self.page_form()
+        elif url.path.startswith("/static/"):
+            self.send_static(url.path[len("/static/"):])
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    def do_POST(self):
+        url = urllib.parse.urlparse(self.path)
+
+        if url.path == "/add":
+            self.save_student()
+        else:
+            self.send_response(404)
+            self.end_headers()
+```
+
+> **`/add` دوو جار هاتووە — بەڵام دوو شتی جیاوازن:**
+>
+> | | چی دەکات |
+> |---|-----------|
+> | `GET /add` | فۆڕمە بەتاڵەکە پیشان دەدات |
+> | `POST /add` | داتاکە وەردەگرێت و پاشەکەوتی دەکات |
+>
+> ئەمە شێوازی ئاسایی وێبە: هەمان ڕێڕەو، دوو کردار.
+
+## ٨.٧ — لینکێک بۆ فۆڕمەکە
+
+`templates/home.html` بگۆڕە:
+
+```html templates/home.html
+<p><a href="/add">+ Register a new student</a></p>
+
+{{ table }}
+```
+
+## ٨.٨ — دیزاینی فۆڕمەکە
+
+لە کۆتایی `static/style.css`:
+
+```css static/style.css
+.student-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 480px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.field > span {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.field input,
+.field select {
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+}
+
+.radio-row {
+  display: flex;
+  gap: 18px;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+button {
+  padding: 9px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.alert {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.alert ul {
+  margin: 0;
+  padding-left: 20px;
+}
+```
+
+<!-- collapse -->
+### ئەم CSSـە چی دەکات؟
+
+| ڕێسا | چی دەکات |
+|------|-----------|
+| `display: flex; flex-direction: column` | خانەکان لەسەر یەک، نەک لەتەنیشت یەک |
+| `gap: 16px` | بۆشایی نێوان خانەکان — بەبێ `margin` |
+| `max-width: 480px` | فۆڕم زۆر پان نابێت — خوێندنەوەی ئاسانتر |
+| `.field > span` | ناوی خانەکە، بچووک و قەڵەو |
+| `font-family: inherit` | ئەگەرنا خانەکان فۆنتێکی جیاوازیان دەبێت |
+| `.radio-row { display: flex }` | کوڕ و کچ لەتەنیشت یەک |
+| `.alert` | سندوقی سووری هەڵەکان |
+
+---
+
+## ٨.٩ — تاقیکردنەوە
+
+سێرڤەرەکە دووبارە بکەرەوە، پاشان `Ctrl + Shift + R`.
+
+**١. فۆڕمەکە بکەرەوە** — کلیک لە **+ Register a new student**
+
+**٢. بەتاڵ بینێرە** — کلیک لە **Register student** بەبێ پڕکردنەوە.
+وێبگەڕ خۆی ڕێگری دەکات (`required`).
+
+**٣. پشکنینی سێرڤەر تاقی بکەرەوە:**
+- `student_id` و `full_name` پڕ بکەرەوە
+- بەش و ڕەگەز هەڵبژێرە
+- لە خانەی ئیمەیلدا بنووسە: `abc`
+
+ئەگەر وێبگەڕ ڕێگری کرد، `type="email"` بکە بە `type="text"` بۆ تاقیکردنەوە.
+دەبێت پەیامی سووری **The email address is not valid.** ببینیت — و
+**هەموو ئەوەی نووسیوتە هێشتا لە شوێنی خۆیدایە**.
+
+**٤. قوتابییەک تۆمار بکە** — خانەکان بە دروستی پڕ بکەرەوە و بینێرە.
+دەبێت بگەڕێیتەوە بۆ لیستەکە و قوتابییەکە لە سەرەوە ببینیت.
+
+**٥. دووبارە بینێرە** — هەمان `student_id` دووبارە تۆمار بکە.
+پەیامی **This student ID is already registered.**
+
+---
+
+## ٨.١٠ — تاقیکردنەوەی `F5`
+
+ئەمە گرنگترین تاقیکردنەوەی ئەم هەنگاوەیە.
+
+دوای تۆمارکردنێکی سەرکەوتوو، لە پەڕەی لیستدا **`F5`** لێبدە.
+
+**هیچ ڕوونادات** — تەنها لیستەکە دووبارە دەخوێنرێتەوە.
+
+**بۆچی؟** لەبەر ئەو دێڕە:
+
+```python app.py
+self.redirect("/")
+```
+
+دوای `POST`، سێرڤەر نایڵێت «تەواو بوو» — دەڵێت **«بڕۆ بۆ `/`»**. بۆیە
+ئەو پەڕەیەی ئێستا لەبەردەمتە `GET /`ـە، نەک `POST /add`.
+
+> **بەبێ ئەو دێڕە چی دەبوو؟** `F5` داواکاری `POST`ـەکە **دووبارە دەناردەوە**،
+> و وێبگەڕ دەیپرسی «دووبارە بنێرمەوە؟». هەر قوتابییەک `F5`ی لێدەدا، دووبارە
+> تۆمار دەکرا.
+>
+> ئەم شێوازە پێی دەگوترێت **PRG** — Post, Redirect, Get. لە وانەی تیۆریدا
+> باسکراوە.
+
+---
+
+## ئەگەر هەڵە دەرکەوت
+
+| کێشە | چارەسەر |
+|------|---------|
+| `501 Unsupported method ('POST')` | `do_POST`ت زیاد نەکردووە |
+| فۆڕمەکە `404` دەداتەوە | `elif url.path == "/add"` لە `do_GET`دا نییە |
+| `KeyError: 'student_id'` | `name="student_id"` لە HTMLدا ڕێک ناگرێتەوە لەگەڵ کۆدەکە |
+| داتاکەم فەوتا دوای هەڵە | `form`ت نەناردووە بۆ `page_form` (بڕوانە ٨.٥) |
+| `F5` دووبارە تۆمار دەکات | `self.redirect("/")`ت نییە |
+| پەیامی هەڵە دەرناکەوێت | `{{ errors }}` لە `form.html`دا نییە |
+| `UnicodeDecodeError` | `.decode("utf-8")` لە `read_form`دا نییە |
+| بەشەکان دەرناکەون | `{{ departments }}` یان `build_department_options` |
+
+---
+
+## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
+
+```
+student-system/
+├── app.py              ← do_POST، پشکنین، redirect
+├── database.py         ← student_id_exists()
+├── students.db
+├── templates/
+│   ├── layout.html
+│   ├── home.html       ← لینکی فۆڕمەکە
+│   ├── list.html
+│   └── form.html       ← نوێ
+└── static/
+    └── style.css       ← دیزاینی فۆڕم
+```
+
+- قوتابی لە وێبگەڕەوە تۆمار دەکرێت
+- خانەی بەتاڵ و ئیمەیلی هەڵە ڕەت دەکرێنەوە
+- ژمارەی دووبارە ڕێگری لێدەکرێت
+- دوای هەڵە، داتاکە نافەوتێت
+- `F5` دووبارە تۆمار ناکات
+
+**دوو لە چوار تەواو بوو.** لە هەنگاوی داهاتوودا **U** — دەستکاریکردن، کە
+هەمان فۆڕم بەکاردەهێنێت.
+
+---
+
+> هەنگاوی ٩ لێرە زیاد دەکرێت.
