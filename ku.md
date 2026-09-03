@@ -872,7 +872,8 @@ def render(template_name, **values):
 
 ## ٥.٤ — بەکارهێنانی
 
-`do_GET` بگۆڕە بۆ ئەمە:
+کلاسی `StudentAppHandler` **بە تەواوی** بسڕەوە — لە دێڕی `class`ـەوە تا
+کۆتایی — و ئەمە لە شوێنی دابنێ:
 
 ```python app.py
 class StudentAppHandler(BaseHTTPRequestHandler):
@@ -1141,7 +1142,8 @@ HTML بۆ ناردووەتەوە.
 
 ## ٦.٤ — ڕێنیشاندەر (router)
 
-`app.py` بگۆڕە. سەرەتا لە سەرەوە:
+`app.py` بگۆڕە. سەرەتا دێڕەکانی سەرەوە (`import`ـەکان و `BASE_DIR`)
+**بسڕەوە** و ئەمانە لە شوێنیان دابنێ:
 
 ```python app.py
 import os
@@ -1498,6 +1500,8 @@ def build_table_rows(students):
 | **`esc(...)`** | دەقەکە ئەمن دەکاتەوە — بڕوانە خوارەوە |
 
 ## ٧.٦ — `page_home` بگۆڕە
+
+فەنکشنی `page_home` **بە تەواوی** بسڕەوە و ئەمە لە شوێنی دابنێ:
 
 ```python app.py
     def page_home(self):
@@ -1944,7 +1948,8 @@ def build_department_options(selected):
 
 ## ٨.٦ — ڕێڕەوەکان
 
-`do_GET` بگۆڕە و `do_POST` زیاد بکە:
+فەنکشنی `do_GET` **بە تەواوی** بسڕەوە، پاشان ئەم دوو فەنکشنە لە شوێنی
+دابنێ:
 
 ```python app.py
     def do_GET(self):
@@ -1981,7 +1986,7 @@ def build_department_options(selected):
 
 ## ٨.٧ — لینکێک بۆ فۆڕمەکە
 
-`templates/home.html` بگۆڕە:
+هەموو ناوەڕۆکی `templates/home.html` بسڕەوە و ئەمە لە شوێنی دابنێ:
 
 ```html templates/home.html
 <p><a href="/add">+ Register a new student</a></p>
@@ -2275,7 +2280,7 @@ def student_id_exists(student_id, ignore_row_id=None):
 
 ## ٩.٣ — `templates/form.html` بگۆڕە
 
-سێ گۆڕانکاری: خانەیەکی شاراوە، ڕێڕەوی گۆڕاو، و ناوی گۆڕاوی دوگمەکە.
+هەموو ناوەڕۆکەکەی بسڕەوە و ئەمە لە شوێنی دابنێ. سێ گۆڕانکاری: خانەیەکی شاراوە، ڕێڕەوی گۆڕاو، و ناوی گۆڕاوی دوگمەکە.
 
 ```html templates/form.html
 <h2>{{ heading }}</h2>
@@ -2400,6 +2405,8 @@ def student_id_exists(student_id, ignore_row_id=None):
 
 ## ٩.٥ — `save_student` بگۆڕە
 
+فەنکشنی `save_student` **بە تەواوی** بسڕەوە و ئەمە لە شوێنی دابنێ:
+
 ```python app.py
     def save_student(self, is_edit=False):
         form = self.read_form()
@@ -2481,7 +2488,8 @@ def student_id_exists(student_id, ignore_row_id=None):
 
 ## ٩.٧ — دوگمەی دەستکاری لە خشتەکەدا
 
-`build_table_rows` بگۆڕە — ستوونێکی نوێ زیاد دەکەین:
+فەنکشنی `build_table_rows` **بە تەواوی** بسڕەوە و ئەمە لە شوێنی دابنێ —
+ستوونێکی نوێی تێدایە:
 
 ```python app.py
 def build_table_rows(students):
@@ -2635,7 +2643,8 @@ def delete_student(row_id):
 
 ## ١٠.٢ — دوگمەکە لە خشتەکەدا
 
-`build_table_rows` بگۆڕە — ستوونی `Actions` ئێستا دوو شتی تێدایە:
+دیسان `build_table_rows` **بە تەواوی** بسڕەوە و ئەمە لە شوێنی دابنێ —
+ستوونی `Actions` ئێستا دوو شتی تێدایە:
 
 ```python app.py
 def build_table_rows(students):
@@ -2896,6 +2905,8 @@ def get_all_students(search=""):
 
 ## ١١.٢ — `templates/home.html` بگۆڕە
 
+هەموو ناوەڕۆکەکەی بسڕەوە و ئەمە لە شوێنی دابنێ:
+
 ```html templates/home.html
 <p><a href="/add">+ Register a new student</a></p>
 
@@ -2933,6 +2944,8 @@ def get_all_students(search=""):
 > سوودەکەی دەبینین.
 
 ## ١١.٣ — `page_home` بگۆڕە
+
+دیسان `page_home` **بە تەواوی** بسڕەوە و ئەمە لە شوێنی دابنێ:
 
 ```python app.py
     def page_home(self, search=""):

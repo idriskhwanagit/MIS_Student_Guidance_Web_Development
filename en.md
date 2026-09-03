@@ -874,7 +874,8 @@ def render(template_name, **values):
 
 ## 5.4 — Use it
 
-Change `do_GET` to this:
+Delete the `StudentAppHandler` class **completely** — from the `class`
+line to the end — and put this in its place:
 
 ```python app.py
 class StudentAppHandler(BaseHTTPRequestHandler):
@@ -1145,7 +1146,8 @@ That is what we fix now.
 
 ## 6.4 — The router
 
-Change `app.py`. First at the top:
+Change `app.py`. First **delete** the top of the file (the `import` lines
+and `BASE_DIR`) and put this in its place:
 
 ```python app.py
 import os
@@ -1501,6 +1503,8 @@ def build_table_rows(students):
 | **`esc(...)`** | Makes the text safe — see below |
 
 ## 7.6 — Change `page_home`
+
+Delete the `page_home` function **completely** and put this in its place:
 
 ```python app.py
     def page_home(self):
@@ -1949,7 +1953,8 @@ Add these as well:
 
 ## 8.6 — The routes
 
-Change `do_GET` and add `do_POST`:
+Delete the `do_GET` function **completely**, then put these two functions
+in its place:
 
 ```python app.py
     def do_GET(self):
@@ -1986,7 +1991,7 @@ Change `do_GET` and add `do_POST`:
 
 ## 8.7 — A link to the form
 
-Change `templates/home.html`:
+Delete everything in `templates/home.html` and put this in its place:
 
 ```html templates/home.html
 <p><a href="/add">+ Register a new student</a></p>
@@ -2280,7 +2285,7 @@ def student_id_exists(student_id, ignore_row_id=None):
 
 ## 9.3 — Change `templates/form.html`
 
-Three changes: a hidden field, a variable action, and a variable button.
+Delete everything in it and put this in its place. Three changes: a hidden field, a variable action, and a variable button.
 
 ```html templates/form.html
 <h2>{{ heading }}</h2>
@@ -2405,6 +2410,8 @@ Delete the old function and put this in:
 
 ## 9.5 — Change `save_student`
 
+Delete the `save_student` function **completely** and put this in its place:
+
 ```python app.py
     def save_student(self, is_edit=False):
         form = self.read_form()
@@ -2486,7 +2493,8 @@ In `do_POST`, after `/add`:
 
 ## 9.7 — An edit button in the table
 
-Change `build_table_rows` — we add a column:
+Delete `build_table_rows` **completely** and put this in its place — it has
+one more column:
 
 ```python app.py
 def build_table_rows(students):
@@ -2642,7 +2650,8 @@ def delete_student(row_id):
 
 ## 10.2 — The button in the table
 
-Change `build_table_rows` — the `Actions` column now holds two things:
+Delete `build_table_rows` **completely** again and put this in its place —
+the `Actions` column now holds two things:
 
 ```python app.py
 def build_table_rows(students):
@@ -2904,6 +2913,8 @@ def get_all_students(search=""):
 
 ## 11.2 — Change `templates/home.html`
 
+Delete everything in it and put this in its place:
+
 ```html templates/home.html
 <p><a href="/add">+ Register a new student</a></p>
 
@@ -2940,6 +2951,8 @@ def get_all_students(search=""):
 > rule as Step 10, seen from the other side.
 
 ## 11.3 — Change `page_home`
+
+Delete `page_home` **completely** again and put this in its place:
 
 ```python app.py
     def page_home(self, search=""):
