@@ -42,7 +42,7 @@ For a student who:
 | 6 | CSS — designing the pages | ✅ |
 | 7 | **R** — showing the student list | ✅ |
 | 8 | **C** — the registration form + validation | ✅ |
-| 9 | **U** — editing | ⏳ |
+| 9 | **U** — editing | ✅ |
 | 10 | **D** — deleting | ⏳ |
 | 11 | Search | ⏳ |
 | 12 | Security — SQL Injection and XSS | ⏳ |
@@ -2144,4 +2144,433 @@ same form.
 
 ---
 
-> Step 9 will be added here.
+# Step 9 — **U** in CRUD: editing
+
+> This step is shorter than you expect — because we reuse **the same form**.
+
+## What we do
+
+Let the details of a registered student be changed.
+
+## Why not build a second form?
+
+The edit form and the registration form have **the same fields**. With two
+files:
+
+- every change has to be made **twice**
+- one day one of them is forgotten, and they drift apart
+
+So we use one file and change only **two things**: where it submits to, and
+the name on the button. The principle is called **DRY** — *Don't Repeat
+Yourself*.
+
+---
+
+## 9.1 — Two functions for `database.py`
+
+```python database.py
+def get_student(row_id):
+    with get_connection() as connection:
+        return connection.execute(
+            "SELECT * FROM students WHERE id = ?", (row_id,)
+        ).fetchone()
+
+
+def update_student(row_id, student_id, full_name, department, gender, email, phone):
+    with get_connection() as connection:
+        connection.execute(
+            """
+            UPDATE students
+               SET student_id = ?,
+                   full_name  = ?,
+                   department = ?,
+                   gender     = ?,
+                   email      = ?,
+                   phone      = ?
+             WHERE id = ?
+            """,
+            (student_id, full_name, department, gender, email, phone, row_id),
+        )
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `get_student(row_id)` | Fetches one student by `id` |
+| `.fetchone()` | One row, or `None` if there is none |
+| `UPDATE ... SET` | Puts the new values in |
+| `WHERE id = ?` | **Only that row** |
+| The order of the `?` | Six values, then `row_id` — it **must match** |
+
+> ### ⚠️ Never forget the `WHERE`
+>
+> ```sql
+> UPDATE students SET department = 'MIS';
+> ```
+>
+> That puts **every student** in MIS. Without a `WHERE`, `UPDATE` and
+> `DELETE` apply to the whole table.
+>
+> It is one of the most dangerous mistakes in SQL, and it has happened at
+> large companies.
+
+## 9.2 — Change `student_id_exists`
+
+Delete the old function and put this in its place:
+
+```python database.py
+def student_id_exists(student_id, ignore_row_id=None):
+    with get_connection() as connection:
+        if ignore_row_id is None:
+            row = connection.execute(
+                "SELECT id FROM students WHERE student_id = ?", (student_id,)
+            ).fetchone()
+        else:
+            row = connection.execute(
+                "SELECT id FROM students WHERE student_id = ? AND id <> ?",
+                (student_id, ignore_row_id),
+            ).fetchone()
+        return row is not None
+```
+
+> ### 🤔 Why `ignore_row_id`?
+>
+> Think it through: you edit a student and change only the name — leaving the
+> number as it was.
+>
+> The check says: *"that number already exists!"* — and it does, **on that
+> same student**.
+>
+> `ignore_row_id` says: look for it, but **do not count this row**.
+> `id <> ?` means "where `id` is not equal to".
+>
+> Without it, no student could ever be edited.
+
+---
+
+## 9.3 — Change `templates/form.html`
+
+Three changes: a hidden field, a variable action, and a variable button.
+
+```html templates/form.html
+<h2>{{ heading }}</h2>
+
+{{ errors }}
+
+<form method="POST" action="{{ action }}" class="student-form">
+
+  <input type="hidden" name="id" value="{{ row_id }}">
+
+  <label class="field">
+    <span>Student ID *</span>
+    <input type="text" name="student_id" value="{{ student_id }}" required>
+  </label>
+
+  <label class="field">
+    <span>Full name *</span>
+    <input type="text" name="full_name" value="{{ full_name }}" required>
+  </label>
+
+  <label class="field">
+    <span>Department *</span>
+    <select name="department" required>
+      <option value="">-- Choose a department --</option>
+      {{ departments }}
+    </select>
+  </label>
+
+  <div class="field">
+    <span>Gender *</span>
+    <div class="radio-row">
+      <label><input type="radio" name="gender" value="Male"{{ male_checked }} required> Male</label>
+      <label><input type="radio" name="gender" value="Female"{{ female_checked }}> Female</label>
+    </div>
+  </div>
+
+  <label class="field">
+    <span>Email</span>
+    <input type="email" name="email" value="{{ email }}">
+  </label>
+
+  <label class="field">
+    <span>Phone</span>
+    <input type="text" name="phone" value="{{ phone }}">
+  </label>
+
+  <div class="form-actions">
+    <button type="submit">{{ submit_label }}</button>
+    <a href="/">Cancel</a>
+  </div>
+
+</form>
+```
+
+<!-- collapse -->
+### What does this HTML do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `<input type="hidden" name="id">` | The user never sees it, but it is sent with the form |
+| `action="{{ action }}"` | `/add` or `/edit` — Python decides |
+| `{{ submit_label }}` | *Register student* or *Save changes* |
+| `{{ male_checked }}` | When editing, the previous gender is selected |
+
+> **Why a hidden field?** The server has to know **which student** is being
+> changed. That `id` comes in through the URL (`/edit?id=2`), goes into the
+> form, and returns with the `POST`.
+
+## 9.4 — Change `page_form`
+
+Delete the old function and put this in:
+
+```python app.py
+    def page_form(self, row_id="", errors="", values=None):
+        student = database.get_student(row_id) if row_id else None
+
+        if row_id and student is None:
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        if values is None:
+            values = dict(student) if student else {}
+
+        is_edit = student is not None
+        gender = values.get("gender", "")
+
+        body = render(
+            "form.html",
+            heading="Edit student" if is_edit else "Register a new student",
+            action="/edit" if is_edit else "/add",
+            submit_label="Save changes" if is_edit else "Register student",
+            row_id=esc(values.get("id", "")),
+            errors=errors,
+            student_id=esc(values.get("student_id", "")),
+            full_name=esc(values.get("full_name", "")),
+            email=esc(values.get("email", "")),
+            phone=esc(values.get("phone", "")),
+            departments=build_department_options(values.get("department", "")),
+            male_checked=" checked" if gender == "Male" else "",
+            female_checked=" checked" if gender == "Female" else "",
+        )
+        title = "Edit student" if is_edit else "New student"
+        self.send_html(render("layout.html", title=title, content=body))
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `if row_id else None` | With no `id`, this is the add form |
+| `student is None` → `404` | An `id` was asked for that does not exist |
+| `values is None` | First time round: use the saved values |
+| `dict(student)` | Turns the database row into a dictionary |
+| `is_edit` | One variable, three decisions taken from it |
+| `gender == "Male"` | Which radio button is selected |
+
+> **Note:** if `values` was passed in — meaning something went wrong — then
+> what the user typed is used, not what is in the database. The same
+> principle as Step 8.
+
+## 9.5 — Change `save_student`
+
+```python app.py
+    def save_student(self, is_edit=False):
+        form = self.read_form()
+        row_id = form.get("id", "") if is_edit else ""
+
+        problems = []
+        if not form.get("student_id"):
+            problems.append("Student ID is required.")
+        if not form.get("full_name"):
+            problems.append("Full name is required.")
+        if not form.get("department"):
+            problems.append("Please choose a department.")
+        if not form.get("gender"):
+            problems.append("Please choose a gender.")
+        if form.get("email") and "@" not in form["email"]:
+            problems.append("The email address is not valid.")
+        if form.get("student_id") and database.student_id_exists(
+            form["student_id"], ignore_row_id=row_id if is_edit else None
+        ):
+            problems.append("This student ID is already registered.")
+
+        if problems:
+            items = "".join("<li>" + esc(p) + "</li>" for p in problems)
+            return self.page_form(row_id, '<div class="alert"><ul>' + items + "</ul></div>", form)
+
+        values = (
+            form["student_id"], form["full_name"], form["department"],
+            form["gender"], form.get("email", ""), form.get("phone", ""),
+        )
+
+        if is_edit:
+            database.update_student(row_id, *values)
+        else:
+            database.add_student(*values)
+
+        self.redirect("/")
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `is_edit=False` | One function, two jobs |
+| `row_id = form.get("id")` | It comes from the hidden field |
+| `ignore_row_id=row_id if is_edit else None` | When editing, do not count this row |
+| `values = (...)` | The six values written once, not twice |
+| `*values` | Unpacks the tuple into six arguments |
+| `update_student(row_id, *values)` | Seven arguments: the `id` and the other six |
+
+## 9.6 — The routes
+
+In `do_GET`, after `/add`:
+
+```python app.py
+        elif url.path == "/edit":
+            query = urllib.parse.parse_qs(url.query)
+            self.page_form(query.get("id", [""])[0])
+```
+
+In `do_POST`, after `/add`:
+
+```python app.py
+        elif url.path == "/edit":
+            self.save_student(is_edit=True)
+```
+
+<!-- collapse -->
+### What does this code do?
+
+| Part | What it does |
+| ---- | ------------ |
+| `url.query` | The part after the `?` — `id=2`, for example |
+| `parse_qs(...)` | Turns it into `{"id": ["2"]}` |
+| `.get("id", [""])[0]` | The first value, or empty if there is none |
+
+> `/edit` now has two sides like `/add`: `GET` shows the form, `POST` saves
+> it.
+
+## 9.7 — An edit button in the table
+
+Change `build_table_rows` — we add a column:
+
+```python app.py
+def build_table_rows(students):
+    rows = []
+    for number, student in enumerate(students, start=1):
+        rows.append(
+            """
+            <tr>
+              <td>{number}</td>
+              <td>{student_id}</td>
+              <td>{full_name}</td>
+              <td>{department}</td>
+              <td>{created_at}</td>
+              <td><a href="/edit?id={row_id}">Edit</a></td>
+            </tr>
+            """.format(
+                number=number,
+                row_id=student["id"],
+                student_id=esc(student["student_id"]),
+                full_name=esc(student["full_name"]),
+                department=esc(student["department"]),
+                created_at=esc(student["created_at"]),
+            )
+        )
+    return "".join(rows)
+```
+
+And in `templates/list.html`, a new heading:
+
+```html templates/list.html
+<p>{{ total }} student(s)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Student ID</th>
+      <th>Full name</th>
+      <th>Department</th>
+      <th>Registered at</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ rows }}
+  </tbody>
+</table>
+```
+
+> **Why no `esc()` on `row_id`?** Because it is a number the database
+> assigned, not text a user typed. Anything that comes from a user gets
+> `esc()`.
+
+---
+
+## 9.8 — Test it
+
+Restart the server, `Ctrl + Shift + R`.
+
+**1. Edit** — click **Edit** next to a student.
+
+You should see the form **filled in with their details** — name, department,
+gender, all of it. The heading says *Edit student* and the button says *Save
+changes*.
+
+**2. Change something** — change the name and save. It should be changed in
+the list.
+
+**3. The important test — leave the number alone:**
+Edit the same student, change only the phone number, and save.
+
+It should **work**. If you get *This student ID is already registered.*, your
+`ignore_row_id` is not right (see 9.2).
+
+**4. Take somebody else's number** — while editing, type another student's
+number. It must be **refused**.
+
+**5. Ask for an `id` that does not exist:**
+
+```bash
+http://localhost:8000/edit?id=9999
+```
+
+You should get a `404`.
+
+---
+
+## If you get an error
+
+| Problem | Fix |
+| ------- | --- |
+| The form is empty when editing | Check `values is None` or `dict(student)` |
+| I cannot save — it says the number exists | `ignore_row_id` is not right (9.2) |
+| The change is not saved | `<input type="hidden" name="id">` is missing from the form |
+| Every student changed! | You forgot `WHERE id = ?` in the `UPDATE` |
+| I click `Edit` and get an empty form | The `id` is missing from the link, or `parse_qs` is wrong |
+| `TypeError: ... takes 7 positional arguments` | Check the order of the arguments to `update_student` |
+| The gender is not selected | `{{ male_checked }}` is missing from the HTML |
+
+---
+
+## ✅ This step is finished when
+
+- Clicking **Edit** opens a filled-in form
+- Changes are saved
+- A student can be edited without changing their number
+- Another student's number is still refused
+- An `id` that does not exist gives a `404`
+
+**Three of four are done.** In the next step, **D** — deleting, which is the
+shortest step but carries an important point about safety.
+
+---
+
+> Step 10 will be added here.

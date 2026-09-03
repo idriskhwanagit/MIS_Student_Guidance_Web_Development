@@ -43,7 +43,7 @@
 | ٦ | CSS — دیزاینی پەڕەکان | ✅ |
 | ٧ | **R** — پیشاندانی لیستی قوتابیان | ✅ |
 | ٨ | **C** — فۆڕمی تۆمارکردن + پشکنین | ✅ |
-| ٩ | **U** — دەستکاریکردن | ⏳ |
+| ٩ | **U** — دەستکاریکردن | ✅ |
 | ١٠ | **D** — سڕینەوە | ⏳ |
 | ١١ | گەڕان | ⏳ |
 | ١٢ | پاراستن — SQL Injection و XSS | ⏳ |
@@ -2139,4 +2139,432 @@ student-system/
 
 ---
 
-> هەنگاوی ٩ لێرە زیاد دەکرێت.
+# هەنگاوی ٩ — **U** لە CRUD: دەستکاریکردن
+
+> ئەم هەنگاوە کورتترە لەوەی چاوەڕێی دەکەیت — چونکە **هەمان فۆڕم**
+> بەکاردەهێنینەوە.
+
+## چی دەکەین
+
+ڕێگە دەدەین زانیاری قوتابییەکی تۆمارکراو بگۆڕدرێت.
+
+## بۆچی فۆڕمێکی نوێ دروست ناکەین؟
+
+فۆڕمی دەستکاری و فۆڕمی تۆمارکردن **هەمان خانەکانیان هەیە**. ئەگەر دوو
+فایل دروست بکەین:
+
+- هەر گۆڕانکارییەک دەبێت **دوو جار** بکرێت
+- ڕۆژێک یەکێکیان لەبیر دەچێت و لێک جیا دەبنەوە
+
+بۆیە یەک فایل بەکاردەهێنین و تەنها **دوو شت** دەگۆڕین: ڕێڕەوی ناردن، و
+ناوی دوگمەکە. ئەم بنەمایە پێی دەگوترێت **DRY** — *Don't Repeat Yourself*.
+
+---
+
+## ٩.١ — دوو فەنکشن بۆ `database.py`
+
+```python database.py
+def get_student(row_id):
+    with get_connection() as connection:
+        return connection.execute(
+            "SELECT * FROM students WHERE id = ?", (row_id,)
+        ).fetchone()
+
+
+def update_student(row_id, student_id, full_name, department, gender, email, phone):
+    with get_connection() as connection:
+        connection.execute(
+            """
+            UPDATE students
+               SET student_id = ?,
+                   full_name  = ?,
+                   department = ?,
+                   gender     = ?,
+                   email      = ?,
+                   phone      = ?
+             WHERE id = ?
+            """,
+            (student_id, full_name, department, gender, email, phone, row_id),
+        )
+```
+
+<!-- collapse -->
+### ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `get_student(row_id)` | یەک قوتابی بە `id`ـەکەی دەهێنێت |
+| `.fetchone()` | یەک ڕیز، یان `None` ئەگەر نەبوو |
+| `UPDATE ... SET` | نرخە نوێکان دادەنێت |
+| `WHERE id = ?` | **تەنها ئەو ڕیزە** |
+| ڕیزبەندی `?`ـەکان | شەش نرخ، پاشان `row_id` — **دەبێت ڕێک بێت** |
+
+> ### ⚠️ `WHERE` لەبیر مەکە
+>
+> ```sql
+> UPDATE students SET department = 'MIS';
+> ```
+>
+> ئەمە **هەموو قوتابییەکان** دەکاتە MIS. بەبێ `WHERE`، `UPDATE` و `DELETE`
+> بەسەر هەموو خشتەکەدا کاردەکەن.
+>
+> ئەمە یەکێکە لە مەترسیدارترین هەڵەکانی SQL، و لە کۆمپانیا گەورەکانیشدا
+> ڕوویداوە.
+
+## ٩.٢ — `student_id_exists` بگۆڕە
+
+فەنکشنە کۆنەکە بسڕەوە و ئەمە لە شوێنی دابنێ:
+
+```python database.py
+def student_id_exists(student_id, ignore_row_id=None):
+    with get_connection() as connection:
+        if ignore_row_id is None:
+            row = connection.execute(
+                "SELECT id FROM students WHERE student_id = ?", (student_id,)
+            ).fetchone()
+        else:
+            row = connection.execute(
+                "SELECT id FROM students WHERE student_id = ? AND id <> ?",
+                (student_id, ignore_row_id),
+            ).fetchone()
+        return row is not None
+```
+
+> ### 🤔 بۆچی `ignore_row_id`؟
+>
+> بیربکەرەوە: قوتابییەک دەستکاری دەکەیت و تەنها ناوەکەی دەگۆڕیت — ژمارەکەی
+> وەک خۆی دەهێڵیتەوە.
+>
+> پشکنینەکە دەڵێت: *«ئەم ژمارەیە پێشتر هەیە!»* — چونکە بەڕاستی هەیە،
+> **لای خۆی**.
+>
+> `ignore_row_id` دەڵێت: بەدوایدا بگەڕێ، بەڵام **خۆی ژمار مەکە**.
+> `id <> ?` واتای «`id` یەکسان نەبێت بە».
+>
+> بەبێ ئەمە، هیچ قوتابییەک ناتوانرێت دەستکاری بکرێت.
+
+---
+
+## ٩.٣ — `templates/form.html` بگۆڕە
+
+سێ گۆڕانکاری: خانەیەکی شاراوە، ڕێڕەوی گۆڕاو، و ناوی گۆڕاوی دوگمەکە.
+
+```html templates/form.html
+<h2>{{ heading }}</h2>
+
+{{ errors }}
+
+<form method="POST" action="{{ action }}" class="student-form">
+
+  <input type="hidden" name="id" value="{{ row_id }}">
+
+  <label class="field">
+    <span>Student ID *</span>
+    <input type="text" name="student_id" value="{{ student_id }}" required>
+  </label>
+
+  <label class="field">
+    <span>Full name *</span>
+    <input type="text" name="full_name" value="{{ full_name }}" required>
+  </label>
+
+  <label class="field">
+    <span>Department *</span>
+    <select name="department" required>
+      <option value="">-- Choose a department --</option>
+      {{ departments }}
+    </select>
+  </label>
+
+  <div class="field">
+    <span>Gender *</span>
+    <div class="radio-row">
+      <label><input type="radio" name="gender" value="Male"{{ male_checked }} required> Male</label>
+      <label><input type="radio" name="gender" value="Female"{{ female_checked }}> Female</label>
+    </div>
+  </div>
+
+  <label class="field">
+    <span>Email</span>
+    <input type="email" name="email" value="{{ email }}">
+  </label>
+
+  <label class="field">
+    <span>Phone</span>
+    <input type="text" name="phone" value="{{ phone }}">
+  </label>
+
+  <div class="form-actions">
+    <button type="submit">{{ submit_label }}</button>
+    <a href="/">Cancel</a>
+  </div>
+
+</form>
+```
+
+<!-- collapse -->
+### ئەم HTMLـە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `<input type="hidden" name="id">` | بەکارهێنەر نایبینێت، بەڵام لەگەڵ فۆڕمەکەدا دەنێردرێت |
+| `action="{{ action }}"` | `/add` یان `/edit` — Python بڕیار دەدات |
+| `{{ submit_label }}` | *Register student* یان *Save changes* |
+| `{{ male_checked }}` | لە کاتی دەستکاریدا، ڕەگەزی پێشوو هەڵدەبژێردرێت |
+
+> **بۆچی خانەی شاراوە؟** سێرڤەر دەبێت بزانێت **کام قوتابی** دەگۆڕدرێت.
+> ئەو `id`ـە لە URLـەکەوە دێت (`/edit?id=2`) و دەخرێتە ناو فۆڕمەکەوە، تاکو
+> لەگەڵ `POST`ـەکەدا بگەڕێتەوە.
+
+## ٩.٤ — `page_form` بگۆڕە
+
+فەنکشنە کۆنەکە بسڕەوە و ئەمە دابنێ:
+
+```python app.py
+    def page_form(self, row_id="", errors="", values=None):
+        student = database.get_student(row_id) if row_id else None
+
+        if row_id and student is None:
+            self.send_response(404)
+            self.end_headers()
+            return
+
+        if values is None:
+            values = dict(student) if student else {}
+
+        is_edit = student is not None
+        gender = values.get("gender", "")
+
+        body = render(
+            "form.html",
+            heading="Edit student" if is_edit else "Register a new student",
+            action="/edit" if is_edit else "/add",
+            submit_label="Save changes" if is_edit else "Register student",
+            row_id=esc(values.get("id", "")),
+            errors=errors,
+            student_id=esc(values.get("student_id", "")),
+            full_name=esc(values.get("full_name", "")),
+            email=esc(values.get("email", "")),
+            phone=esc(values.get("phone", "")),
+            departments=build_department_options(values.get("department", "")),
+            male_checked=" checked" if gender == "Male" else "",
+            female_checked=" checked" if gender == "Female" else "",
+        )
+        title = "Edit student" if is_edit else "New student"
+        self.send_html(render("layout.html", title=title, content=body))
+```
+
+<!-- collapse -->
+### ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `if row_id else None` | ئەگەر `id` نەبوو، فۆڕمی زیادکردنە |
+| `student is None` → `404` | `id`ـێک داوا کراوە کە بوونی نییە |
+| `values is None` | یەکەم جار: نرخە پاشەکەوتکراوەکان بەکاربهێنە |
+| `dict(student)` | ڕیزی داتابەیس دەکاتە وشەنامە |
+| `is_edit` | یەک گۆڕاو، سێ بڕیاری لەسەر دەدرێت |
+| `gender == "Male"` | کام دوگمە هەڵبژێردرابێت |
+
+> **تێبینی:** ئەگەر `values` نێردرابوو (واتە هەڵەیەک ڕوویدا)، ئەوسا ئەوەی
+> بەکارهێنەر نووسیویەتی بەکاردێت — نەک ئەوەی لە داتابەیسدایە. هەمان بنەمای
+> هەنگاوی ٨.
+
+## ٩.٥ — `save_student` بگۆڕە
+
+```python app.py
+    def save_student(self, is_edit=False):
+        form = self.read_form()
+        row_id = form.get("id", "") if is_edit else ""
+
+        problems = []
+        if not form.get("student_id"):
+            problems.append("Student ID is required.")
+        if not form.get("full_name"):
+            problems.append("Full name is required.")
+        if not form.get("department"):
+            problems.append("Please choose a department.")
+        if not form.get("gender"):
+            problems.append("Please choose a gender.")
+        if form.get("email") and "@" not in form["email"]:
+            problems.append("The email address is not valid.")
+        if form.get("student_id") and database.student_id_exists(
+            form["student_id"], ignore_row_id=row_id if is_edit else None
+        ):
+            problems.append("This student ID is already registered.")
+
+        if problems:
+            items = "".join("<li>" + esc(p) + "</li>" for p in problems)
+            return self.page_form(row_id, '<div class="alert"><ul>' + items + "</ul></div>", form)
+
+        values = (
+            form["student_id"], form["full_name"], form["department"],
+            form["gender"], form.get("email", ""), form.get("phone", ""),
+        )
+
+        if is_edit:
+            database.update_student(row_id, *values)
+        else:
+            database.add_student(*values)
+
+        self.redirect("/")
+```
+
+<!-- collapse -->
+### ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `is_edit=False` | یەک فەنکشن، دوو کار |
+| `row_id = form.get("id")` | لە خانە شاراوەکەوە دێت |
+| `ignore_row_id=row_id if is_edit else None` | لە کاتی دەستکاریدا، خۆی ژمار مەکە |
+| `values = (...)` | شەش نرخەکە جارێک نووسراون، نەک دوو جار |
+| `*values` | تووپڵەکە دەکاتەوە بۆ شەش پارامەتەر |
+| `update_student(row_id, *values)` | حەوت پارامەتەر: `id` و شەشەکەی تر |
+
+## ٩.٦ — ڕێڕەوەکان
+
+لە `do_GET`، دوای `/add`:
+
+```python app.py
+        elif url.path == "/edit":
+            query = urllib.parse.parse_qs(url.query)
+            self.page_form(query.get("id", [""])[0])
+```
+
+لە `do_POST`، دوای `/add`:
+
+```python app.py
+        elif url.path == "/edit":
+            self.save_student(is_edit=True)
+```
+
+<!-- collapse -->
+### ئەم کۆدە چی دەکات؟
+
+| بەش | چی دەکات |
+|-----|-----------|
+| `url.query` | ئەو بەشەی دوای `?` — بۆ نموونە `id=2` |
+| `parse_qs(...)` | دەیکاتە `{"id": ["2"]}` |
+| `.get("id", [""])[0]` | یەکەم نرخ، یان بۆشایی ئەگەر نەبوو |
+
+> ئێستا `/edit` وەک `/add` دوو ڕووی هەیە: `GET` فۆڕمەکە پیشان دەدات،
+> `POST` پاشەکەوتی دەکات.
+
+## ٩.٧ — دوگمەی دەستکاری لە خشتەکەدا
+
+`build_table_rows` بگۆڕە — ستوونێکی نوێ زیاد دەکەین:
+
+```python app.py
+def build_table_rows(students):
+    rows = []
+    for number, student in enumerate(students, start=1):
+        rows.append(
+            """
+            <tr>
+              <td>{number}</td>
+              <td>{student_id}</td>
+              <td>{full_name}</td>
+              <td>{department}</td>
+              <td>{created_at}</td>
+              <td><a href="/edit?id={row_id}">Edit</a></td>
+            </tr>
+            """.format(
+                number=number,
+                row_id=student["id"],
+                student_id=esc(student["student_id"]),
+                full_name=esc(student["full_name"]),
+                department=esc(student["department"]),
+                created_at=esc(student["created_at"]),
+            )
+        )
+    return "".join(rows)
+```
+
+و لە `templates/list.html`، سەردێڕێکی نوێ:
+
+```html templates/list.html
+<p>{{ total }} student(s)</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Student ID</th>
+      <th>Full name</th>
+      <th>Department</th>
+      <th>Registered at</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ rows }}
+  </tbody>
+</table>
+```
+
+> **`row_id` بۆچی `esc()` نییە؟** چونکە ژمارەیەکە کە داتابەیس خۆی دایناوە،
+> نەک دەقێک کە بەکارهێنەر نووسیویەتی. هەرچی لە بەکارهێنەرەوە دێت، `esc()`
+> دەبێت.
+
+---
+
+## ٩.٨ — تاقیکردنەوە
+
+سێرڤەرەکە دووبارە بکەرەوە، `Ctrl + Shift + R`.
+
+**١. دەستکاری بکە** — کلیک لە **Edit** لەتەنیشت قوتابییەک.
+
+دەبێت فۆڕمەکە ببینیت **بە زانیارییەکەیەوە پڕکراوە** — ناو، بەش، ڕەگەز،
+هەمووی. سەردێڕەکە دەڵێت *Edit student* و دوگمەکە *Save changes*.
+
+**٢. شتێک بگۆڕە** — ناوەکە بگۆڕە و پاشەکەوتی بکە. دەبێت لە لیستەکەدا
+گۆڕدرابێت.
+
+**٣. تاقیکردنەوەی گرنگ — ژمارەکە مەگۆڕە:**
+هەمان قوتابی دەستکاری بکە، تەنها تەلەفۆنەکەی بگۆڕە و پاشەکەوتی بکە.
+
+دەبێت **کار بکات**. ئەگەر پەیامی *This student ID is already registered.*
+دەرکەوت، واتە `ignore_row_id`ـەکەت ڕێک نییە (بڕوانە ٩.٢).
+
+**٤. ژمارەی کەسێکی تر بەکاربهێنە** — لە کاتی دەستکاریدا، ژمارەی قوتابییەکی
+تر بنووسە. دەبێت **ڕەت بکرێتەوە**.
+
+**٥. `id`ـێکی نەبوو داوا بکە:**
+
+```bash
+http://localhost:8000/edit?id=9999
+```
+
+دەبێت `404` ببینیت.
+
+---
+
+## ئەگەر هەڵە دەرکەوت
+
+| کێشە | چارەسەر |
+|------|---------|
+| فۆڕمەکە بەتاڵە لە کاتی دەستکاری | `values is None` یان `dict(student)` بپشکنە |
+| ناتوانم پاشەکەوت بکەم — دەڵێت ژمارەکە هەیە | `ignore_row_id` ڕێک نییە (٩.٢) |
+| گۆڕانکارییەکە پاشەکەوت نابێت | `<input type="hidden" name="id">` لە فۆڕمەکەدا نییە |
+| هەموو قوتابییەکان گۆڕان! | `WHERE id = ?`ت لە `UPDATE`دا لەبیر چووە |
+| `Edit` کلیک دەکەم، فۆڕمی بەتاڵ دێت | `id`ـەکە لە لینکەکەدا نییە یان `parse_qs` هەڵەیە |
+| `TypeError: ... takes 7 positional arguments` | ڕیزبەندی پارامەتەرەکانی `update_student` بپشکنە |
+| ڕەگەز هەڵنەبژێردراوە | `{{ male_checked }}` لە HTMLدا نییە |
+
+---
+
+## ✅ کاتێک ئەم هەنگاوە تەواو دەبێت
+
+- کلیک لە **Edit** فۆڕمێکی پڕکراو دەکاتەوە
+- گۆڕانکارییەکان پاشەکەوت دەبن
+- قوتابی دەتوانێت دەستکاری بکرێت بەبێ گۆڕینی ژمارەکەی
+- ژمارەی کەسێکی تر هێشتا ڕەت دەکرێتەوە
+- `id`ـێکی نەبوو `404` دەداتەوە
+
+**سێ لە چوار تەواو بوو.** لە هەنگاوی داهاتوودا **D** — سڕینەوە، کە
+کورتترین هەنگاوە بەڵام خاڵێکی گرنگی پاراستنی تێدایە.
+
+---
+
+> هەنگاوی ١٠ لێرە زیاد دەکرێت.
