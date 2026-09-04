@@ -2129,7 +2129,8 @@ Everything so far has been **reading** (`GET`). Now we are **changing**
 
 ## 8.1 — A new function for `database.py`
 
-Before registering, we need to know whether that number is already taken:
+Before registering, we need to know whether that number is already taken.
+**At the end of `database.py`**, below `get_all_students()`:
 
 ```python database.py add
 def student_id_exists(student_id):
@@ -2316,7 +2317,19 @@ student-system/
 
 ## 8.3 — The list of departments
 
-At the top of `app.py`, under `STATIC_DIR`:
+In `app.py`, **after the `STATIC_DIR` line** and **before
+`def render(...)`**. At the far left, with no indentation — this sits
+outside every class and function:
+
+```out
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+    <- here
+
+def render(template_name, **values):
+```
 
 ```python app.py add
 DEPARTMENTS = [
@@ -2350,7 +2363,26 @@ def build_department_options(selected):
 
 ## 8.4 — Three helpers for the class
 
-Add these inside `StudentAppHandler`:
+These three go **inside the `StudentAppHandler` class**, straight
+**after `send_static`** — the last method there — and **before the
+`database.init_db()` line**:
+
+```out
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self): ...
+    def page_home(self): ...
+    def send_static(self, filename): ...
+        self.wfile.write(body)
+
+    <- here
+
+database.init_db()
+server = HTTPServer(("localhost", 8000), StudentAppHandler)
+```
+
+> ⚠️ All three start with **4 spaces** — because they are **inside the
+> class**. Written at the far left they fall outside it, and `self` stops
+> working.
 
 ```python app.py add
     def send_html(self, content, status=200):
@@ -2387,7 +2419,8 @@ Add these inside `StudentAppHandler`:
 
 ## 8.5 — Two new pages
 
-Add these as well:
+These go in the same place — **inside the class**, straight after the
+`read_form()` you just added, again with **4 spaces**:
 
 ```python app.py add
     def page_form(self, errors="", values=None):
@@ -2705,6 +2738,8 @@ Yourself*.
 ---
 
 ## 9.1 — Two functions for `database.py`
+
+**At the end of `database.py`**, below `student_id_exists()`:
 
 ```python database.py add
 def get_student(row_id):
@@ -3062,26 +3097,14 @@ Change `build_table_rows` like this — one more column:
      return "".join(rows)
 ```
 
-And in `templates/list.html`, a new heading:
+And in `templates/list.html`, **one new heading** — after
+`<th>Registered at</th>`:
 
-```html templates/list.html add
-<p>{{ total }} student(s)</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Student ID</th>
-      <th>Full name</th>
-      <th>Department</th>
-      <th>Registered at</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{ rows }}
-  </tbody>
-</table>
+```diff templates/list.html edit
+       <th>Department</th>
+       <th>Registered at</th>
++      <th>Actions</th>
+     </tr>
 ```
 
 > **Why no `esc()` on `row_id`?** Because it is a number the database
@@ -3169,6 +3192,8 @@ Add a delete button, with a confirmation.
 ---
 
 ## 10.1 — A function for `database.py`
+
+**At the end of `database.py`**, below `update_student()`:
 
 ```python database.py add
 def delete_student(row_id):
@@ -3565,6 +3590,8 @@ In `do_GET`:
 
 ## 11.5 — Styling
 
+**At the end of `static/style.css`**:
+
 ```css static/style.css add
 .search {
   display: flex;
@@ -3819,9 +3846,13 @@ too.
 
 ### Put the defence back
 
-```python app.py add
-def esc(value):
-    return html.escape("" if value is None else str(value))
+Find that same `esc` function in `app.py` and restore it:
+
+```diff app.py edit
+ def esc(value):
+-    # ❌ dangerous — for this test only
+-    return "" if value is None else str(value)
++    return html.escape("" if value is None else str(value))
 ```
 
 Restart the server.

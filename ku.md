@@ -2125,7 +2125,8 @@ student-system/
 
 ## ٨.١ — فەنکشنێکی نوێ بۆ `database.py`
 
-پێش تۆمارکردن، دەبێت بزانین ئایا ئەم ژمارەیە پێشتر هەیە:
+پێش تۆمارکردن، دەبێت بزانین ئایا ئەم ژمارەیە پێشتر هەیە.
+**لە کۆتایی `database.py`**، لەژێر `get_all_students()`:
 
 ```python database.py add
 def student_id_exists(student_id):
@@ -2314,7 +2315,18 @@ student-system/
 
 ## ٨.٣ — لیستی بەشەکان
 
-لە سەرەوەی `app.py`، لەژێر `STATIC_DIR`:
+لە `app.py`، **دوای دێڕی `STATIC_DIR`** و **پێش `def render(...)`**.
+لە چەپەوە بەبێ بۆشایی — ئەمە لە دەرەوەی هەموو کلاس و فەنکشنێکە:
+
+```out
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+STATIC_DIR = os.path.join(BASE_DIR, "static")
+
+    ← لێرە
+
+def render(template_name, **values):
+```
 
 ```python app.py add
 DEPARTMENTS = [
@@ -2348,7 +2360,26 @@ def build_department_options(selected):
 
 ## ٨.٤ — سێ یارمەتیدەر بۆ کلاسەکە
 
-ئەمانە زیاد بکە بۆ ناو `StudentAppHandler`:
+ئەم سێ فەنکشنە دەچنە **ناو کلاسی `StudentAppHandler`**، ڕاستەوخۆ **دوای
+`send_static`** — کە کۆتا فەنکشنی کلاسەکەیە — و **پێش دێڕی
+`database.init_db()`**:
+
+```out
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self): ...
+    def page_home(self): ...
+    def send_static(self, filename): ...
+        self.wfile.write(body)
+
+    ← لێرە
+
+database.init_db()
+server = HTTPServer(("localhost", 8000), StudentAppHandler)
+```
+
+> ⚠️ هەر سێکیان بە **٤ بۆشایی** دەست پێدەکەن — چونکە **لەناو کلاسەکەن**.
+> ئەگەر لە چەپەوە بەبێ بۆشایی بیاننووسیت، لە دەرەوەی کلاسەکە دەبن و
+> `self` کار ناکات.
 
 ```python app.py add
     def send_html(self, content, status=200):
@@ -2385,7 +2416,8 @@ def build_department_options(selected):
 
 ## ٨.٥ — دوو پەڕەی نوێ
 
-ئەمانەش زیاد بکە:
+ئەمانەش لە هەمان شوێن — **ناو کلاسەکە**، ڕاستەوخۆ دوای `read_form()`ی
+سەرەوە، هەر بە **٤ بۆشایی**:
 
 ```python app.py add
     def page_form(self, errors="", values=None):
@@ -2703,6 +2735,8 @@ student-system/
 ---
 
 ## ٩.١ — دوو فەنکشن بۆ `database.py`
+
+**لە کۆتایی `database.py`**، لەژێر `student_id_exists()`:
 
 ```python database.py add
 def get_student(row_id):
@@ -3060,26 +3094,14 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
      return "".join(rows)
 ```
 
-و لە `templates/list.html`، سەردێڕێکی نوێ:
+و لە `templates/list.html`، **یەک سەردێڕی نوێ** — دوای
+`<th>Registered at</th>`:
 
-```html templates/list.html add
-<p>{{ total }} student(s)</p>
-
-<table>
-  <thead>
-    <tr>
-      <th>#</th>
-      <th>Student ID</th>
-      <th>Full name</th>
-      <th>Department</th>
-      <th>Registered at</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {{ rows }}
-  </tbody>
-</table>
+```diff templates/list.html edit
+       <th>Department</th>
+       <th>Registered at</th>
++      <th>Actions</th>
+     </tr>
 ```
 
 > **`row_id` بۆچی `esc()` نییە؟** چونکە ژمارەیەکە کە داتابەیس خۆی دایناوە،
@@ -3165,6 +3187,8 @@ http://localhost:8000/edit?id=9999
 ---
 
 ## ١٠.١ — فەنکشنێک بۆ `database.py`
+
+**لە کۆتایی `database.py`**، لەژێر `update_student()`:
 
 ```python database.py add
 def delete_student(row_id):
@@ -3561,6 +3585,8 @@ http://localhost:8000/delete?id=1
 
 ## ١١.٥ — دیزاین
 
+**لە کۆتایی `static/style.css`**:
+
 ```css static/style.css add
 .search {
   display: flex;
@@ -3815,9 +3841,13 @@ SELECT * FROM students WHERE full_name LIKE '%' OR '1'='1%' ORDER BY id DESC
 
 ### پاراستنەکە بگەڕێنەوە
 
-```python app.py add
-def esc(value):
-    return html.escape("" if value is None else str(value))
+هەمان فەنکشنی `esc` لە `app.py` بدۆزەرەوە و وەک خۆی بیگەڕێنەوە:
+
+```diff app.py edit
+ def esc(value):
+-    # ❌ مەترسیدار — تەنها بۆ تاقیکردنەوە
+-    return "" if value is None else str(value)
++    return html.escape("" if value is None else str(value))
 ```
 
 سێرڤەرەکە دووبارە بکەرەوە.
