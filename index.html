@@ -443,8 +443,11 @@ body {
 /* --- where a block of code goes ----------------------------------------- */
 .block > .where {
   display: flex;
-  justify-content: space-between;
-  gap: 1rem;
+  /* the badge sits beside the filename, not at the far end — the copy
+     button floats in that corner */
+  justify-content: flex-start;
+  align-items: center;
+  gap: .6rem;
   padding: .45rem .95rem;
   border-radius: 10px 10px 0 0;
   background: #0b232c;
