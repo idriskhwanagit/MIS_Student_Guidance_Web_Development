@@ -2191,6 +2191,32 @@ everything the person typed is gone.
 | `.fetchone()` | Just one row — we do not need more |
 | `row is not None` | If it found something, it is already taken |
 
+## 8.1.1 — Try it
+
+Nothing calls this function yet, but **you can test it right now**. Stop
+the server and run:
+
+```bash
+python -c "import database; print(database.student_id_exists('MIS-2025-001'), database.student_id_exists('MIS-9999-999'))"
+```
+
+## What you should see
+
+```out
+True False
+```
+
+| Answer | Why |
+| ------ | --- |
+| **`True`** | `MIS-2025-001` already exists — we added it in 7.2 |
+| **`False`** | `MIS-9999-999` does not |
+
+> **That is proof the function works** — and proof it is in the right file.
+> If you had put it in `app.py`, this command would fail.
+
+> It also shows that `database.py` **works on its own**, with no server at
+> all. That is what separating the two files bought us in Step 4.
+
 ---
 
 ## 8.2 — `templates/form.html`
@@ -2265,6 +2291,28 @@ A new file:
 > ⚠️ `required` and `type="email"` are **on the client** — they can be
 > removed with `F12`. That is why step 8.5 checks the same things **on the
 > server**.
+
+## What you should see
+
+**Nothing — yet.** The file exists, but no route points to it. Open
+`localhost:8000/add` now and you get a `404`. We build the route in 8.6.
+
+**But check this:** the file has to be **inside the `templates` folder**,
+not beside `app.py`. In the Explorer it should look like this:
+
+```out
+student-system/
+├── app.py
+├── database.py
+└── templates/
+    ├── layout.html
+    ├── home.html
+    ├── list.html
+    └── form.html     <- new, in here
+```
+
+> In the wrong place it fails in 8.6 with `FileNotFoundError: form.html`.
+> Drag it into `templates` in the Explorer.
 
 ## 8.3 — The list of departments
 
