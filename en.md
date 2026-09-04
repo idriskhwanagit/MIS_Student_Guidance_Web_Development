@@ -2140,6 +2140,21 @@ def student_id_exists(student_id):
         return row is not None
 ```
 
+> ### ⚠️ Check which file you are in first
+>
+> This goes into **`database.py`** — not `app.py`. Put it at the end of
+> that file, below `get_all_students()`.
+>
+> **If you paste it into `app.py` by mistake**, two things give it away:
+>
+> 1. A yellow squiggle under `get_connection()` — VS Code is saying "that
+> name does not exist here", because it lives in `database.py`.
+>
+> 2. Anything below `server.serve_forever()` **never runs** — that line
+> waits forever, and Python never reaches what follows it.
+>
+> The fix: delete it from `app.py` and put it at the end of `database.py`.
+
 ### This is not a duplicate — though it looks like one
 
 In Step 4 we wrote that `student_id` must be `UNIQUE`, which means the
