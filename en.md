@@ -2491,31 +2491,57 @@ These go in the same place — **inside the class**, straight after the
 
 ## 8.6 — The routes
 
-Change `do_GET`, and add the new `do_POST` below it:
+There are two jobs here, and we do them one at a time.
+
+### 8.6.1 — Teach `do_GET` about `/add`
+
+Find `do_GET`. Add **two lines** — between `self.page_home()` and
+`elif url.path.startswith("/static/")`:
 
 ```diff app.py edit
-     def do_GET(self):
-         url = urllib.parse.urlparse(self.path)
- 
          if url.path == "/":
              self.page_home()
 +        elif url.path == "/add":
 +            self.page_form()
          elif url.path.startswith("/static/"):
              self.send_static(url.path[len("/static/"):])
-         else:
-             self.send_response(404)
-             self.end_headers()
-+
-+    def do_POST(self):
-+        url = urllib.parse.urlparse(self.path)
-+
-+        if url.path == "/add":
-+            self.save_student()
-+        else:
-+            self.send_response(404)
-+            self.end_headers()
 ```
+
+> 8 spaces for `elif`, 12 for `self.page_form()` — exactly like the two
+> lines above them.
+
+### 8.6.2 — A new method: `do_POST`
+
+This is a **completely new method** — do not rename `do_GET`.
+
+Where `do_GET` ends, leave a blank line and write this below it:
+
+```out
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        ...
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    <- here
+
+    def page_home(self): ...
+```
+
+```python app.py add
+    def do_POST(self):
+        url = urllib.parse.urlparse(self.path)
+
+        if url.path == "/add":
+            self.save_student()
+        else:
+            self.send_response(404)
+            self.end_headers()
+```
+
+> **4 spaces** for `def do_POST` — it lives inside the class, just like
+> `do_GET`.
 
 > **`/add` appears twice — but they are two different things:**
 >

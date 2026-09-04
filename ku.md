@@ -2488,31 +2488,56 @@ server = HTTPServer(("localhost", 8000), StudentAppHandler)
 
 ## ٨.٦ — ڕێڕەوەکان
 
-`do_GET` بگۆڕە و `do_POST`ی نوێ لەژێری زیاد بکە:
+دوو کار هەیە، و بە جیا دەیانکەین.
+
+### ٨.٦.١ — `do_GET` فێری `/add` بکە
+
+`do_GET` بدۆزەرەوە. **دوو دێڕ** زیاد بکە — لە نێوان `self.page_home()` و
+`elif url.path.startswith("/static/")`دا:
 
 ```diff app.py edit
-     def do_GET(self):
-         url = urllib.parse.urlparse(self.path)
- 
          if url.path == "/":
              self.page_home()
 +        elif url.path == "/add":
 +            self.page_form()
          elif url.path.startswith("/static/"):
              self.send_static(url.path[len("/static/"):])
-         else:
-             self.send_response(404)
-             self.end_headers()
-+
-+    def do_POST(self):
-+        url = urllib.parse.urlparse(self.path)
-+
-+        if url.path == "/add":
-+            self.save_student()
-+        else:
-+            self.send_response(404)
-+            self.end_headers()
 ```
+
+> ٨ بۆشایی بۆ `elif`، ١٢ بۆشایی بۆ `self.page_form()` — ڕێک وەک ئەو دوو
+> دێڕەی سەرەوەیان.
+
+### ٨.٦.٢ — فەنکشنێکی نوێ: `do_POST`
+
+ئەمە **فەنکشنێکی تەواو نوێیە** — ناوی `do_GET` مەگۆڕە.
+
+کاتێک `do_GET` تەواو بوو، دێڕێکی بەتاڵ بەجێبهێڵە و ئەمە لەژێری بنووسە:
+
+```out
+class StudentAppHandler(BaseHTTPRequestHandler):
+    def do_GET(self):
+        ...
+        else:
+            self.send_response(404)
+            self.end_headers()
+
+    ← لێرە
+
+    def page_home(self): ...
+```
+
+```python app.py add
+    def do_POST(self):
+        url = urllib.parse.urlparse(self.path)
+
+        if url.path == "/add":
+            self.save_student()
+        else:
+            self.send_response(404)
+            self.end_headers()
+```
+
+> **٤ بۆشایی** بۆ `def do_POST` — چونکە لەناو کلاسەکەیە، هەروەک `do_GET`.
 
 > **`/add` دوو جار هاتووە — بەڵام دوو شتی جیاوازن:**
 >
