@@ -44,6 +44,26 @@ For a student who:
 
 ---
 
+## Every code box tells you what to do with it
+
+The bar above every code box carries **two things**:
+
+- **which file** — for example `database.py`
+- **what to do** — a coloured badge, one of these four:
+
+| Badge | Meaning | What you do |
+| ----- | ------- | ----------- |
+| **new file** | This file does not exist yet | Create it in VS Code and type the code into it |
+| **add this** | The file already exists | Put this code **at the end** of it. Leave what is already there **alone** |
+| **change this** | Part of the file changes | Find that part in your file and **paste over it** |
+| **just read it** | This is here to be understood | Type nothing — only look at it |
+
+> **And the boxes with no badge?** The ones headed `Terminal` are commands —
+> type them in the terminal. The ones headed `Output` are what you **should
+> see** — they have no copy button, because there is nothing to take.
+
+---
+
 ## The steps
 
 | # | Step | Status |
@@ -375,7 +395,7 @@ app.py
 
 ## 3.2 — Type the code
 
-```python app.py
+```python app.py new
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
@@ -628,7 +648,7 @@ It belongs beside `app.py` — directly in the project folder.
 
 ## 4.2 — Type the code
 
-```python database.py
+```python database.py new
 import os
 import sqlite3
 
@@ -706,7 +726,7 @@ Save with `Ctrl + S`.
 `database.py` does nothing on its own — nobody has called it. Add **two
 lines** to `app.py`:
 
-```diff app.py
+```diff app.py edit
  from http.server import BaseHTTPRequestHandler, HTTPServer
 +
 +import database
@@ -880,7 +900,7 @@ Write the HTML in its own files, and write a function that fills them in.
 
 Right now our HTML lives inside Python:
 
-```python
+```python read
 self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
 ```
 
@@ -905,7 +925,7 @@ layout.html
 
 Type this:
 
-```html templates/layout.html
+```html templates/layout.html new
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -929,7 +949,7 @@ content changes.
 
 Another file in the same folder:
 
-```html templates/home.html
+```html templates/home.html new
 <p>Welcome to the Student Registration System.</p>
 <p>Students registered: {{ total }}</p>
 ```
@@ -941,7 +961,7 @@ those are in `layout.html`.
 
 Add this to `app.py`. First at the top:
 
-```diff app.py
+```diff app.py edit
 +import os
 +import re
  from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -967,7 +987,7 @@ Add this to `app.py`. First at the top:
 
 In the `StudentAppHandler` class, change `do_GET` like this:
 
-```diff app.py
+```diff app.py edit
  class StudentAppHandler(BaseHTTPRequestHandler):
      def do_GET(self):
 +        body = render("home.html", total=0)
@@ -1029,7 +1049,7 @@ Students registered: 0
 
 Leave the server **running**. Open `home.html` and change the text:
 
-```diff templates/home.html
+```diff templates/home.html edit
 -<p>Welcome to the Student Registration System.</p>
 +<p>Hello from my own page!</p>
  <p>Students registered: {{ total }}</p>
@@ -1058,7 +1078,7 @@ Do not read about it — **see it**. Two small changes, then we undo them.
 
 **1.** Add a comment line at the top of `templates/home.html`:
 
-```diff templates/home.html
+```diff templates/home.html edit
 +<!-- the home page -->
  <p>Hello from my own page!</p>
  <p>Students registered: {{ total }}</p>
@@ -1066,7 +1086,7 @@ Do not read about it — **see it**. Two small changes, then we undo them.
 
 **2.** And one in `templates/layout.html`, just above `{{ content }}`:
 
-```diff templates/layout.html
+```diff templates/layout.html edit
    <h1>{{ title }}</h1>
 +  <!-- the content goes here: {{ content }} -->
    {{ content }}
@@ -1115,13 +1135,13 @@ Then further down, the real `{{ content }}` put the same thing in again.
 
 Those two lines were only for the test. Take them both out:
 
-```diff templates/layout.html
+```diff templates/layout.html edit
    <h1>{{ title }}</h1>
 -  <!-- the content goes here: {{ content }} -->
    {{ content }}
 ```
 
-```diff templates/home.html
+```diff templates/home.html edit
 -<!-- the home page -->
  <p>Hello from my own page!</p>
  <p>Students registered: {{ total }}</p>
@@ -1132,7 +1152,7 @@ Those two lines were only for the test. Take them both out:
 `Hello from my own page!` was written in 5.7, and that was only a test too.
 Put it back as it was:
 
-```diff templates/home.html
+```diff templates/home.html edit
 -<p>Hello from my own page!</p>
 +<p>Welcome to the Student Registration System.</p>
  <p>Students registered: {{ total }}</p>
@@ -1224,7 +1244,7 @@ Click the `static` folder, then **New File**:
 style.css
 ```
 
-```css static/style.css
+```css static/style.css new
 :root {
   --brand: #2563eb;
   --text: #1f2937;
@@ -1285,7 +1305,7 @@ h1 {
 
 Open `templates/layout.html` and make two changes:
 
-```diff templates/layout.html
+```diff templates/layout.html edit
  <!DOCTYPE html>
  <html lang="en">
  <head>
@@ -1327,7 +1347,7 @@ That is what we fix now.
 
 Change `app.py`. First at the top:
 
-```diff app.py
+```diff app.py edit
  import os
  import re
 +import urllib.parse
@@ -1342,7 +1362,7 @@ Change `app.py`. First at the top:
 
 Then the class:
 
-```diff app.py
+```diff app.py edit
  class StudentAppHandler(BaseHTTPRequestHandler):
      def do_GET(self):
 +        url = urllib.parse.urlparse(self.path)
@@ -1615,7 +1635,7 @@ worked. **First we build the way to look, then the way to add.**
 
 Add these at the end of `database.py`:
 
-```python database.py
+```python database.py add
 def add_student(student_id, full_name, department, gender, email, phone):
     with get_connection() as connection:
         cursor = connection.execute(
@@ -1741,7 +1761,7 @@ python -c "import database; rows = database.get_all_students(); print(len(rows),
 
 A new file in the `templates` folder:
 
-```html templates/list.html
+```html templates/list.html new
 <p>{{ total }} student(s)</p>
 
 <table>
@@ -1767,7 +1787,7 @@ A new file in the `templates` folder:
 
 ## 7.4 — Change `templates/home.html`
 
-```diff templates/home.html
+```diff templates/home.html edit
  <p>Welcome to the Student Registration System.</p>
 -<p>Students registered: {{ total }}</p>
 +
@@ -1804,7 +1824,7 @@ it puts **an empty string** there — it does not raise an error.
 
 First at the top of the file:
 
-```diff app.py
+```diff app.py edit
 +import html
  import os
  import re
@@ -1821,7 +1841,7 @@ Then add these **two new functions**.
 That is, in the gap that already sits between them. Leave two blank lines
 between functions — that is how Python code is written.
 
-```diff app.py
+```diff app.py edit
      return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
  
  
@@ -1904,7 +1924,7 @@ your indentation were wrong, it would show here — not two sections later.
 
 Change the `page_home` function like this:
 
-```diff app.py
+```diff app.py edit
      def page_home(self):
 -        body = render("home.html", total=0)
 +        students = database.get_all_students()
@@ -1933,7 +1953,7 @@ Change the `page_home` function like this:
 
 At the end of `static/style.css`:
 
-```css static/style.css
+```css static/style.css add
 table {
   width: 100%;
   border-collapse: collapse;
@@ -2111,7 +2131,7 @@ Everything so far has been **reading** (`GET`). Now we are **changing**
 
 Before registering, we need to know whether that number is already taken:
 
-```python database.py
+```python database.py add
 def student_id_exists(student_id):
     with get_connection() as connection:
         row = connection.execute(
@@ -2119,6 +2139,33 @@ def student_id_exists(student_id):
         ).fetchone()
         return row is not None
 ```
+
+### This is not a duplicate — though it looks like one
+
+In Step 4 we wrote that `student_id` must be `UNIQUE`, which means the
+database already refuses a repeated number. So why ask again?
+
+Because both stop the same thing, but in **two very different ways**:
+
+| | The database's `UNIQUE` | `student_id_exists()` |
+| --- | --- | --- |
+| When it acts | As the row is written | **Before** anything is written |
+| What happens | The program crashes | An ordinary message |
+| What the user sees | A red error page | The form, with their typing still in it |
+| What they typed | **Lost** | Kept |
+
+Without this function, one repeated number gives an `IntegrityError` and
+everything the person typed is gone.
+
+> **So why keep both?**
+>
+> `UNIQUE` is the **last line of defence** — we never drop it, because data
+> can arrive another way (those terminal commands in 7.2, for instance).
+>
+> `student_id_exists()` is there **out of respect for the person** — someone
+> arriving through the form deserves a human answer, not a `Traceback`.
+>
+> This is known as **defence in depth**: one guard is never enough.
 
 <!-- collapse -->
 ### What does this code do?
@@ -2129,17 +2176,13 @@ def student_id_exists(student_id):
 | `.fetchone()` | Just one row — we do not need more |
 | `row is not None` | If it found something, it is already taken |
 
-> **But the database already has `UNIQUE` — why this?**
-> So that we can show a clear message rather than a hard failure. The
-> database refuses; we explain **why**.
-
 ---
 
 ## 8.2 — `templates/form.html`
 
 A new file:
 
-```html templates/form.html
+```html templates/form.html new
 <h2>{{ heading }}</h2>
 
 {{ errors }}
@@ -2212,7 +2255,7 @@ A new file:
 
 At the top of `app.py`, under `STATIC_DIR`:
 
-```python app.py
+```python app.py add
 DEPARTMENTS = [
     "Management Information Systems",
     "Accounting",
@@ -2246,7 +2289,7 @@ def build_department_options(selected):
 
 Add these inside `StudentAppHandler`:
 
-```python app.py
+```python app.py add
     def send_html(self, content, status=200):
         body = content.encode("utf-8")
         self.send_response(status)
@@ -2283,7 +2326,7 @@ Add these inside `StudentAppHandler`:
 
 Add these as well:
 
-```python app.py
+```python app.py add
     def page_form(self, errors="", values=None):
         values = values or {}
         body = render(
@@ -2354,7 +2397,7 @@ Add these as well:
 
 Change `do_GET`, and add the new `do_POST` below it:
 
-```diff app.py
+```diff app.py edit
      def do_GET(self):
          url = urllib.parse.urlparse(self.path)
  
@@ -2391,7 +2434,7 @@ Change `do_GET`, and add the new `do_POST` below it:
 
 Add one line at the top of `templates/home.html`:
 
-```diff templates/home.html
+```diff templates/home.html edit
 -<p>Welcome to the Student Registration System.</p>
 +<p><a href="/add">+ Register a new student</a></p>
  
@@ -2402,7 +2445,7 @@ Add one line at the top of `templates/home.html`:
 
 At the end of `static/style.css`:
 
-```css static/style.css
+```css static/style.css add
 .student-form {
   display: flex;
   flex-direction: column;
@@ -2518,7 +2561,7 @@ After a successful registration, press **`F5`** on the list page.
 
 **Why?** Because of this line:
 
-```python app.py
+```python app.py read
 self.redirect("/")
 ```
 
@@ -2600,7 +2643,7 @@ Yourself*.
 
 ## 9.1 — Two functions for `database.py`
 
-```python database.py
+```python database.py add
 def get_student(row_id):
     with get_connection() as connection:
         return connection.execute(
@@ -2652,7 +2695,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 Change the function like this:
 
-```diff database.py
+```diff database.py edit
 -def student_id_exists(student_id):
 +def student_id_exists(student_id, ignore_row_id=None):
      with get_connection() as connection:
@@ -2690,7 +2733,7 @@ Change the function like this:
 
 Three changes: a hidden field, a variable action, and a variable button.
 
-```diff templates/form.html
+```diff templates/form.html edit
  <h2>{{ heading }}</h2>
  
  {{ errors }}
@@ -2765,7 +2808,7 @@ Three changes: a hidden field, a variable action, and a variable button.
 
 Change the function like this:
 
-```diff app.py
+```diff app.py edit
 -    def page_form(self, errors="", values=None):
 -        values = values or {}
 +    def page_form(self, row_id="", errors="", values=None):
@@ -2823,7 +2866,7 @@ Change the function like this:
 
 Change `save_student` like this:
 
-```diff app.py
+```diff app.py edit
 -    def save_student(self):
 +    def save_student(self, is_edit=False):
          form = self.read_form()
@@ -2881,7 +2924,7 @@ Change `save_student` like this:
 
 In `do_GET`:
 
-```diff app.py
+```diff app.py edit
      def do_GET(self):
          url = urllib.parse.urlparse(self.path)
  
@@ -2901,7 +2944,7 @@ In `do_GET`:
 
 and in `do_POST`:
 
-```diff app.py
+```diff app.py edit
      def do_POST(self):
          url = urllib.parse.urlparse(self.path)
  
@@ -2930,7 +2973,7 @@ and in `do_POST`:
 
 Change `build_table_rows` like this — one more column:
 
-```diff app.py
+```diff app.py edit
  def build_table_rows(students):
      rows = []
      for number, student in enumerate(students, start=1):
@@ -2958,7 +3001,7 @@ Change `build_table_rows` like this — one more column:
 
 And in `templates/list.html`, a new heading:
 
-```html templates/list.html
+```html templates/list.html add
 <p>{{ total }} student(s)</p>
 
 <table>
@@ -3064,7 +3107,7 @@ Add a delete button, with a confirmation.
 
 ## 10.1 — A function for `database.py`
 
-```python database.py
+```python database.py add
 def delete_student(row_id):
     with get_connection() as connection:
         connection.execute("DELETE FROM students WHERE id = ?", (row_id,))
@@ -3086,7 +3129,7 @@ def delete_student(row_id):
 
 Change `build_table_rows` again — the `Actions` column now holds two things:
 
-```diff app.py
+```diff app.py edit
  def build_table_rows(students):
      rows = []
      for number, student in enumerate(students, start=1):
@@ -3162,7 +3205,7 @@ Change `build_table_rows` again — the `Actions` column now holds two things:
 
 In `do_POST`:
 
-```diff app.py
+```diff app.py edit
      def do_POST(self):
          url = urllib.parse.urlparse(self.path)
  
@@ -3186,7 +3229,7 @@ In `do_POST`:
 
 At the end of `static/style.css`:
 
-```css static/style.css
+```css static/style.css add
 .actions {
   display: flex;
   align-items: center;
@@ -3300,7 +3343,7 @@ program.
 
 Delete the old function and put this in:
 
-```diff database.py
+```diff database.py edit
 -def get_all_students():
 +def get_all_students(search=""):
      with get_connection() as connection:
@@ -3360,7 +3403,7 @@ Delete the old function and put this in:
 
 Add the search form between the link and the table:
 
-```diff templates/home.html
+```diff templates/home.html edit
  <p><a href="/add">+ Register a new student</a></p>
  
 +<form class="search" method="GET" action="/">
@@ -3399,7 +3442,7 @@ Add the search form between the link and the table:
 
 Change `page_home` again, like this:
 
-```diff app.py
+```diff app.py edit
 -    def page_home(self):
 -        students = database.get_all_students()
 +    def page_home(self, search=""):
@@ -3448,7 +3491,7 @@ Change `page_home` again, like this:
 
 In `do_GET`:
 
-```diff app.py
+```diff app.py edit
          if url.path == "/":
 -            self.page_home()
 +            query = urllib.parse.parse_qs(url.query)
@@ -3459,7 +3502,7 @@ In `do_GET`:
 
 ## 11.5 — Styling
 
-```css static/style.css
+```css static/style.css add
 .search {
   display: flex;
   gap: 8px;
@@ -3578,7 +3621,7 @@ eyes.
 In `database.py`, find `get_all_students`. Change **the search part** to this
 **dangerous** version:
 
-```diff database.py
+```diff database.py edit
          if search:
 -            pattern = "%" + search + "%"
 -            return connection.execute(
@@ -3634,7 +3677,7 @@ The user did not type data — they typed **part of the statement**.
 
 Delete the dangerous code and restore the version from Step 11:
 
-```diff database.py
+```diff database.py edit
          if search:
 -            # ❌ dangerous — for this test only
 -            sql = ("SELECT * FROM students WHERE full_name LIKE '%"
@@ -3669,7 +3712,7 @@ is `' OR '1'='1`. Nobody is called that.
 
 In `app.py`, find `esc` and change it to this:
 
-```diff app.py
+```diff app.py edit
  def esc(value):
 -    return html.escape("" if value is None else str(value))
 +    # ❌ dangerous — for this test only
@@ -3713,7 +3756,7 @@ too.
 
 ### Put the defence back
 
-```python app.py
+```python app.py add
 def esc(value):
     return html.escape("" if value is None else str(value))
 ```
@@ -3766,7 +3809,7 @@ http://localhost:8000/static/../database.py
 
 In `send_static` we wrote this line:
 
-```python
+```python read
 safe_name = os.path.basename(filename)
 ```
 

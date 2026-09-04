@@ -456,6 +456,20 @@ body {
 
 .block > .where + pre { border-radius: 0 0 10px 10px; }
 
+/* What to do with the block, said in the bar rather than left to the prose */
+.block > .where .act {
+  padding: .05rem .5rem;
+  border-radius: 999px;
+  font-family: var(--f-sans);
+  font-size: .72rem;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.block > .where .act.new  { background: #1d4f5e; color: #a5e4f2; }
+.block > .where .act.add  { background: #1c4a37; color: #9fe3c0; }
+.block > .where .act.edit { background: #4a3a16; color: #f0d494; }
+.block > .where .act.read { background: #2d3742; color: #b9c6d3; }
+
 /* A result is not code to take away — it is what the screen should show.
    No copy button, and a label that says so. */
 .block.out > .where {
@@ -1419,6 +1433,8 @@ body {
           keep: "بۆ هێشتنەوەی کۆپییەک، Ctrl + P دابگرە و وەک PDF چاپی بکە",
           terminal: "تێرمیناڵ",
           output: "ئەنجام",
+          act: { new: "فایلێکی نوێ", add: "زیادی بکە",
+                 edit: "بیگۆڕەوە", read: "تەنها بیخوێنەوە" },
           showMe: "ئەم هەنگاوە پیشانم بدە",
           loading: "دەقەکە دەهێنرێت…",
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
@@ -1427,6 +1443,8 @@ body {
           keep: "To keep a copy, press Ctrl + P and print to PDF",
           terminal: "Terminal",
           output: "Output",
+          act: { new: "new file", add: "add this",
+                 edit: "change this", read: "just read it" },
           showMe: "Show me this step",
           loading: "Loading the text…",
           failed: "The text could not be loaded. Check your connection and reload the page." }
@@ -1494,7 +1512,15 @@ body {
         var fence = line.slice(3).trim().split(/\s+/);
         var lang = fence[0] || "";
         var isOut = lang === "out";
-        var where = fence.slice(1).join(" ") ||
+        /* A fence may end with what the student is meant to do with the
+           block: ```python database.py add. Without it the box says where
+           the code lives but not what to do there. */
+        var rest = fence.slice(1);
+        var act = "";
+        if (rest.length && UI[state.lang].act[rest[rest.length - 1]]) {
+          act = rest.pop();
+        }
+        var where = rest.join(" ") ||
           (lang === "bash" ? UI[state.lang].terminal :
            (isOut ? UI[state.lang].output : ""));
         var code = [];
@@ -1524,7 +1550,9 @@ body {
         out.push('<div class="block' + (isOut ? ' out' : '') + '">' +
           (isOut ? '' : '<button type="button" class="copy">' +
             UI[state.lang].copy + '</button>') +
-          (where ? '<div class="where"><span>' + esc(where) + '</span></div>' : '') +
+          (where || act ? '<div class="where"><span>' + esc(where) + '</span>' +
+            (act ? '<span class="act ' + act + '">' +
+              esc(UI[state.lang].act[act]) + '</span>' : '') + '</div>' : '') +
           '<pre><code data-lang="' + esc(lang) + '" data-copy="' +
           esc(clean) + '">' + inner + '</code></pre></div>');
         continue;

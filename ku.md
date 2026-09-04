@@ -45,6 +45,26 @@
 
 ---
 
+## هەر سندوقێکی کۆد پێت دەڵێت چی بکەیت
+
+لە سەرەوەی هەر سندوقێکی کۆد **دوو شت** نووسراوە:
+
+- **کام فایل** — بۆ نموونە `database.py`
+- **چی بکەیت** — نیشانەیەکی ڕەنگین، یەکێک لەم چوارە:
+
+| نیشانە | واتای | چی بکەیت |
+|--------|-------|-----------|
+| **فایلێکی نوێ** | ئەم فایلە هێشتا بوونی نییە | لە VS Code دروستی بکە و کۆدەکەی تێدا بنووسە |
+| **زیادی بکە** | فایلەکە هەیە | ئەم کۆدە **لە کۆتایی**دا دابنێ. ئەوەی پێشتر لەوێیە **مەگۆڕە** |
+| **بیگۆڕەوە** | بەشێکی فایلەکە دەگۆڕێت | ئەو بەشە لە فایلەکەدا بدۆزەوە و **لەسەری دابنێ** |
+| **تەنها بیخوێنەوە** | ئەمە بۆ تێگەیشتنە | هیچ مەنووسە — تەنها سەیری بکە |
+
+> **سندوقی بێ نیشانە چی؟** ئەوانەی سەرەوەیان `تێرمیناڵ` نووسراوە، فەرمانن —
+> لە تێرمیناڵدا بیاننووسە. ئەوانەی `ئەنجام`یان لەسەرە، ئەوەن کە **دەبێت
+> ببینیت** — دوگمەی کۆپییان نییە، چونکە شتێک نییە بیبەیت.
+
+---
+
 ## ڕیزبەندی هەنگاوەکان
 
 | # | هەنگاو | دۆخ |
@@ -376,7 +396,7 @@ app.py
 
 ## ٣.٢ — کۆدەکە بنووسە
 
-```python app.py
+```python app.py new
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
@@ -631,7 +651,7 @@ database.py
 
 ## ٤.٢ — کۆدەکە بنووسە
 
-```python database.py
+```python database.py new
 import os
 import sqlite3
 
@@ -707,7 +727,7 @@ def init_db():
 `database.py` بە تەنها هیچ ناکات — کەس بانگی نەکردووە. لە `app.py`دا
 **دوو دێڕ** زیاد بکە:
 
-```diff app.py
+```diff app.py edit
  from http.server import BaseHTTPRequestHandler, HTTPServer
 +
 +import database
@@ -879,7 +899,7 @@ student-system/
 
 ئێستا HTMLـەکەمان لەناو Pythonـدایە:
 
-```python
+```python read
 self.wfile.write("<h1>Hello</h1>".encode("utf-8"))
 ```
 
@@ -904,7 +924,7 @@ layout.html
 
 ئەمە بنووسە:
 
-```html templates/layout.html
+```html templates/layout.html new
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -928,7 +948,7 @@ layout.html
 
 فایلێکی تر لە هەمان فۆڵدەردا:
 
-```html templates/home.html
+```html templates/home.html new
 <p>Welcome to the Student Registration System.</p>
 <p>Students registered: {{ total }}</p>
 ```
@@ -940,7 +960,7 @@ layout.html
 
 لە `app.py`دا، ئەمانە زیاد بکە. سەرەتا لە سەرەوە:
 
-```diff app.py
+```diff app.py edit
 +import os
 +import re
  from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -966,7 +986,7 @@ layout.html
 
 لە کلاسی `StudentAppHandler`، `do_GET` بەم شێوەیە بگۆڕە:
 
-```diff app.py
+```diff app.py edit
  class StudentAppHandler(BaseHTTPRequestHandler):
      def do_GET(self):
 +        body = render("home.html", total=0)
@@ -1028,7 +1048,7 @@ Students registered: 0
 
 سێرڤەرەکە **مەوەستێنە**. `home.html` بکەرەوە و دەقەکەی بگۆڕە:
 
-```diff templates/home.html
+```diff templates/home.html edit
 -<p>Welcome to the Student Registration System.</p>
 +<p>Hello from my own page!</p>
  <p>Students registered: {{ total }}</p>
@@ -1058,7 +1078,7 @@ Students registered: 0
 
 **١.** دێڕێکی کۆمێنت لە سەرەوەی `templates/home.html` زیاد بکە:
 
-```diff templates/home.html
+```diff templates/home.html edit
 +<!-- the home page -->
  <p>Hello from my own page!</p>
  <p>Students registered: {{ total }}</p>
@@ -1066,7 +1086,7 @@ Students registered: 0
 
 **٢.** کۆمێنتێکیش لە `templates/layout.html`، لەسەرووی `{{ content }}`:
 
-```diff templates/layout.html
+```diff templates/layout.html edit
    <h1>{{ title }}</h1>
 +  <!-- the content goes here: {{ content }} -->
    {{ content }}
@@ -1114,13 +1134,13 @@ Students registered: 0
 
 ئەم دوو دێڕە تەنها بۆ تاقیکردنەوە بوون. هەردووکیان لابەرە:
 
-```diff templates/layout.html
+```diff templates/layout.html edit
    <h1>{{ title }}</h1>
 -  <!-- the content goes here: {{ content }} -->
    {{ content }}
 ```
 
-```diff templates/home.html
+```diff templates/home.html edit
 -<!-- the home page -->
  <p>Hello from my own page!</p>
  <p>Students registered: {{ total }}</p>
@@ -1131,7 +1151,7 @@ Students registered: 0
 لە ٥.٧دا `Hello from my own page!`مان نووسی، ئەویش تەنها تاقیکردنەوە بوو.
 بیگەڕێنەوە بۆ ئەوەی بوو:
 
-```diff templates/home.html
+```diff templates/home.html edit
 -<p>Hello from my own page!</p>
 +<p>Welcome to the Student Registration System.</p>
  <p>Students registered: {{ total }}</p>
@@ -1222,7 +1242,7 @@ student-system/
 style.css
 ```
 
-```css static/style.css
+```css static/style.css new
 :root {
   --brand: #2563eb;
   --text: #1f2937;
@@ -1283,7 +1303,7 @@ h1 {
 
 `templates/layout.html` بکەرەوە و دوو گۆڕانکاری بکە:
 
-```diff templates/layout.html
+```diff templates/layout.html edit
  <!DOCTYPE html>
  <html lang="en">
  <head>
@@ -1325,7 +1345,7 @@ HTML بۆ ناردووەتەوە.
 
 `app.py` بگۆڕە. سەرەتا لە سەرەوە:
 
-```diff app.py
+```diff app.py edit
  import os
  import re
 +import urllib.parse
@@ -1340,7 +1360,7 @@ HTML بۆ ناردووەتەوە.
 
 پاشان کلاسەکە:
 
-```diff app.py
+```diff app.py edit
  class StudentAppHandler(BaseHTTPRequestHandler):
      def do_GET(self):
 +        url = urllib.parse.urlparse(self.path)
@@ -1612,7 +1632,7 @@ CRUD دەست پێدەکەین: **R** — پیشاندانی لیستی قوتا
 
 لە کۆتایی `database.py` ئەمانە زیاد بکە:
 
-```python database.py
+```python database.py add
 def add_student(student_id, full_name, department, gender, email, phone):
     with get_connection() as connection:
         cursor = connection.execute(
@@ -1738,7 +1758,7 @@ python -c "import database; rows = database.get_all_students(); print(len(rows),
 
 فایلێکی نوێ لە فۆڵدەری `templates`:
 
-```html templates/list.html
+```html templates/list.html new
 <p>{{ total }} student(s)</p>
 
 <table>
@@ -1764,7 +1784,7 @@ python -c "import database; rows = database.get_all_students(); print(len(rows),
 
 ## ٧.٤ — `templates/home.html` بگۆڕە
 
-```diff templates/home.html
+```diff templates/home.html edit
  <p>Welcome to the Student Registration System.</p>
 -<p>Students registered: {{ total }}</p>
 +
@@ -1801,7 +1821,7 @@ Welcome to the Student Registration System.
 
 سەرەتا لە سەرەوەی فایلەکە:
 
-```diff app.py
+```diff app.py edit
 +import html
  import os
  import re
@@ -1818,7 +1838,7 @@ Welcome to the Student Registration System.
 واتە لەو بۆشاییەدا کە ئێستا لە نێوانیاندایە. دوو دێڕی بەتاڵ لە نێوان هەر
 دوو فەنکشنێکدا بەجێبهێڵە — ئەمە شێوازی نووسینی Pythonـە.
 
-```diff app.py
+```diff app.py edit
      return re.sub(r"\{\{\s*(\w+)\s*\}\}", replace, page)
  
  
@@ -1901,7 +1921,7 @@ Server running at http://localhost:8000
 
 فەنکشنی `page_home` بەم شێوەیە بگۆڕە:
 
-```diff app.py
+```diff app.py edit
      def page_home(self):
 -        body = render("home.html", total=0)
 +        students = database.get_all_students()
@@ -1930,7 +1950,7 @@ Server running at http://localhost:8000
 
 لە کۆتایی `static/style.css`:
 
-```css static/style.css
+```css static/style.css add
 table {
   width: 100%;
   border-collapse: collapse;
@@ -2107,7 +2127,7 @@ student-system/
 
 پێش تۆمارکردن، دەبێت بزانین ئایا ئەم ژمارەیە پێشتر هەیە:
 
-```python database.py
+```python database.py add
 def student_id_exists(student_id):
     with get_connection() as connection:
         row = connection.execute(
@@ -2115,6 +2135,34 @@ def student_id_exists(student_id):
         ).fetchone()
         return row is not None
 ```
+
+### دووبارە نییە — بەڵام لەوانەیە وا بیربکەیتەوە
+
+لە هەنگاوی ٤دا نووسیمان کە `student_id` دەبێت `UNIQUE` بێت، واتە
+داتابەیسەکە خۆی ڕێگری لە دووبارەبوونەوە دەکات. کەواتە بۆچی دیسان
+دەپرسینەوە؟
+
+چونکە هەردووکیان یەک شت ڕێگری لێدەکەن، بەڵام **بە دوو شێوەی زۆر جیاواز**:
+
+| | `UNIQUE`ی داتابەیس | `student_id_exists()` |
+|---|---|---|
+| کەی کاردەکات | لە کاتی نووسین | **پێش** نووسین |
+| ئەنجامەکەی | پڕۆگرامەکە دەکەوێت | پەیامێکی ئاسایی |
+| قوتابی چی دەبینێت | پەڕەیەکی سووری هەڵە | فۆڕمەکە، بە نووسینەکەیەوە |
+| ئەوەی نووسیویەتی | **دەفەوتێت** | دەمێنێتەوە |
+
+بەبێ ئەم فەنکشنە، ئەگەر کەسێک ژمارەیەکی دووبارە بنووسێت، سێرڤەرەکە
+`IntegrityError` دەدات و هەموو ئەو زانیاریانەی نووسیویەتی لەدەست دەچێت.
+
+> **کەواتە بۆچی هەردووکیان دەهێڵینەوە؟**
+>
+> `UNIQUE` **دوا هێڵی بەرگرییە** — هەرگیز لای نادەین، چونکە داتا دەکرێت لە
+> ڕێگەی تریشەوە بێت (وەک ئەو فەرمانانەی تێرمیناڵ لە ٧.٢).
+>
+> `student_id_exists()` **بۆ ڕێزگرتنە لە بەکارهێنەر** — کاتێک کەسێک لە
+> فۆڕمەکەوە دێت، دەبێت وەڵامێکی مرۆڤانە وەربگرێت، نەک `Traceback`.
+>
+> ئەمە بە **defence in depth** ناسراوە: یەک پاراستن هەرگیز بەس نییە.
 
 <!-- collapse -->
 ### ئەم کۆدە چی دەکات؟
@@ -2125,17 +2173,13 @@ def student_id_exists(student_id):
 | `.fetchone()` | تەنها یەک ڕیز — چونکە زیاترمان ناوێت |
 | `row is not None` | ئەگەر شتێکی دۆزییەوە، واتە پێشتر هەیە |
 
-> **بەڵام داتابەیسەکە خۆی `UNIQUE`ـی هەیە — بۆچی ئەمە؟**
-> بۆ ئەوەی پەیامێکی ڕوون پیشان بدەین، نەک شکستێکی توند. داتابەیس ڕێگری
-> دەکات؛ ئێمە **ڕوونی دەکەینەوە بۆچی**.
-
 ---
 
 ## ٨.٢ — `templates/form.html`
 
 فایلێکی نوێ:
 
-```html templates/form.html
+```html templates/form.html new
 <h2>{{ heading }}</h2>
 
 {{ errors }}
@@ -2207,7 +2251,7 @@ def student_id_exists(student_id):
 
 لە سەرەوەی `app.py`، لەژێر `STATIC_DIR`:
 
-```python app.py
+```python app.py add
 DEPARTMENTS = [
     "Management Information Systems",
     "Accounting",
@@ -2241,7 +2285,7 @@ def build_department_options(selected):
 
 ئەمانە زیاد بکە بۆ ناو `StudentAppHandler`:
 
-```python app.py
+```python app.py add
     def send_html(self, content, status=200):
         body = content.encode("utf-8")
         self.send_response(status)
@@ -2278,7 +2322,7 @@ def build_department_options(selected):
 
 ئەمانەش زیاد بکە:
 
-```python app.py
+```python app.py add
     def page_form(self, errors="", values=None):
         values = values or {}
         body = render(
@@ -2349,7 +2393,7 @@ def build_department_options(selected):
 
 `do_GET` بگۆڕە و `do_POST`ی نوێ لەژێری زیاد بکە:
 
-```diff app.py
+```diff app.py edit
      def do_GET(self):
          url = urllib.parse.urlparse(self.path)
  
@@ -2386,7 +2430,7 @@ def build_department_options(selected):
 
 دێڕێکی نوێ لە سەرەوەی `templates/home.html` زیاد بکە:
 
-```diff templates/home.html
+```diff templates/home.html edit
 -<p>Welcome to the Student Registration System.</p>
 +<p><a href="/add">+ Register a new student</a></p>
  
@@ -2397,7 +2441,7 @@ def build_department_options(selected):
 
 لە کۆتایی `static/style.css`:
 
-```css static/style.css
+```css static/style.css add
 .student-form {
   display: flex;
   flex-direction: column;
@@ -2513,7 +2557,7 @@ button {
 
 **بۆچی؟** لەبەر ئەو دێڕە:
 
-```python app.py
+```python app.py read
 self.redirect("/")
 ```
 
@@ -2595,7 +2639,7 @@ student-system/
 
 ## ٩.١ — دوو فەنکشن بۆ `database.py`
 
-```python database.py
+```python database.py add
 def get_student(row_id):
     with get_connection() as connection:
         return connection.execute(
@@ -2647,7 +2691,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 فەنکشنەکە بەم شێوەیە بگۆڕە:
 
-```diff database.py
+```diff database.py edit
 -def student_id_exists(student_id):
 +def student_id_exists(student_id, ignore_row_id=None):
      with get_connection() as connection:
@@ -2685,7 +2729,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 سێ گۆڕانکاری: خانەیەکی شاراوە، ڕێڕەوی گۆڕاو، و ناوی گۆڕاوی دوگمەکە.
 
-```diff templates/form.html
+```diff templates/form.html edit
  <h2>{{ heading }}</h2>
  
  {{ errors }}
@@ -2760,7 +2804,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 فەنکشنەکە بەم شێوەیە بگۆڕە:
 
-```diff app.py
+```diff app.py edit
 -    def page_form(self, errors="", values=None):
 -        values = values or {}
 +    def page_form(self, row_id="", errors="", values=None):
@@ -2818,7 +2862,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 `save_student` بەم شێوەیە بگۆڕە:
 
-```diff app.py
+```diff app.py edit
 -    def save_student(self):
 +    def save_student(self, is_edit=False):
          form = self.read_form()
@@ -2876,7 +2920,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 لە `do_GET` دا:
 
-```diff app.py
+```diff app.py edit
      def do_GET(self):
          url = urllib.parse.urlparse(self.path)
  
@@ -2896,7 +2940,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 و لە `do_POST` دا:
 
-```diff app.py
+```diff app.py edit
      def do_POST(self):
          url = urllib.parse.urlparse(self.path)
  
@@ -2925,7 +2969,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 `build_table_rows` بەم شێوەیە بگۆڕە — ستوونێکی نوێ:
 
-```diff app.py
+```diff app.py edit
  def build_table_rows(students):
      rows = []
      for number, student in enumerate(students, start=1):
@@ -2953,7 +2997,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
 
 و لە `templates/list.html`، سەردێڕێکی نوێ:
 
-```html templates/list.html
+```html templates/list.html add
 <p>{{ total }} student(s)</p>
 
 <table>
@@ -3057,7 +3101,7 @@ http://localhost:8000/edit?id=9999
 
 ## ١٠.١ — فەنکشنێک بۆ `database.py`
 
-```python database.py
+```python database.py add
 def delete_student(row_id):
     with get_connection() as connection:
         connection.execute("DELETE FROM students WHERE id = ?", (row_id,))
@@ -3079,7 +3123,7 @@ def delete_student(row_id):
 
 دیسان `build_table_rows` بگۆڕە — ستوونی `Actions` ئێستا دوو شتی تێدایە:
 
-```diff app.py
+```diff app.py edit
  def build_table_rows(students):
      rows = []
      for number, student in enumerate(students, start=1):
@@ -3154,7 +3198,7 @@ def delete_student(row_id):
 
 لە `do_POST` دا:
 
-```diff app.py
+```diff app.py edit
      def do_POST(self):
          url = urllib.parse.urlparse(self.path)
  
@@ -3178,7 +3222,7 @@ def delete_student(row_id):
 
 لە کۆتایی `static/style.css`:
 
-```css static/style.css
+```css static/style.css add
 .actions {
   display: flex;
   align-items: center;
@@ -3292,7 +3336,7 @@ http://localhost:8000/delete?id=1
 
 فەنکشنە کۆنەکە بسڕەوە و ئەمە دابنێ:
 
-```diff database.py
+```diff database.py edit
 -def get_all_students():
 +def get_all_students(search=""):
      with get_connection() as connection:
@@ -3352,7 +3396,7 @@ http://localhost:8000/delete?id=1
 
 فۆڕمی گەڕان لە نێوان لینکەکە و خشتەکەدا زیاد بکە:
 
-```diff templates/home.html
+```diff templates/home.html edit
  <p><a href="/add">+ Register a new student</a></p>
  
 +<form class="search" method="GET" action="/">
@@ -3392,7 +3436,7 @@ http://localhost:8000/delete?id=1
 
 دیسان `page_home` بەم شێوەیە بگۆڕە:
 
-```diff app.py
+```diff app.py edit
 -    def page_home(self):
 -        students = database.get_all_students()
 +    def page_home(self, search=""):
@@ -3441,7 +3485,7 @@ http://localhost:8000/delete?id=1
 
 لە `do_GET`:
 
-```diff app.py
+```diff app.py edit
          if url.path == "/":
 -            self.page_home()
 +            query = urllib.parse.parse_qs(url.query)
@@ -3452,7 +3496,7 @@ http://localhost:8000/delete?id=1
 
 ## ١١.٥ — دیزاین
 
-```css static/style.css
+```css static/style.css add
 .search {
   display: flex;
   gap: 8px;
@@ -3572,7 +3616,7 @@ http://localhost:8000/?q=Ah
 لە `database.py`، فەنکشنی `get_all_students` بدۆزەرەوە. **بەشی گەڕانەکەی**
 بگۆڕە بۆ ئەم شێوە **مەترسیدارە**:
 
-```diff database.py
+```diff database.py edit
          if search:
 -            pattern = "%" + search + "%"
 -            return connection.execute(
@@ -3628,7 +3672,7 @@ SELECT * FROM students WHERE full_name LIKE '%' OR '1'='1%' ORDER BY id DESC
 
 کۆدە مەترسیدارەکە بسڕەوە و ئەوەی هەنگاوی ١١ دابنێوە:
 
-```diff database.py
+```diff database.py edit
          if search:
 -            # ❌ مەترسیدار — تەنها بۆ تاقیکردنەوە
 -            sql = ("SELECT * FROM students WHERE full_name LIKE '%"
@@ -3663,7 +3707,7 @@ SELECT * FROM students WHERE full_name LIKE '%' OR '1'='1%' ORDER BY id DESC
 
 لە `app.py`، فەنکشنی `esc` بدۆزەرەوە و بەم شێوەیە بیگۆڕە:
 
-```diff app.py
+```diff app.py edit
  def esc(value):
 -    return html.escape("" if value is None else str(value))
 +    # ❌ مەترسیدار — تەنها بۆ تاقیکردنەوە
@@ -3706,7 +3750,7 @@ SELECT * FROM students WHERE full_name LIKE '%' OR '1'='1%' ORDER BY id DESC
 
 ### پاراستنەکە بگەڕێنەوە
 
-```python app.py
+```python app.py add
 def esc(value):
     return html.escape("" if value is None else str(value))
 ```
@@ -3760,7 +3804,7 @@ http://localhost:8000/static/../database.py
 
 لە `send_static`دا ئەم دێڕەمان نووسی:
 
-```python
+```python read
 safe_name = os.path.basename(filename)
 ```
 
