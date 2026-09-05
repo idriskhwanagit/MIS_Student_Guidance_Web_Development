@@ -3180,9 +3180,10 @@ It should **work**. If you get *This student ID is already registered.*, your
 **4. Take somebody else's number** — while editing, type another student's
 number. It must be **refused**.
 
-**5. Ask for an `id` that does not exist:**
+**5. Ask for an `id` that does not exist.** Open this **in the browser**,
+not in the terminal:
 
-```bash
+```
 http://localhost:8000/edit?id=9999
 ```
 
@@ -3416,9 +3417,9 @@ reloads.
 **4. Delete them all** — you should see *No student is registered yet.*
 That is the `else` we wrote in Step 7.
 
-**5. Test the rule:**
+**5. Test the rule.** Open this **in the browser**, not in the terminal:
 
-```bash
+```
 http://localhost:8000/delete?id=1
 ```
 
