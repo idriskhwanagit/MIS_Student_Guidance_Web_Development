@@ -3082,7 +3082,7 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
              self.end_headers()
 ```
 
-و لە `do_POST` دا:
+**و لە `do_POST` دا** — ئەم دووەمە **مەیبەزێنە**:
 
 ```diff app.py edit
      def do_POST(self):
@@ -3096,6 +3096,22 @@ def update_student(row_id, student_id, full_name, department, gender, email, pho
              self.send_response(404)
              self.end_headers()
 ```
+
+> ### ⚠️ هەردوو سندوقەکە پێویستن
+>
+> **`do_GET`** فۆڕمەکە پیشان دەدات · **`do_POST`** پاشەکەوتی دەکات.
+>
+> ئەگەر تەنها یەکەمیان بکەیت، فۆڕمەکە دەکرێتەوە و پڕ دەبێتەوە — بەڵام کاتێک
+> **Save** لێدەدەیت، ئەم پەڕەیە دەبینیت:
+>
+> ```out
+> This 127.0.0.1 page can't be found
+> No webpage was found for the web address: http://127.0.0.1:8000/edit
+> HTTP ERROR 404
+> ```
+>
+> واتای: سێرڤەرەکە نازانێت بە `POST /edit` چی بکات. ئەو دوو دێڕەی سەرەوە
+> ئەوەی فێر دەکەن.
 
 <!-- collapse -->
 ### ئەم کۆدە چی دەکات؟
@@ -3197,6 +3213,7 @@ http://localhost:8000/edit?id=9999
 | هەموو قوتابییەکان گۆڕان! | `WHERE id = ?`ت لە `UPDATE`دا لەبیر چووە |
 | `Edit` کلیک دەکەم، فۆڕمی بەتاڵ دێت | `id`ـەکە لە لینکەکەدا نییە یان `parse_qs` هەڵەیە |
 | `TypeError: ... takes 7 positional arguments` | ڕیزبەندی پارامەتەرەکانی `update_student` بپشکنە |
+| دوای **Save**، پەڕەی `404` لە `/edit` دێت | ئەو دوو دێڕەی `do_POST` لە ٩.٦دا زیاد نەکراون |
 | ڕەگەز هەڵنەبژێردراوە | `{{ male_checked }}` لە HTMLدا نییە |
 
 ---

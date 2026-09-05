@@ -2941,6 +2941,7 @@ Three changes: a hidden field, a variable action, and a variable button.
 | `<input type="hidden" name="id">` | The user never sees it, but it is sent with the form |
 | `action="{{ action }}"` | `/add` or `/edit` — Python decides |
 | `{{ submit_label }}` | *Register student* or *Save changes* |
+| A `404` at `/edit` after pressing **Save** | The two `do_POST` lines in 9.6 were never added |
 | `{{ male_checked }}` | When editing, the previous gender is selected |
 
 > **Why a hidden field?** The server has to know **which student** is being
@@ -3099,6 +3100,22 @@ and in `do_POST`:
              self.send_response(404)
              self.end_headers()
 ```
+
+> ### ⚠️ Both boxes are needed
+>
+> **`do_GET`** shows the form · **`do_POST`** saves it.
+>
+> Do only the first and the form opens and fills in correctly — but the
+> moment you press **Save** you get this:
+>
+> ```out
+> This 127.0.0.1 page can't be found
+> No webpage was found for the web address: http://127.0.0.1:8000/edit
+> HTTP ERROR 404
+> ```
+>
+> It means the server does not know what to do with `POST /edit`. Those
+> two lines above are what teach it.
 
 <!-- collapse -->
 ### What does this code do?
