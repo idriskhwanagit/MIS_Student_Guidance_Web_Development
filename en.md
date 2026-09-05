@@ -473,7 +473,7 @@ While the server runs it holds the terminal. Try these in order:
 | 1 | **Click inside the terminal**, then press `Ctrl + C` |
 | 2 | If nothing happens, press `Ctrl + C` two or three times |
 | 3 | Kill the terminal — the **🗑** icon at the top of the panel |
-| 4 | Open a new terminal (`+`) and run `taskkill /IM python.exe /F` |
+| 4 | Open a new terminal (`+`), run `netstat -ano | findstr :8000`, then `taskkill /PID <the number> /F` |
 
 > **The first one matters most.** `Ctrl + C` often does nothing because the
 > focus is on the editor rather than on the terminal.
@@ -594,16 +594,36 @@ netstat -ano | findstr :8000
 
 If **more than one line** appears, that is the problem.
 
-**Fix:**
+**Fix:** the last number on each line is the **PID** — that process's id.
+In the example above it is `28836`. Kill it:
 
 ```bash
-taskkill /IM python.exe /F
+taskkill /PID 28836 /F
 ```
 
-> This kills every Python process. While working on this project that is
-> safe — this server is the only one running.
+> **Use your own number**, not this one. Every line has a different id.
 
-Then `python app.py` again.
+It should say:
+
+```out
+SUCCESS: The process with PID 28836 has been terminated.
+```
+
+Run `netstat -ano | findstr :8000` again — **nothing** should come back.
+Then `python app.py`.
+
+> ### Why by id, and not by name?
+>
+> You may see `taskkill /IM python.exe /F` elsewhere. That kills every
+> Python **by filename** — but if your Python came from the **Microsoft
+> Store** the file is called `python3.13.exe`, not `python.exe`, and you
+> get this:
+>
+> ```out
+> ERROR: The process "python.exe" not found.
+> ```
+>
+> **The id always works**, whichever Python you have.
 
 > **Avoiding it:** after `Ctrl + C`, wait for the `>` to come back before
 > starting the server again. And do not open **two terminals** for one
