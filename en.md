@@ -2533,6 +2533,18 @@ Find `do_GET`. Add **two lines** — between `self.page_home()` and
 
 This is a **completely new method** — do not rename `do_GET`.
 
+> ### ⚠️ If you already have a `do_POST`
+>
+> **Do not add a second one.** Press `Ctrl + F` and search for `do_POST`
+> first.
+>
+> If one is already there, add only the lines that are missing — not the
+> whole function again.
+>
+> **Why it matters:** with two functions of the same name, Python uses the
+> **second** and ignores the first — **with no error at all**. It is a hard
+> bug to find: the code looks right and does nothing.
+
 Where `do_GET` ends, leave a blank line and write this below it:
 
 ```out
@@ -2942,6 +2954,7 @@ Three changes: a hidden field, a variable action, and a variable button.
 | `action="{{ action }}"` | `/add` or `/edit` — Python decides |
 | `{{ submit_label }}` | *Register student* or *Save changes* |
 | A `404` at `/edit` after pressing **Save** | The two `do_POST` lines in 9.6 were never added |
+| The lines are there and it still `404`s | You have **two `do_POST`** functions. `Ctrl + F` → `do_POST`. Delete the second |
 | `{{ male_checked }}` | When editing, the previous gender is selected |
 
 > **Why a hidden field?** The server has to know **which student** is being
