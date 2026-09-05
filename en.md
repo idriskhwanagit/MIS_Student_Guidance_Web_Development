@@ -508,6 +508,24 @@ You should see:
 
 Look at the terminal too: a new line has appeared showing the request.
 
+> ### 🐢 If the page is slow
+>
+> On some machines every request takes about **0.2 seconds** longer than it
+> should. The page arrives, but it feels sluggish.
+>
+> **Your code is not at fault.** The name `localhost` has two addresses: a
+> newer one (`::1`) and an older one (`127.0.0.1`). The browser tries the
+> newer one first, but our server only listens on the older one — so the
+> browser waits, then falls back.
+>
+> **The fix:** use this instead of `localhost`:
+>
+> ```
+> http://127.0.0.1:8000
+> ```
+>
+> Same server. It only skips the slow road. Save it as a **bookmark**.
+
 ## 3.6 — Stop it
 
 Go back to the terminal and press `Ctrl + C`.
@@ -551,6 +569,7 @@ Because the server still has the old code in memory. You have to:
 | **This site can't be reached** | The server is not running. Look at the terminal |
 | Kurdish letters show as `Ø¨Ø§` | `charset=utf-8` is missing from the `Content-Type` |
 | My change does not show | You did not restart the server (see 3.7) |
+| The page loads, but is **very slow** (seconds) | Use `127.0.0.1:8000` instead of `localhost:8000` (see 3.5) |
 | A white dot ● in the tab | The file is not saved. `Ctrl + S` |
 
 ---
@@ -4177,6 +4196,7 @@ every line is in it.
 | `python` is not found by `run.bat` | Step 1.3 — PATH |
 | The browser opens too early and shows nothing | Wait a second and press `F5` |
 | An error after deleting `students.db` | Make sure `database.init_db()` is in `app.py` |
+| Every page is **slow** | Use `127.0.0.1:8000`, not `localhost:8000` (see 3.5) |
 
 ---
 
