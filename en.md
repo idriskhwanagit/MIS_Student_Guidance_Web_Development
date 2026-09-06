@@ -56,6 +56,17 @@ The bar above every code box carries **two things**:
 | **new file** | This file does not exist yet | Create it in VS Code and type the code into it |
 | **add this** | The file already exists | Put this code **at the end** of it. Leave what is already there **alone** |
 | **change this** | Part of the file changes | Find that part in your file and **paste over it** |
+
+> ### ⚠️ After every "change this", check this
+>
+> Paste **over** the old part — not at the cursor.
+>
+> To be sure: press `Ctrl + F` and type the name of the function you
+> changed (`def page_home`, say). VS Code shows the number of matches on
+> the right — **it must be 1**.
+>
+> If it says 2, you have two copies. **Python silently uses the second**
+> and ignores the first — so the code reads correctly and does nothing.
 | **just read it** | This is here to be understood | Type nothing — only look at it |
 
 > **And the boxes with no badge?** The ones headed `Terminal` are commands —
