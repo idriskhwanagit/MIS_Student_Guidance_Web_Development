@@ -1785,7 +1785,7 @@ body {
      once this one has been seen in class.                              */
   /* which steps get a code replay — the walkthrough covers step 1 */
   var PLAYER_STEPS = [];
-  var STAGE_STEPS = [1, 2, 3, 4, 5, 6];
+  var STAGE_STEPS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
 
   var player = document.getElementById("player");
   var playerWhere = player.querySelector(".where");
@@ -2716,6 +2716,722 @@ body {
       screen: function () { return styledPage(); },
       spot: "card", hold: 2400 }
   ];
+
+  /* ---- shared pieces for the CRUD walkthroughs --------------------------- */
+
+  /* A page as the student sees it once the CSS of step 6 is in: a title and
+     a white card. Everything from here on is drawn inside that card. */
+  function page(inner, addr) {
+    return '<div class="win browser"><div class="win-bar">' + WIN +
+      '<span class="addr">' + (addr || "localhost:8000") + '</span></div>' +
+      '<div style="padding:18px;background:#f4f6fb;height:100%;overflow:hidden">' +
+      '<h1 style="margin:0 0 12px;color:#2563eb;font-size:20px">Students</h1>' +
+      '<div style="padding:14px;background:#fff;border:1px solid #e5e7eb;' +
+      'border-radius:10px;font-size:12px">' + inner + '</div></div></div>';
+  }
+
+  function table(rows, extraHead) {
+    var head = '<tr><th>#</th><th>Student ID</th><th>Full name</th>' +
+      '<th>Department</th>' + (extraHead || '') + '</tr>';
+    return '<table style="width:100%;border-collapse:collapse;font-size:11.5px">' +
+      '<thead style="color:#6b7280;text-transform:uppercase;font-size:10px">' +
+      head + '</thead><tbody>' + rows + '</tbody></table>';
+  }
+
+  function row(n, id, name, dept, extra, mark) {
+    return '<tr' + (mark ? ' data-spot="' + mark + '"' : '') +
+      ' style="border-top:1px solid #eef2f5"><td>' + n + '</td><td>' + id +
+      '</td><td>' + name + '</td><td>' + dept + '</td>' +
+      (extra ? '<td>' + extra + '</td>' : '') + '</tr>';
+  }
+
+  var EDIT_LINK = '<a style="color:#2563eb">Edit</a>';
+  var DEL_BTN = '<span style="border:1px solid #fca5a5;color:#b91c1c;' +
+    'border-radius:5px;padding:1px 6px;background:#fef2f2">Delete</span>';
+
+  /* ---- step 7: R — showing the list --------------------------------------- */
+
+  WALKS[7] = [
+    { ku: "دوو قوتابی لە تێرمیناڵەوە زیاد بکە — هێشتا فۆڕممان نییە",
+      en: "Add two students from the terminal — there is no form yet",
+      screen: function () {
+        return term("Terminal",
+          "&gt; <span data-type=\"python -c &quot;import database; ...add_student(...)&quot;\"></span>");
+      },
+      type: true, hold: 1400 },
+
+    { ku: "تێرمیناڵ هیچ ناڵێت — ئەمە ئاسایییە",
+      en: "The terminal says nothing — that is normal",
+      screen: function () {
+        return term("Terminal", "&gt; python -c \"...add_student(...)\"" + NL +
+          "&gt; python -c \"...add_student(...)\"" + NL +
+          '&gt; <span class="caret"></span>');
+      },
+      hold: 2000 },
+
+    { ku: "بۆیە خۆمان دەپرسین: چی چووە ناو داتابەیسەکەوە؟",
+      en: "So we ask for ourselves: what went into the database?",
+      screen: function () {
+        return term("Terminal",
+          "&gt; <span data-type=\"python -c &quot;...print(len(rows), 'students')&quot;\"></span>" +
+          '<span class="ans" data-after="' + NL + "2 students" + NL +
+          "['Sara Ali', 'Ahmad Karim']\"></span>");
+      },
+      type: true, hold: 2200 },
+
+    { ku: "فایلی list.html — خشتەکە، بە <tbody>ی بەتاڵ",
+      en: "list.html — the table, with an empty <tbody>",
+      screen: function () {
+        return typingWindow("list.html",
+          "<p>{{ total }} student(s)</p>" + NL + NL + "<table>" + NL +
+          "  <thead>" + NL + "    <tr>" + NL + "      <th>#</th>" + NL +
+          "      <th>Student ID</th>" + NL + "      <th>Full name</th>" + NL +
+          "    </tr>" + NL + "  </thead>" + NL + "  <tbody>" + NL +
+          "    {{ rows }}" + NL + "  </tbody>" + NL + "</table>");
+      },
+      type: true, hold: 1400 },
+
+    { ku: "لە app.py: build_table_rows ڕیزەکان دروست دەکات",
+      en: "In app.py: build_table_rows builds the rows",
+      screen: function () {
+        return typingWindow("app.py",
+          "def build_table_rows(students):" + NL +
+          "    rows = []" + NL +
+          "    for number, student in enumerate(students, start=1):" + NL +
+          "        rows.append(...)" + NL +
+          '    return "".join(rows)');
+      },
+      type: true, hold: 1400 },
+
+    { ku: "سێرڤەر دووبارە بکەرەوە — خشتەکە دەردەکەوێت",
+      en: "Restart the server — the table appears",
+      screen: function () {
+        return page('<p style="margin:0 0 8px">2 student(s)</p>' +
+          table(row(1, "MIS-2025-002", "Sara Ali", "Accounting") +
+                row(2, "MIS-2025-001", "Ahmad Karim", "MIS")));
+      },
+      hold: 2400 },
+
+    { ku: "سارا لە سەرەوەیە — چونکە ORDER BY id DESC",
+      en: "Sara is at the top — because of ORDER BY id DESC",
+      screen: function () {
+        return page('<p style="margin:0 0 8px">2 student(s)</p>' +
+          table('<tr data-spot="first" style="border-top:1px solid #eef2f5;' +
+                'background:#eff6ff"><td>1</td><td>MIS-2025-002</td>' +
+                '<td>Sara Ali</td><td>Accounting</td></tr>' +
+                row(2, "MIS-2025-001", "Ahmad Karim", "MIS")));
+      },
+      spot: "first", hold: 2400 },
+
+    { ku: "ئێستا قوتابییەک زیاد بکە کە ناوەکەی کۆدە",
+      en: "Now add a student whose name is code",
+      screen: function () {
+        return term("Terminal",
+          "&gt; <span data-type=\"python -c &quot;...add_student('&lt;script&gt;alert(1)&lt;/script&gt;', ...)&quot;\"></span>");
+      },
+      type: true, hold: 1600 },
+
+    { ku: "ناوەکە وەک دەق دەردەکەوێت — نەک وەک کۆد. ئەمە esc()ـە",
+      en: "The name shows as text, not as code. That is esc()",
+      screen: function () {
+        return page('<p style="margin:0 0 8px">3 student(s)</p>' +
+          table(row(1, "MIS-2025-003",
+                    '<code style="background:#fef2f2;color:#b91c1c;padding:0 3px">' +
+                    '&lt;script&gt;alert(1)&lt;/script&gt;</code>', "MIS") +
+                row(2, "MIS-2025-002", "Sara Ali", "Accounting")));
+      },
+      hold: 2600 }
+  ];
+
+  /* ---- step 8: C — the registration form ---------------------------------- */
+
+  function formCard(fields, msg) {
+    return (msg || '') +
+      '<div style="display:grid;gap:8px;max-width:20rem">' + fields +
+      '<div style="margin-top:4px">' +
+      '<span style="background:#2563eb;color:#fff;border-radius:6px;' +
+      'padding:4px 12px">Register student</span>' +
+      '<a style="color:#2563eb;margin-inline-start:10px">Cancel</a></div></div>';
+  }
+
+  function field(label, value, bad) {
+    return '<label style="display:block"><span style="color:#6b7280;' +
+      'font-size:10.5px">' + label + '</span>' +
+      '<div style="border:1px solid ' + (bad ? '#fca5a5' : '#d1d5db') +
+      ';border-radius:6px;padding:4px 8px;background:#fff;min-height:1.5em">' +
+      (value || '') + '</div></label>';
+  }
+
+  WALKS[8] = [
+    { ku: "فایلی form.html — خانەکانی فۆڕمەکە",
+      en: "form.html — the fields of the form",
+      screen: function () {
+        return typingWindow("form.html",
+          '<form method="POST" action="/add">' + NL +
+          '  <input name="student_id" value="{{ student_id }}" required>' + NL +
+          '  <input name="full_name"  value="{{ full_name }}"  required>' + NL +
+          "  <select name=\"department\">{{ departments }}</select>" + NL +
+          "  <button type=\"submit\">Register student</button>" + NL +
+          "</form>");
+      },
+      type: true, hold: 1600 },
+
+    { ku: "do_GET فێری /add دەبێت، و do_POST بە تەواوی نوێیە",
+      en: "do_GET learns /add, and do_POST is brand new",
+      screen: function () {
+        return fileWindow("app.py", esc2("    def do_GET(self):" + NL +
+          '        if url.path == "/":' + NL +
+          "            self.page_home()" + NL + "        ") +
+          '<span class="name">' + esc2('elif url.path == "/add":') + '</span>' +
+          esc2(NL + "            ...") + NL + NL + "    " +
+          '<span class="name">' + esc2("def do_POST(self):") + '</span>' +
+          esc2(NL + '        if url.path == "/add":' + NL +
+               "            self.save_student()"), true);
+      },
+      hold: 2600 },
+
+    { ku: "کلیک لە + Register a new student",
+      en: "Click + Register a new student",
+      screen: function () {
+        return page('<p data-spot="add" style="margin:0 0 8px;color:#2563eb">' +
+          '+ Register a new student</p>' +
+          table(row(1, "MIS-2025-002", "Sara Ali", "Accounting")));
+      },
+      spot: "add" },
+
+    { ku: "فۆڕمە بەتاڵەکە — ئەمە GET /add ـە",
+      en: "The empty form — this is GET /add",
+      screen: function () {
+        return page(formCard(field("Student ID", "") + field("Full name", "") +
+          field("Department", "Accounting")), "localhost:8000/add");
+      },
+      hold: 2000 },
+
+    { ku: "بەئەنقەست ناوەکە بەتاڵ بهێڵەرەوە و Register لێبدە",
+      en: "Leave the name empty on purpose and press Register",
+      screen: function () {
+        return page(formCard(field("Student ID", "MIS-2025-004") +
+          field("Full name", "", true) + field("Department", "Accounting")),
+          "localhost:8000/add");
+      },
+      hold: 2000 },
+
+    { ku: "ڕەت کرایەوە — بەڵام ئەوەی نووسیوتە نەفەوتا",
+      en: "Refused — but what you typed is still there",
+      screen: function () {
+        return page(formCard(field("Student ID", "MIS-2025-004") +
+          field("Full name", "", true) + field("Department", "Accounting"),
+          '<div style="background:#fef2f2;border-inline-start:3px solid #dc2626;' +
+          'color:#b91c1c;padding:6px 10px;margin-bottom:10px;border-radius:0 6px 6px 0">' +
+          'Full name is required.</div>'), "localhost:8000/add");
+      },
+      hold: 2600 },
+
+    { ku: "ناوەکە بنووسە و دووبارە Register لێبدە",
+      en: "Type the name and press Register again",
+      screen: function () {
+        return page(formCard(field("Student ID", "MIS-2025-004") +
+          field("Full name", "Peyam Idris") + field("Department", "Accounting")),
+          "localhost:8000/add");
+      },
+      hold: 1800 },
+
+    { ku: "دەگەڕێیتەوە بۆ لیستەکە — سەیری لینکەکە بکە، /add نەماوە",
+      en: "Back to the list — look at the link, /add is gone",
+      screen: function () {
+        return page('<p style="margin:0 0 8px;color:#2563eb">+ Register a new student</p>' +
+          table('<tr style="border-top:1px solid #eef2f5;background:#ecfdf5">' +
+                '<td>1</td><td>MIS-2025-004</td><td>Peyam Idris</td>' +
+                '<td>Accounting</td></tr>' +
+                row(2, "MIS-2025-002", "Sara Ali", "Accounting")));
+      },
+      hold: 2400 },
+
+    { ku: "F5 لێبدە — هیچ دووبارە تۆمار نابێت. ئەمە PRGـە",
+      en: "Press F5 — nothing is saved twice. That is PRG",
+      screen: function () {
+        return page('<p style="margin:0 0 8px;color:#2563eb">+ Register a new student</p>' +
+          table(row(1, "MIS-2025-004", "Peyam Idris", "Accounting") +
+                row(2, "MIS-2025-002", "Sara Ali", "Accounting"))) + keys("F5");
+      },
+      hold: 2400 }
+  ];
+
+  /* ---- step 9: U — editing ------------------------------------------------ */
+
+  WALKS[9] = [
+    { ku: "ستوونێکی نوێ: Actions، لەگەڵ لینکی Edit",
+      en: "A new column: Actions, with an Edit link",
+      screen: function () {
+        return page(table(row(1, "MIS-2025-004", "Peyam Idris", "Accounting", EDIT_LINK) +
+          row(2, "MIS-2025-002", "Sara Ali", "Accounting", EDIT_LINK),
+          "<th>Actions</th>"));
+      },
+      hold: 2000 },
+
+    { ku: "کلیک لە Edit بکە",
+      en: "Click Edit",
+      screen: function () {
+        return page(table('<tr style="border-top:1px solid #eef2f5"><td>1</td>' +
+          '<td>MIS-2025-004</td><td>Peyam Idris</td><td>Accounting</td>' +
+          '<td data-spot="edit"><a style="color:#2563eb">Edit</a></td></tr>' +
+          row(2, "MIS-2025-002", "Sara Ali", "Accounting", EDIT_LINK),
+          "<th>Actions</th>"));
+      },
+      spot: "edit" },
+
+    { ku: "هەمان فۆڕمەکە — بەڵام ئەم جارە پڕکراوەتەوە",
+      en: "The same form — but this time it is filled in",
+      screen: function () {
+        return page(formCard(field("Student ID", "MIS-2025-004") +
+          field("Full name", "Peyam Idris") + field("Department", "Accounting")),
+          "localhost:8000/edit?id=1");
+      },
+      hold: 2200 },
+
+    { ku: "سەیری لینکەکە بکە: ?id=1 — سێرڤەر پێی دەزانێت کامیان",
+      en: "Look at the link: ?id=1 — that is how the server knows which one",
+      screen: function () {
+        return '<div class="win browser"><div class="win-bar">' + WIN +
+          '<span class="addr" style="background:#fff7ed;border:1px solid #fdba74">' +
+          'localhost:8000/edit<b style="color:#c2410c">?id=1</b></span></div>' +
+          '<div style="padding:18px;background:#f4f6fb;height:100%">' +
+          '<h1 style="margin:0 0 12px;color:#2563eb;font-size:20px">Edit student</h1>' +
+          '</div></div>';
+      },
+      hold: 2400 },
+
+    { ku: "خانەیەکی شاراوە ژمارەکە لەگەڵ خۆی دەبات",
+      en: "A hidden field carries that number with it",
+      screen: function () {
+        return fileWindow("form.html",
+          '<span class="name">' + esc2('<input type="hidden" name="id" value="{{ row_id }}">') +
+          '</span>' + esc2(NL + '<input name="student_id" value="{{ student_id }}">' + NL +
+                           '<input name="full_name" value="{{ full_name }}">'), true);
+      },
+      hold: 2600 },
+
+    { ku: "ناوەکە بگۆڕە و Save لێبدە",
+      en: "Change the name and press Save",
+      screen: function () {
+        return page(formCard(field("Student ID", "MIS-2025-004") +
+          field("Full name", '<span style="background:#dcfce7">Peyam Karim</span>') +
+          field("Department", "Accounting")), "localhost:8000/edit?id=1");
+      },
+      hold: 2000 },
+
+    { ku: "ناوە نوێیەکە لە لیستەکەدایە — تۆمارێکی نوێ دروست نەبوو",
+      en: "The new name is in the list — no new record was made",
+      screen: function () {
+        return page('<p style="margin:0 0 8px">2 student(s)</p>' +
+          table('<tr style="border-top:1px solid #eef2f5;background:#ecfdf5">' +
+                '<td>1</td><td>MIS-2025-004</td><td>Peyam Karim</td>' +
+                '<td>Accounting</td><td>' + EDIT_LINK + '</td></tr>' +
+                row(2, "MIS-2025-002", "Sara Ali", "Accounting", EDIT_LINK),
+                "<th>Actions</th>"));
+      },
+      hold: 2400 },
+
+    { ku: "ئێستا id ـێکی نەبوو داوا بکە: /edit?id=9999",
+      en: "Now ask for an id that does not exist: /edit?id=9999",
+      screen: function () {
+        return '<div class="win browser"><div class="win-bar">' + WIN +
+          '<span class="addr">localhost:8000/edit?id=9999</span></div>' +
+          '<div class="plain" style="text-align:center;padding-top:30px">' +
+          '<h1 style="color:#6b7280;font-size:18px">This page can’t be found</h1>' +
+          '<p style="color:#9ca3af;font-size:12px">HTTP ERROR 404</p></div></div>';
+      },
+      hold: 2400 }
+  ];
+
+  /* ---- step 10: D — deleting ---------------------------------------------- */
+
+  WALKS[10] = [
+    { ku: "لەتەنیشت Edit، دوگمەیەکی سووری Delete",
+      en: "Beside Edit, a red Delete button",
+      screen: function () {
+        return page(table(
+          row(1, "MIS-2025-004", "Peyam Karim", "Accounting", EDIT_LINK + " " + DEL_BTN) +
+          row(2, "MIS-2025-002", "Sara Ali", "Accounting", EDIT_LINK + " " + DEL_BTN),
+          "<th>Actions</th>"));
+      },
+      hold: 2000 },
+
+    { ku: "بەڵام ئەمە لینک نییە — فۆڕمێکی بچووکە",
+      en: "But it is not a link — it is a tiny form",
+      screen: function () {
+        return typingWindow("app.py",
+          '<form method="POST" action="/delete"' + NL +
+          '      onsubmit="return confirm(\'Delete this student?\')">' + NL +
+          '  <input type="hidden" name="id" value="ROW">' + NL +
+          '  <button class="danger">Delete</button>' + NL +
+          "</form>");
+      },
+      type: true, hold: 1800 },
+
+    { ku: "کلیک لە Delete بکە",
+      en: "Click Delete",
+      screen: function () {
+        return page(table(
+          '<tr style="border-top:1px solid #eef2f5"><td>1</td>' +
+          '<td>MIS-2025-004</td><td>Peyam Karim</td><td>Accounting</td>' +
+          '<td>' + EDIT_LINK + ' <span data-spot="del" style="border:1px solid #fca5a5;' +
+          'color:#b91c1c;border-radius:5px;padding:1px 6px;background:#fef2f2">' +
+          'Delete</span></td></tr>' +
+          row(2, "MIS-2025-002", "Sara Ali", "Accounting", EDIT_LINK + " " + DEL_BTN),
+          "<th>Actions</th>"));
+      },
+      spot: "del" },
+
+    { ku: "وێبگەڕ پرسیارت لێدەکات — سڕینەوە گەڕانەوەی نییە",
+      en: "The browser asks first — a deletion cannot be undone",
+      screen: function () {
+        return page(table(row(1, "MIS-2025-004", "Peyam Karim", "Accounting",
+                              EDIT_LINK + " " + DEL_BTN), "<th>Actions</th>")) +
+          '<div style="position:absolute;inset-block-start:22%;inset-inline:22%;' +
+          'background:#fff;border:1px solid #cbd5e1;border-radius:10px;' +
+          'box-shadow:0 12px 30px rgba(0,0,0,.25);padding:16px;text-align:center;' +
+          'font-size:13px;color:#16202b">Delete this student?' +
+          '<div style="margin-top:12px">' +
+          '<span style="background:#2563eb;color:#fff;border-radius:6px;padding:3px 14px">OK</span>' +
+          '<span style="border:1px solid #cbd5e1;border-radius:6px;padding:3px 14px;' +
+          'margin-inline-start:8px">Cancel</span></div></div>';
+      },
+      hold: 2600 },
+
+    { ku: "ڕیزەکە نەماوە",
+      en: "The row is gone",
+      screen: function () {
+        return page('<p style="margin:0 0 8px">1 student(s)</p>' +
+          table(row(1, "MIS-2025-002", "Sara Ali", "Accounting",
+                    EDIT_LINK + " " + DEL_BTN), "<th>Actions</th>"));
+      },
+      hold: 2200 },
+
+    { ku: "ئێستا هەوڵبدە بە لینکێک بیسڕیتەوە: /delete?id=1",
+      en: "Now try to delete with a plain link: /delete?id=1",
+      screen: function () {
+        return '<div class="win browser"><div class="win-bar">' + WIN +
+          '<span class="addr">localhost:8000/delete?id=1</span></div>' +
+          '<div class="plain" style="text-align:center;padding-top:30px">' +
+          '<h1 style="color:#6b7280;font-size:18px">This page can’t be found</h1>' +
+          '<p style="color:#9ca3af;font-size:12px">HTTP ERROR 404</p></div></div>';
+      },
+      hold: 2200 },
+
+    { ku: "404، و هیچ نەسڕدرایەوە — چونکە GET نابێت شت بگۆڕێت",
+      en: "404, and nothing was deleted — a GET must never change anything",
+      screen: function () {
+        return page('<p style="margin:0 0 8px">1 student(s)</p>' +
+          table(row(1, "MIS-2025-002", "Sara Ali", "Accounting",
+                    EDIT_LINK + " " + DEL_BTN), "<th>Actions</th>")) + keys("F5");
+      },
+      hold: 2600 }
+  ];
+
+  /* ---- step 11: search ----------------------------------------------------- */
+
+  function searchBar(value, mark) {
+    return '<div style="display:flex;gap:6px;margin-bottom:10px"' +
+      (mark ? ' data-spot="' + mark + '"' : '') + '>' +
+      '<div style="flex:1;border:1px solid #d1d5db;border-radius:6px;' +
+      'padding:4px 8px;background:#fff;color:' + (value ? '#16202b' : '#9ca3af') +
+      '">' + (value || "Search by name, student ID or department...") + '</div>' +
+      '<span style="background:#2563eb;color:#fff;border-radius:6px;padding:4px 12px">' +
+      'Search</span><a style="color:#2563eb;padding:4px">Reset</a></div>';
+  }
+
+  WALKS[11] = [
+    { ku: "لە database.py: LIKE بەدوای بەشێکی دەقەکەدا دەگەڕێت",
+      en: "In database.py: LIKE matches part of the text",
+      screen: function () {
+        return typingWindow("database.py",
+          "if search:" + NL +
+          '    pattern = "%" + search + "%"' + NL +
+          "    return connection.execute(" + NL +
+          '        """SELECT * FROM students' + NL +
+          "           WHERE full_name  LIKE ?" + NL +
+          "              OR student_id LIKE ?" + NL +
+          '              OR department LIKE ?""",' + NL +
+          "        (pattern, pattern, pattern),").replace(
+          "typingWindow", "typingWindow");
+      },
+      type: true, hold: 1800 },
+
+    { ku: "فۆڕمی گەڕان لە home.html — ئەمە GET ـە، نەک POST",
+      en: "The search form in home.html — this is a GET, not a POST",
+      screen: function () {
+        return typingWindow("home.html",
+          '<form class="search" method="GET" action="/">' + NL +
+          '  <input type="text" name="q" value="{{ search }}">' + NL +
+          "  <button type=\"submit\">Search</button>" + NL +
+          '  <a href="/">Reset</a>' + NL + "</form>");
+      },
+      type: true, hold: 1600 },
+
+    { ku: "هەموو قوتابییەکان، پێش گەڕان",
+      en: "Every student, before searching",
+      screen: function () {
+        return page(searchBar("") + '<p style="margin:0 0 8px">3 student(s)</p>' +
+          table(row(1, "MIS-2025-004", "Peyam Karim", "Accounting") +
+                row(2, "MIS-2025-002", "Sara Ali", "Accounting") +
+                row(3, "MIS-2025-001", "Ahmad Karim", "MIS")));
+      },
+      hold: 2000 },
+
+    { ku: "بنووسە Karim و Search لێبدە",
+      en: "Type Karim and press Search",
+      screen: function () {
+        return page(searchBar("Karim", "box") +
+          '<p style="margin:0 0 8px">3 student(s)</p>' +
+          table(row(1, "MIS-2025-004", "Peyam Karim", "Accounting")));
+      },
+      spot: "box", hold: 1600 },
+
+    { ku: "دوو ئەنجام — و وشەکە لە خانەکەدا ماوەتەوە",
+      en: "Two results — and the word stayed in the box",
+      screen: function () {
+        return page(searchBar("Karim") + '<p style="margin:0 0 8px">2 student(s)</p>' +
+          table(row(1, "MIS-2025-004", "Peyam Karim", "Accounting") +
+                row(2, "MIS-2025-001", "Ahmad Karim", "MIS")),
+          "localhost:8000/?q=Karim");
+      },
+      hold: 2600 },
+
+    { ku: "سەیری لینکەکە بکە — گەڕانەکە لەناویدایە، بۆیە دەکرێت بنێردرێت",
+      en: "Look at the link — the search is in it, so it can be shared",
+      screen: function () {
+        return '<div class="win browser"><div class="win-bar">' + WIN +
+          '<span class="addr" style="background:#fff7ed;border:1px solid #fdba74">' +
+          'localhost:8000/<b style="color:#c2410c">?q=Karim</b></span></div>' +
+          '<div style="padding:18px;background:#f4f6fb;height:100%">' +
+          '<h1 style="margin:0 0 12px;color:#2563eb;font-size:20px">Students</h1>' +
+          '</div></div>';
+      },
+      hold: 2400 },
+
+    { ku: "بگەڕێ بۆ شتێکی نەبوو — پەیامێکی تایبەت، نەک خشتەیەکی بەتاڵ",
+      en: "Search for something that is not there — a message, not an empty table",
+      screen: function () {
+        return page(searchBar("zzz") +
+          '<p style="margin:0;color:#6b7280">No student matches &quot;zzz&quot;.</p>',
+          "localhost:8000/?q=zzz");
+      },
+      hold: 2400 },
+
+    { ku: "Reset — دەگەڕێیتەوە بۆ هەموویان",
+      en: "Reset — back to everyone",
+      screen: function () {
+        return page(searchBar("") + '<p style="margin:0 0 8px">3 student(s)</p>' +
+          table(row(1, "MIS-2025-004", "Peyam Karim", "Accounting") +
+                row(2, "MIS-2025-002", "Sara Ali", "Accounting") +
+                row(3, "MIS-2025-001", "Ahmad Karim", "MIS")));
+      },
+      hold: 2000 }
+  ];
+
+  /* ---- step 12: security — break it, then mend it -------------------------- */
+
+  var ATTACK = "' OR '1'='1";
+
+  WALKS[12] = [
+    { ku: "پێش هەموو شتێک: هێرشەکە بکە، لەکاتێکدا پاراستنەکە هەیە",
+      en: "First: run the attack while the guard is still there",
+      screen: function () {
+        return page(searchBar(ATTACK) +
+          '<p style="margin:0;color:#6b7280">No student matches &quot;' +
+          ATTACK + '&quot;.</p>');
+      },
+      hold: 2400 },
+
+    { ku: "هیچ ڕوونادات — بەڵام هێشتا نازانیت بۆچی. ئێستا پاراستنەکە لابەرە",
+      en: "Nothing happens — but you cannot see why yet. Now take the guard out",
+      screen: function () {
+        return fileWindow("database.py", esc2("        if search:" + NL) +
+          '<span class="del">' + esc2('            pattern = "%" + search + "%"') +
+          '</span>' + NL + '<span class="del">' +
+          esc2("            return connection.execute(...LIKE ?...)") + '</span>' +
+          NL + '<span class="name">' +
+          esc2('            sql = "... LIKE \'%" + search + "%\'"') + '</span>' + NL +
+          '<span class="name">' + esc2("            return connection.execute(sql)") +
+          '</span>', false) + keys("Ctrl + S");
+      },
+      hold: 3000 },
+
+    { ku: "سێرڤەر دووبارە بکەرەوە، و هەمان شت بگەڕێ",
+      en: "Restart the server, and search for the same thing",
+      screen: function () {
+        return page(searchBar(ATTACK, "box"));
+      },
+      spot: "box", hold: 1600 },
+
+    { ku: "⚠️ هەموو قوتابییەکان دەردەکەون — هەرچەندە هیچیان ئەو ناوەیان نییە",
+      en: "⚠️ Every student appears — although none of them has that name",
+      screen: function () {
+        return page(searchBar(ATTACK) +
+          '<p style="margin:0 0 8px;color:#b91c1c;font-weight:700">3 student(s)</p>' +
+          table(row(1, "MIS-2025-004", "Peyam Karim", "Accounting") +
+                row(2, "MIS-2025-002", "Sara Ali", "Accounting") +
+                row(3, "MIS-2025-001", "Ahmad Karim", "MIS")));
+      },
+      hold: 3200 },
+
+    { ku: "ئەم کۆتەیە دەقەکەی داخست — هەرچی دوای ئەو، بووە فەرمان",
+      en: "That quote closed the text — everything after it became a command",
+      screen: function () {
+        return '<div class="win term"><div class="win-bar term-bar">' + WIN +
+          '<span>SQL</span></div><div class="term-body" style="font-size:12px">' +
+          "SELECT * FROM students WHERE full_name LIKE '%'" +
+          '<span style="color:#f0d494"> OR \'1\'=\'1</span>%\'' + NL + NL +
+          '<span class="ans">' +
+          "                                              ↑" + NL +
+          "                              ئەمە بەکارهێنەر نووسیویەتی" + NL +
+          "                              '1'='1  هەمیشە ڕاستە" + NL +
+          "                              بۆیە هەموو ڕیزەکان دەگەڕێنەوە" +
+          '</span></div></div>';
+      },
+      hold: 3400 },
+
+    { ku: "پاراستنەکە بگەڕێنەوە — بە ? ",
+      en: "Put the guard back — with ?",
+      screen: function () {
+        return fileWindow("database.py", esc2("        if search:" + NL) +
+          '<span class="del">' + esc2("            sql = \"... \" + search + \" ...\"") +
+          '</span>' + NL + '<span class="name">' +
+          esc2('            pattern = "%" + search + "%"') + '</span>' + NL +
+          '<span class="name">' +
+          esc2("            return connection.execute(sql, (pattern,))") + '</span>',
+          true) + keys("Ctrl + S");
+      },
+      hold: 2800 },
+
+    { ku: "هەمان گەڕان — ئێستا هیچ. جیاوازییەکە ئەو یەک پیتەیە",
+      en: "The same search — nothing now. The difference is that one mark",
+      screen: function () {
+        return page(searchBar(ATTACK) +
+          '<p style="margin:0;color:#6b7280">No student matches &quot;' +
+          ATTACK + '&quot;.</p>');
+      },
+      hold: 2800 },
+
+    { ku: "هێرشی دووەم: esc() لابەرە، پاشان ناوێکی کۆد تۆمار بکە",
+      en: "Second attack: take esc() out, then register a name that is code",
+      screen: function () {
+        return fileWindow("app.py", esc2("def esc(value):" + NL) +
+          '<span class="del">' +
+          esc2('    return html.escape("" if value is None else str(value))') +
+          '</span>' + NL + '<span class="name">' +
+          esc2('    return "" if value is None else str(value)') + '</span>',
+          false) + keys("Ctrl + S");
+      },
+      hold: 2600 },
+
+    { ku: "⚠️ کۆدەکە کاردەکات — بۆ هەر کەسێک کە پەڕەکە دەکاتەوە",
+      en: "⚠️ The code runs — for everyone who opens the page",
+      screen: function () {
+        return page(searchBar("") + '<p style="margin:0 0 8px">4 student(s)</p>' +
+          table(row(1, "MIS-2025-005", "", "MIS"))) +
+          '<div style="position:absolute;inset-block-start:20%;inset-inline:26%;' +
+          'background:#fff;border:1px solid #cbd5e1;border-radius:10px;' +
+          'box-shadow:0 12px 30px rgba(0,0,0,.25);padding:16px;text-align:center;' +
+          'font-size:13px">XSS<div style="margin-top:12px">' +
+          '<span style="background:#2563eb;color:#fff;border-radius:6px;' +
+          'padding:3px 16px">OK</span></div></div>';
+      },
+      hold: 3200 },
+
+    { ku: "esc() بگەڕێنەوە — ئێستا ناوەکە وەک دەق دەردەکەوێت",
+      en: "Put esc() back — now the name shows as text",
+      screen: function () {
+        return page(searchBar("") + '<p style="margin:0 0 8px">4 student(s)</p>' +
+          table(row(1, "MIS-2025-005",
+                    '<code style="background:#fef2f2;color:#b91c1c;padding:0 3px">' +
+                    "&lt;script&gt;alert('XSS')&lt;/script&gt;</code>", "MIS")));
+      },
+      hold: 3000 },
+
+    { ku: "دوو هێڵی بەرگری: ? بۆ داتابەیس، esc() بۆ پەڕەکە",
+      en: "Two lines of defence: ? for the database, esc() for the page",
+      screen: function () {
+        return '<div class="win term"><div class="win-bar term-bar">' + WIN +
+          '<span>defence in depth</span></div>' +
+          '<div class="term-body" style="font-size:12px">' +
+          '<span class="ans">?      →  SQL Injection' + NL +
+          "esc()  →  XSS" + NL + NL +
+          "یەک پاراستن هەرگیز بەس نییە." + '</span></div></div>';
+      },
+      hold: 2800 }
+  ];
+
+  /* ---- step 13: finishing -------------------------------------------------- */
+
+  WALKS[13] = [
+    { ku: "فایلێکی نوێ لە فۆڵدەری پڕۆژە: run.bat",
+      en: "A new file in the project folder: run.bat",
+      screen: function () {
+        return vscode(tree('<div class="vs-row">STUDENT-SYSTEM</div>' +
+          '<div class="vs-row">📁 templates</div>' +
+          '<div class="vs-row">📁 static</div>' +
+          '<div class="vs-row">📄 app.py</div>' +
+          '<div class="vs-row">📄 database.py</div>' +
+          '<div class="vs-row">📄 <span class="name" data-type="run.bat"></span></div>',
+          false), "");
+      },
+      type: true },
+
+    { ku: "سێ دێڕ — کاری تێرمیناڵ دەکات بۆ تۆ",
+      en: "Three lines — they do the terminal's work for you",
+      screen: function () {
+        return typingWindow("run.bat",
+          "@echo off" + NL + "python app.py" + NL + "pause");
+      },
+      type: true, hold: 1800 },
+
+    { ku: "ئێستا دوو کلیک لەسەر run.bat — تێرمیناڵ ناوێت",
+      en: "Now double-click run.bat — no terminal needed",
+      screen: function () {
+        return vscode(tree('<div class="vs-row">STUDENT-SYSTEM</div>' +
+          '<div class="vs-row">📄 app.py</div>' +
+          '<div class="vs-row" data-spot="bat">📄 run.bat</div>', false), "");
+      },
+      spot: "bat" },
+
+    { ku: "سێرڤەرەکە هەڵدەستێت",
+      en: "The server starts",
+      screen: function () {
+        return term("run.bat",
+          '<span class="ans">Server running at http://localhost:8000' + NL +
+          "Press Ctrl + C to stop.</span>" + NL + '<span class="caret"></span>');
+      },
+      hold: 2200 },
+
+    { ku: "کۆتا تاقیکردنەوە: هەموو CRUDـەکە بە ڕیزبەندی",
+      en: "The final test: all of CRUD, in order",
+      screen: function () {
+        return page(searchBar("") + '<p style="margin:0 0 8px">2 student(s)</p>' +
+          table(row(1, "MIS-2025-004", "Peyam Karim", "Accounting",
+                    EDIT_LINK + " " + DEL_BTN) +
+                row(2, "MIS-2025-002", "Sara Ali", "Accounting",
+                    EDIT_LINK + " " + DEL_BTN), "<th>Actions</th>"));
+      },
+      hold: 2600 },
+
+    { ku: "بۆ ناردنی پڕۆژەکە: students.db مەنێرە — خۆی دروست دەبێتەوە",
+      en: "To hand the project over: leave students.db out — it rebuilds itself",
+      screen: function () {
+        return vscode(tree('<div class="vs-row">STUDENT-SYSTEM</div>' +
+          '<div class="vs-row">📁 templates ✔</div>' +
+          '<div class="vs-row">📁 static ✔</div>' +
+          '<div class="vs-row">📄 app.py ✔</div>' +
+          '<div class="vs-row">📄 database.py ✔</div>' +
+          '<div class="vs-row">📄 run.bat ✔</div>' +
+          '<div class="vs-row" style="opacity:.45">🗄 students.db ✕</div>',
+          false), "");
+      },
+      hold: 3000 }
+  ];
+
+
 
 
 
