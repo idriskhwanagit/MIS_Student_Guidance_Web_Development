@@ -3751,17 +3751,10 @@ The message *No student matches "zzz".*
 
 **5. Press `Reset`** — back to the whole list.
 
-**6. A security test** — type this into the search box:
-
-```
-' OR '1'='1
-```
-
-**Nothing** should be found — because it went through a `?`, so SQLite looks
-for a student whose name is that text.
-
-> Without the `?`, that text would have returned every row — because
-> `'1'='1'` is always true. That is **SQL Injection**.
+> The `?` marks written in 11.1 are what stop **SQL Injection**. Testing
+> that here would show you nothing, though — "nothing found" looks like any
+> other empty search. In **Step 12** we take the guard out and you see the
+> attack work, and then it means something.
 
 ---
 
