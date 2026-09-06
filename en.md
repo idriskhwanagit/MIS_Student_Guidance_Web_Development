@@ -3851,24 +3851,52 @@ Type this into the search box:
 
 **Every student appears** — although none of them has that name.
 
-<!-- collapse -->
-### Why? Because the statement becomes this
+### Why? — this is the whole point of the step
+
+The dangerous code put your text **straight into the statement**:
+
+```python
+sql = ("SELECT * FROM students WHERE full_name LIKE '%"
+       + search + "%' ORDER BY id DESC")
+```
+
+You typed `' OR '1'='1`, so the statement became:
 
 ```sql
 SELECT * FROM students WHERE full_name LIKE '%' OR '1'='1%' ORDER BY id DESC
 ```
 
-`'1'='1'` is **always true**, so the `OR` makes every row come back.
+Look at the middle of it:
 
-The user did not type data — they typed **part of the statement**.
+```out
+WHERE full_name LIKE '%'   OR   '1'='1%'
+                      ^         ^
+                      |         `-- you added this
+                      `-- this quote was meant to close
+                          your text... but you closed it
+                          yourself, with a quote of your own
+```
 
-> In a real system this is used to:
->
-> - read every user's details
-> - log in without a password
-> - drop tables
->
-> It is one of the oldest and most common attacks on the web.
+**The quote (`'`) at the start of what you typed closed the one inside the
+statement.** From that point on, everything you wrote was read by SQLite as
+**a command**, not as text.
+
+Then `'1'='1` is **always true**, and `OR` means "either this or that" — so
+it is true for every row, and every row comes back.
+
+> **In one line:** the user did not type data — they typed **part of the
+> statement**.
+
+### In the real world
+
+| Typed into a box | What it does |
+| ---------------- | ------------ |
+| `' OR '1'='1` in a password field | Logs in without a password |
+| `'; DROP TABLE students; --` | Destroys the table |
+| `' UNION SELECT password FROM users --` | Reads every password |
+
+It is the **oldest and most common** attack on the web — and it still
+happens every year.
 
 ### Put the defence back
 
