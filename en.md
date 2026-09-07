@@ -13,7 +13,7 @@ For a student who:
 ## How to use it
 
 1. **Go in order.** Do not skip a step — each one builds on the one before it.
-2. **Type the code by hand**, do not copy it. The brain learns by typing.
+2. **In the practical session you may copy the code**, but when you are on your own, try to type it out — that is how your coding gets stronger.
 3. **Test after every step.** Never move to the next step until the current one works.
 4. **If you get an error**, look in the table below for the common ones.
 
