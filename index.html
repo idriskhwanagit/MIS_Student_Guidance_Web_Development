@@ -1310,7 +1310,10 @@ body {
     border: 1px solid var(--rule);
     border-radius: 12px;
   }
-  .reader { padding: 1.5rem 1.25rem 2rem; }
+  /* --measure is 68ch, which the Arabic face renders at about 608px.
+     Wider than a phone, and because the page is right-to-left the
+     surplus hangs off the left edge where it cannot be scrolled to. */
+  .reader { max-width: 100%; padding: 1.5rem 1.25rem 2rem; }
   .topbar { gap: .6rem 1rem; padding: .6rem 1rem; }
   .brand .crud { display: none; }
 }
