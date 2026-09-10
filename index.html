@@ -408,6 +408,18 @@ body {
   unicode-bidi: embed;
 }
 
+/* the English line the study sheet prints under a Kurdish question — see
+   the "@en " marker handled in flushPara() */
+.reader p.en-aside {
+  margin-top: -.4rem;
+  direction: ltr;
+  unicode-bidi: embed;
+  text-align: start;
+  color: var(--ink-soft);
+  font-size: .92em;
+  font-style: italic;
+}
+
 /* --- collapsed explanations ----------------------------------------------
    A reader who already follows the code walks straight past these; one who
    does not opens them. Closed by default so the page stays short.
@@ -1603,7 +1615,15 @@ body {
 
     function flushPara() {
       if (para.length) {
-        out.push("<p>" + inline(para.join(" ")) + "</p>");
+        var text = para.join(" ");
+        /* "@en " opens the English line the study sheet prints under a
+           Kurdish question. Left to inherit the page's RTL direction, the
+           bidi algorithm drags a trailing "?" to the wrong end of it — so
+           this one case is pinned to LTR, as inline code already is. */
+        var aside = text.indexOf("@en ") === 0;
+        out.push(aside
+          ? '<p class="en-aside">' + inline(text.slice(4)) + "</p>"
+          : "<p>" + inline(text) + "</p>");
         para = [];
       }
     }

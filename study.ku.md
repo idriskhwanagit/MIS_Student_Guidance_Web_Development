@@ -16,7 +16,7 @@
 
 **1.** کام پڕۆگرام کۆدی Python کاردەخات؟
 
-*Which program runs Python code?*
+@en Which program runs Python code?
 
 > **وەڵام:** Python
 > 
@@ -24,7 +24,7 @@
 
 **2.** بۆ کردنەوەی تێرمیناڵ لە VS Code، کام مێنیو؟
 
-*Which menu opens a terminal in VS Code?*
+@en Which menu opens a terminal in VS Code?
 
 > **وەڵام:** Terminal → New Terminal
 > 
@@ -32,13 +32,13 @@
 
 **3.** کام فەرمان پیشان دەدات کە Python دابەزێنراوە یان نا؟
 
-*Which command shows whether Python is installed?*
+@en Which command shows whether Python is installed?
 
 > **وەڵام:** python --version
 
 **4.** `python --version` دەڵێت *not recognized*. واتای چییە؟
 
-*`python --version` says *not recognized*. What does it mean?*
+@en `python --version` says *not recognized*. What does it mean?
 
 > **وەڵام:** Python دابەزێنراوە بەڵام لە PATHدا نییە
 > 
@@ -46,7 +46,7 @@
 
 **5.** کورتەڕێی کردنەوەی تێرمیناڵ لە VS Code چییە؟
 
-*What is the shortcut for opening a terminal in VS Code?*
+@en What is the shortcut for opening a terminal in VS Code?
 
 > **وەڵام:** Ctrl + `
 > 
@@ -54,7 +54,7 @@
 
 **6.** لە کاتی دابەزاندنی Pythonدا، کام خانە زۆر گرنگە؟
 
-*Which box matters most when installing Python?*
+@en Which box matters most when installing Python?
 
 > **وەڵام:** Add Python to PATH
 > 
@@ -62,7 +62,7 @@
 
 **7.** چۆن دەزانیت لە کام فۆڵدەردایت لە تێرمیناڵدا؟
 
-*How do you know which folder the terminal is in?*
+@en How do you know which folder the terminal is in?
 
 > **وەڵام:** ئەو ڕێڕەوەی پێش `>` نووسراوە
 
@@ -72,7 +72,7 @@
 
 **1.** فۆڵدەری `templates` بۆ چییە؟
 
-*What is the `templates` folder for?*
+@en What is the `templates` folder for?
 
 > **وەڵام:** فایلە HTMLـەکان
 > 
@@ -80,7 +80,7 @@
 
 **2.** فۆڵدەری `static` بۆ چییە؟
 
-*What is the `static` folder for?*
+@en What is the `static` folder for?
 
 > **وەڵام:** CSS و وێنەکان
 > 
@@ -88,13 +88,13 @@
 
 **3.** ناوی فۆڵدەری پڕۆژەکە چییە؟
 
-*What is the project folder called?*
+@en What is the project folder called?
 
 > **وەڵام:** student-system
 
 **4.** بۆچی لە ناوی فۆڵدەردا بۆشایی بەکارناهێنین؟
 
-*Why no spaces in the folder name?*
+@en Why no spaces in the folder name?
 
 > **وەڵام:** چونکە لە تێرمیناڵدا کێشە دروست دەکات
 > 
@@ -102,7 +102,7 @@
 
 **5.** پڕۆژەکە لە کام فۆڵدەردا دروست دەکەین؟
 
-*Where do we create the project?*
+@en Where do we create the project?
 
 > **وەڵام:** Documents
 > 
@@ -110,7 +110,7 @@
 
 **6.** لە VS Code، بۆ کردنەوەی فۆڵدەری پڕۆژە کام مێنیو؟
 
-*Which menu opens the project folder in VS Code?*
+@en Which menu opens the project folder in VS Code?
 
 > **وەڵام:** File → Open Folder
 > 
@@ -118,7 +118,7 @@
 
 **7.** دوو فۆڵدەری ناو پڕۆژەکە ناویان چییە؟
 
-*What are the two folders inside the project called?*
+@en What are the two folders inside the project called?
 
 > **وەڵام:** templates و static
 
@@ -128,13 +128,13 @@
 
 **1.** کام فەرمان سێرڤەرەکە هەڵدەستێنێت؟
 
-*Which command starts the server?*
+@en Which command starts the server?
 
 > **وەڵام:** python app.py
 
 **2.** سێرڤەرەکە لەسەر کام پۆرت کاردەکات؟
 
-*Which port does the server run on?*
+@en Which port does the server run on?
 
 > **وەڵام:** 8000
 > 
@@ -142,7 +142,7 @@
 
 **3.** دوای `python app.py`، تێرمیناڵ ناجوڵێت. واتای چییە؟
 
-*After `python app.py` the terminal stops responding. What does that mean?*
+@en After `python app.py` the terminal stops responding. What does that mean?
 
 > **وەڵام:** سێرڤەرەکە کاردەکات و چاوەڕێی داواکارییە
 > 
@@ -150,13 +150,13 @@
 
 **4.** چۆن سێرڤەرەکە دەوەستێنیت؟
 
-*How do you stop the server?*
+@en How do you stop the server?
 
 > **وەڵام:** Ctrl + C
 
 **5.** `app.py`ت گۆڕی و پاشەکەوتت کرد. چی دەکەیت تا گۆڕانکارییەکە دەربکەوێت؟
 
-*You changed `app.py` and saved it. What must you do for the change to show?*
+@en You changed `app.py` and saved it. What must you do for the change to show?
 
 > **وەڵام:** سێرڤەرەکە بوەستێنە و دووبارە هەڵیبستێنە
 > 
@@ -164,7 +164,7 @@
 
 **6.** `BaseHTTPRequestHandler` چییە؟
 
-*What is `BaseHTTPRequestHandler`?*
+@en What is `BaseHTTPRequestHandler`?
 
 > **وەڵام:** کلاسێک کە داواکارییەکان چارەسەر دەکات
 > 
@@ -172,7 +172,7 @@
 
 **7.** `self.send_response(200)` چی دەکات؟
 
-*What does `self.send_response(200)` do?*
+@en What does `self.send_response(200)` do?
 
 > **وەڵام:** بە وێبگەڕ دەڵێت داواکارییەکە سەرکەوتوو بوو
 > 
@@ -180,7 +180,7 @@
 
 **8.** بۆچی `.encode("utf-8")` بەکاردەهێنین؟
 
-*Why do we use `.encode("utf-8")`?*
+@en Why do we use `.encode("utf-8")`?
 
 > **وەڵام:** چونکە سێرڤەر بایت دەنێرێت، نەک دەق
 
@@ -190,7 +190,7 @@
 
 **1.** داتابەیسەکە لە کام فایلدا خەزن دەکرێت؟
 
-*Which file holds the database?*
+@en Which file holds the database?
 
 > **وەڵام:** students.db
 > 
@@ -198,7 +198,7 @@
 
 **2.** `UNIQUE` لەسەر `student_id` چی دەکات؟
 
-*What does `UNIQUE` on `student_id` do?*
+@en What does `UNIQUE` on `student_id` do?
 
 > **وەڵام:** ناهێڵێت هەمان ژمارە دوو جار تۆمار بکرێت
 > 
@@ -206,7 +206,7 @@
 
 **3.** بۆچی ژمارەی تەلەفۆن `TEXT`ـە، نەک `INTEGER`؟
 
-*Why is the phone number `TEXT` and not `INTEGER`?*
+@en Why is the phone number `TEXT` and not `INTEGER`?
 
 > **وەڵام:** چونکە سفری سەرەتا لەدەست دەچێت
 > 
@@ -214,7 +214,7 @@
 
 **4.** `created_at` کێ پڕی دەکاتەوە؟
 
-*Who fills in `created_at`?*
+@en Who fills in `created_at`?
 
 > **وەڵام:** خودی داتابەیس
 > 
@@ -222,7 +222,7 @@
 
 **5.** ستوونێکت لە خشتەکەدا گۆڕی، بەڵام هیچ نەگۆڕا. بۆچی؟
 
-*You changed a column and nothing happened. Why?*
+@en You changed a column and nothing happened. Why?
 
 > **وەڵام:** `CREATE TABLE IF NOT EXISTS` خشتەی هەبوو نایگۆڕێت
 > 
@@ -230,7 +230,7 @@
 
 **6.** `AUTOINCREMENT` چی دەکات؟
 
-*What does `AUTOINCREMENT` do?*
+@en What does `AUTOINCREMENT` do?
 
 > **وەڵام:** بۆ هەر ڕیزێکی نوێ ژمارەیەکی نوێ دادەنێت
 > 
@@ -238,7 +238,7 @@
 
 **7.** `sqlite3.connect(DB_PATH)` چی دەکات ئەگەر فایلەکە نەبێت؟
 
-*What does `sqlite3.connect(DB_PATH)` do if the file is missing?*
+@en What does `sqlite3.connect(DB_PATH)` do if the file is missing?
 
 > **وەڵام:** **دروستی دەکات**
 > 
@@ -246,7 +246,7 @@
 
 **8.** کام فەنکشن خشتەکە دروست دەکات؟
 
-*Which function creates the table?*
+@en Which function creates the table?
 
 > **وەڵام:** init_db()
 
@@ -256,7 +256,7 @@
 
 **1.** لە فایلێکی templateدا `{{ title }}` چییە؟
 
-*What is `{{ title }}` in a template?*
+@en What is `{{ title }}` in a template?
 
 > **وەڵام:** شوێنێکی بەتاڵ کە Python پڕی دەکاتەوە
 > 
@@ -264,7 +264,7 @@
 
 **2.** `layout.html` چی لەخۆدەگرێت؟
 
-*What does `layout.html` hold?*
+@en What does `layout.html` hold?
 
 > **وەڵام:** چوارچێوەی هەموو پەڕەکان — `<html>`، `<head>`، `<body>`
 > 
@@ -272,7 +272,7 @@
 
 **3.** فایلێکی HTMLی ناو `templates`ت گۆڕی. چی دەکەیت؟
 
-*You changed an HTML file inside `templates`. What do you do?*
+@en You changed an HTML file inside `templates`. What do you do?
 
 > **وەڵام:** تەنها F5 لە وێبگەڕدا
 > 
@@ -280,7 +280,7 @@
 
 **4.** `{{ total }}`ت نووسی بەڵام هیچ نرخێکت بۆ نەنارد. چی دەردەکەوێت؟
 
-*You wrote `{{ total }}` but sent no value for it. What appears?*
+@en You wrote `{{ total }}` but sent no value for it. What appears?
 
 > **وەڵام:** هیچ — شوێنەکە بەتاڵ دەبێت
 > 
@@ -288,7 +288,7 @@
 
 **5.** `{{ content }}` لە `layout.html`دا چی دەگرێتەوە؟
 
-*What goes into `{{ content }}` in `layout.html`?*
+@en What goes into `{{ content }}` in `layout.html`?
 
 > **وەڵام:** ناوەڕۆکی ئەو پەڕەیەی پیشان دەدرێت
 > 
@@ -296,7 +296,7 @@
 
 **6.** `render("home.html", total=0)` چەند نرخ دەنێرێت؟
 
-*How many values does `render("home.html", total=0)` pass?*
+@en How many values does `render("home.html", total=0)` pass?
 
 > **وەڵام:** یەک — بە ناوی `total`
 > 
@@ -304,7 +304,7 @@
 
 **7.** بۆچی `render()` دوو جار بانگ دەکەین؟
 
-*Why do we call `render()` twice?*
+@en Why do we call `render()` twice?
 
 > **وەڵام:** یەک جار بۆ ناوەڕۆک، جارێکی تر بۆ خستنە ناو چوارچێوەکەوە
 
@@ -314,7 +314,7 @@
 
 **1.** لە `do_GET`دا، `if url.path == "/"` چی دەکات؟
 
-*In `do_GET`, what does `if url.path == "/"` do?*
+@en In `do_GET`, what does `if url.path == "/"` do?
 
 > **وەڵام:** پەڕەی سەرەکی پیشان دەدات
 > 
@@ -322,7 +322,7 @@
 
 **2.** بەبێ ڕێنیشاندەر (router)، بۆچی CSSەکە کار ناکات؟
 
-*Without the router, why does the CSS not work?*
+@en Without the router, why does the CSS not work?
 
 > **وەڵام:** سێرڤەرەکە بۆ هەر داواکارییەک هەمان پەڕە دەنێرێتەوە
 > 
@@ -330,7 +330,7 @@
 
 **3.** `os.path.basename()` چی دەکات؟
 
-*What does `os.path.basename()` do?*
+@en What does `os.path.basename()` do?
 
 > **وەڵام:** هەموو `../`ـەکان لادەبات و تەنها ناوی فایلەکە دەهێڵێتەوە
 > 
@@ -338,7 +338,7 @@
 
 **4.** بەبێ `basename`، کەسێک دەتوانێت چی بکات؟
 
-*Without `basename`, what could someone do?*
+@en Without `basename`, what could someone do?
 
 > **وەڵام:** فایلێکی دەرەوەی `static` بخوێنێتەوە، وەک `database.py`
 > 
@@ -346,7 +346,7 @@
 
 **5.** داوای پەڕەیەکی نەبوو دەکەیت. سێرڤەر چی دەداتەوە؟
 
-*You ask for a page that does not exist. What does the server return?*
+@en You ask for a page that does not exist. What does the server return?
 
 > **وەڵام:** 404
 > 
@@ -354,7 +354,7 @@
 
 **6.** `urllib.parse.urlparse(self.path)` چی دەکات؟
 
-*What does `urllib.parse.urlparse(self.path)` do?*
+@en What does `urllib.parse.urlparse(self.path)` do?
 
 > **وەڵام:** لینکەکە دەکاتە پارچە: ڕێڕەو، پارامەتەر، …
 > 
@@ -362,7 +362,7 @@
 
 **7.** بۆچی CSSەکە بە `"rb"` دەخوێنرێتەوە؟
 
-*Why is the CSS read with `"rb"`?*
+@en Why is the CSS read with `"rb"`?
 
 > **وەڵام:** چونکە وەک بایت دەنێردرێت، نەک دەق
 > 
@@ -370,7 +370,7 @@
 
 **8.** `Content-Type` بۆ فایلێکی CSS چییە؟
 
-*What is the `Content-Type` for a CSS file?*
+@en What is the `Content-Type` for a CSS file?
 
 > **وەڵام:** text/css
 
@@ -380,7 +380,7 @@
 
 **1.** `SELECT * FROM students` چی دەکات؟
 
-*What does `SELECT * FROM students` do?*
+@en What does `SELECT * FROM students` do?
 
 > **وەڵام:** هەموو ڕیزەکان وەردەگرێت
 > 
@@ -388,7 +388,7 @@
 
 **2.** `ORDER BY id DESC` چی دەکات؟
 
-*What does `ORDER BY id DESC` do?*
+@en What does `ORDER BY id DESC` do?
 
 > **وەڵام:** نوێترین لە سەرەوە
 > 
@@ -396,7 +396,7 @@
 
 **3.** `esc()` چی دەکات؟
 
-*What does `esc()` do?*
+@en What does `esc()` do?
 
 > **وەڵام:** `<` دەکات بە `&lt;` — بۆیە وەک دەق دەردەکەوێت نەک کۆد
 > 
@@ -404,7 +404,7 @@
 
 **4.** بەبێ `esc()`، ناوێکی وەک `<script>alert(1)</script>` چی دەکات؟
 
-*Without `esc()`, what does a name like `<script>alert(1)</script>` do?*
+@en Without `esc()`, what does a name like `<script>alert(1)</script>` do?
 
 > **وەڵام:** وەک کۆد کاردەکات — پەنجەرەیەک دەکرێتەوە
 > 
@@ -412,7 +412,7 @@
 
 **5.** ئەگەر هیچ قوتابییەک تۆمار نەکرابێت، چی دەبێت پیشان بدرێت؟
 
-*If no student is registered, what should be shown?*
+@en If no student is registered, what should be shown?
 
 > **وەڵام:** پەیامێکی ڕوون وەک *No student is registered yet*
 > 
@@ -420,7 +420,7 @@
 
 **6.** `.fetchall()` چی دەگەڕێنێتەوە؟
 
-*What does `.fetchall()` return?*
+@en What does `.fetchall()` return?
 
 > **وەڵام:** هەموو ڕیزەکان
 > 
@@ -428,7 +428,7 @@
 
 **7.** `enumerate(students, start=1)` بۆچی `start=1`؟
 
-*Why `start=1` in `enumerate(students, start=1)`?*
+@en Why `start=1` in `enumerate(students, start=1)`?
 
 > **وەڵام:** چونکە بۆ خوێنەر ژمارەکردن لە ١ـەوە دەست پێدەکات
 > 
@@ -436,7 +436,7 @@
 
 **8.** `"".join(rows)` چی دەکات؟
 
-*What does `"".join(rows)` do?*
+@en What does `"".join(rows)` do?
 
 > **وەڵام:** هەموو ڕیزەکان دەکاتە یەک دەق
 
@@ -446,7 +446,7 @@
 
 **1.** فۆڕمەکە بە کام شێواز داتاکە دەنێرێت؟
 
-*Which method does the form use to send data?*
+@en Which method does the form use to send data?
 
 > **وەڵام:** POST
 > 
@@ -454,7 +454,7 @@
 
 **2.** جیاوازی `GET /add` و `POST /add` چییە؟
 
-*What is the difference between `GET /add` and `POST /add`?*
+@en What is the difference between `GET /add` and `POST /add`?
 
 > **وەڵام:** `GET` فۆڕمەکە پیشان دەدات، `POST` پاشەکەوتی دەکات
 > 
@@ -462,7 +462,7 @@
 
 **3.** دوای پاشەکەوتکردنێکی سەرکەوتوو، بۆچی `redirect` دەکەین؟
 
-*Why redirect after a successful save?*
+@en Why redirect after a successful save?
 
 > **وەڵام:** بۆ ئەوەی `F5` داتاکە دووبارە تۆمار نەکات
 > 
@@ -470,7 +470,7 @@
 
 **4.** `required` لە HTMLدا بەسە بۆ پشکنین؟
 
-*Is `required` in HTML enough as validation?*
+@en Is `required` in HTML enough as validation?
 
 > **وەڵام:** نەخێر — بە `F12` لادەبرێت، بۆیە لای سێرڤەریش دەپشکنین
 > 
@@ -478,7 +478,7 @@
 
 **5.** داتابەیس خۆی `UNIQUE`ـی هەیە. کەواتە `student_id_exists()` بۆچی؟
 
-*The database already has `UNIQUE`. So why `student_id_exists()`?*
+@en The database already has `UNIQUE`. So why `student_id_exists()`?
 
 > **وەڵام:** بۆ پیشاندانی پەیامێکی ڕوون لەبری شکستێکی توند
 > 
@@ -486,7 +486,7 @@
 
 **6.** `self.rfile.read(length)` چی دەخوێنێتەوە؟
 
-*What does `self.rfile.read(length)` read?*
+@en What does `self.rfile.read(length)` read?
 
 > **وەڵام:** ئەو داتایەی فۆڕمەکە ناردوویەتی
 > 
@@ -494,7 +494,7 @@
 
 **7.** `parse_qs("a=1&b=2")` چی دەگەڕێنێتەوە؟
 
-*What does `parse_qs("a=1&b=2")` return?*
+@en What does `parse_qs("a=1&b=2")` return?
 
 > **وەڵام:** `{"a": ["1"], "b": ["2"]}`
 > 
@@ -502,7 +502,7 @@
 
 **8.** `.strip()` لە `read_form`دا چی دەکات؟
 
-*What does `.strip()` do in `read_form`?*
+@en What does `.strip()` do in `read_form`?
 
 > **وەڵام:** بۆشایی سەرەتا و کۆتایی لادەبات
 
@@ -512,7 +512,7 @@
 
 **1.** لە SQLدا کام فەرمان تۆمارێکی هەبوو دەگۆڕێت؟
 
-*Which SQL command changes an existing row?*
+@en Which SQL command changes an existing row?
 
 > **وەڵام:** UPDATE
 > 
@@ -520,7 +520,7 @@
 
 **2.** `WHERE id = ?`ت لە `UPDATE`دا لەبیر چوو. چی ڕوودەدات؟
 
-*You forgot `WHERE id = ?` in an `UPDATE`. What happens?*
+@en You forgot `WHERE id = ?` in an `UPDATE`. What happens?
 
 > **وەڵام:** **هەموو** ڕیزەکان دەگۆڕێن
 > 
@@ -528,7 +528,7 @@
 
 **3.** `<input type="hidden" name="id">` بۆچییە؟
 
-*What is `<input type="hidden" name="id">` for?*
+@en What is `<input type="hidden" name="id">` for?
 
 > **وەڵام:** بۆ ئەوەی سێرڤەر بزانێت کام قوتابی دەگۆڕدرێت
 > 
@@ -536,7 +536,7 @@
 
 **4.** `/edit?id=9999` دەکەیتەوە بەڵام ئەو قوتابییە نییە. چی دەبینیت؟
 
-*You open `/edit?id=9999` but no such student exists. What do you see?*
+@en You open `/edit?id=9999` but no such student exists. What do you see?
 
 > **وەڵام:** 404
 > 
@@ -544,7 +544,7 @@
 
 **5.** `get_student(row_id)` چی دەگەڕێنێتەوە ئەگەر نەبوو؟
 
-*What does `get_student(row_id)` return when there is no such row?*
+@en What does `get_student(row_id)` return when there is no such row?
 
 > **وەڵام:** `None`
 > 
@@ -552,7 +552,7 @@
 
 **6.** `ignore_row_id` لە `student_id_exists`دا بۆچییە؟
 
-*What is `ignore_row_id` for in `student_id_exists`?*
+@en What is `ignore_row_id` for in `student_id_exists`?
 
 > **وەڵام:** تاکو قوتابییەک ژمارەی خۆی بهێڵێتەوە لە کاتی دەستکاریدا
 > 
@@ -560,7 +560,7 @@
 
 **7.** کام خانەی فۆڕمەکە ژمارەی ڕیزەکە دەگوازێتەوە؟
 
-*Which form field carries the row's number?*
+@en Which form field carries the row's number?
 
 > **وەڵام:** `<input type="hidden" name="id">`
 
@@ -570,7 +570,7 @@
 
 **1.** کام فەرمانی SQL تۆمارێک دەسڕێتەوە؟
 
-*Which SQL command deletes a row?*
+@en Which SQL command deletes a row?
 
 > **وەڵام:** DELETE
 > 
@@ -578,7 +578,7 @@
 
 **2.** بۆچی سڕینەوە بە `POST`ـە، نەک بە لینکێکی ئاسایی؟
 
-*Why is deleting a `POST` and not an ordinary link?*
+@en Why is deleting a `POST` and not an ordinary link?
 
 > **وەڵام:** چونکە لینک دەکرێت بە هەڵە بکرێتەوە و شتێک بسڕێتەوە
 > 
@@ -586,7 +586,7 @@
 
 **3.** `/delete?id=1` لە وێبگەڕدا دەکەیتەوە. چی ڕوودەدات؟
 
-*You open `/delete?id=1` in the browser. What happens?*
+@en You open `/delete?id=1` in the browser. What happens?
 
 > **وەڵام:** 404 — و هیچ ناسڕدرێتەوە
 > 
@@ -594,7 +594,7 @@
 
 **4.** بۆچی پێش سڕینەوە `confirm()` بەکاردەهێنین؟
 
-*Why use `confirm()` before deleting?*
+@en Why use `confirm()` before deleting?
 
 > **وەڵام:** بۆ ئەوەی بەکارهێنەر بە هەڵە نەیسڕێتەوە
 > 
@@ -602,7 +602,7 @@
 
 **5.** `confirm()` لە کوێ کاردەکات؟
 
-*Where does `confirm()` run?*
+@en Where does `confirm()` run?
 
 > **وەڵام:** لە وێبگەڕدا
 > 
@@ -610,7 +610,7 @@
 
 **6.** دوای سڕینەوە، سێرڤەر چی دەکات؟
 
-*What does the server do after deleting?*
+@en What does the server do after deleting?
 
 > **وەڵام:** `redirect` بۆ لیستەکە
 > 
@@ -618,7 +618,7 @@
 
 **7.** کام فەنکشنی `database.py` ڕیزێک دەسڕێتەوە؟
 
-*Which function in `database.py` deletes a row?*
+@en Which function in `database.py` deletes a row?
 
 > **وەڵام:** delete_student(row_id)
 
@@ -628,7 +628,7 @@
 
 **1.** لە SQLدا `LIKE` چی دەکات؟
 
-*What does `LIKE` do in SQL?*
+@en What does `LIKE` do in SQL?
 
 > **وەڵام:** بەدوای بەشێکی دەقەکەدا دەگەڕێت
 > 
@@ -636,7 +636,7 @@
 
 **2.** لە `LIKE '%ali%'`دا، `%` چی دەگەیەنێت؟
 
-*In `LIKE '%ali%'`, what does `%` mean?*
+@en In `LIKE '%ali%'`, what does `%` mean?
 
 > **وەڵام:** هەر ژمارەیەک لە پیتەکان — لەوانەیە هیچیش
 > 
@@ -644,7 +644,7 @@
 
 **3.** لە `‎/?q=ahmad`دا، `q` چییە؟
 
-*In `/?q=ahmad`, what is `q`?*
+@en In `/?q=ahmad`, what is `q`?
 
 > **وەڵام:** پارامەتەری گەڕان لە لینکەکەدا
 > 
@@ -652,7 +652,7 @@
 
 **4.** بۆچی فۆڕمی گەڕان `GET`ـە نەک `POST`؟
 
-*Why is the search form a `GET` and not a `POST`?*
+@en Why is the search form a `GET` and not a `POST`?
 
 > **وەڵام:** چونکە هیچ ناگۆڕێت، و لینکەکە دەکرێت هاوبەش بکرێت
 > 
@@ -660,7 +660,7 @@
 
 **5.** `url.query` بۆ `‎/?q=ahmad` چییە؟
 
-*What is `url.query` for `/?q=ahmad`?*
+@en What is `url.query` for `/?q=ahmad`?
 
 > **وەڵام:** `q=ahmad`
 > 
@@ -668,7 +668,7 @@
 
 **6.** دوگمەی `Reset` چی دەکات؟
 
-*What does the `Reset` button do?*
+@en What does the `Reset` button do?
 
 > **وەڵام:** دەگەڕێتەوە بۆ `/` بەبێ گەڕان
 > 
@@ -676,7 +676,7 @@
 
 **7.** `value="{{ search }}"` بۆچی لە خانەی گەڕاندایە؟
 
-*Why is `value="{{ search }}"` on the search box?*
+@en Why is `value="{{ search }}"` on the search box?
 
 > **وەڵام:** تاکو وشەکە دوای گەڕان لە خانەکەدا بمێنێتەوە
 
@@ -686,7 +686,7 @@
 
 **1.** SQL Injection چییە؟
 
-*What is SQL Injection?*
+@en What is SQL Injection?
 
 > **وەڵام:** کەسێک فەرمانی SQL دەنووسێتە ناو خانەیەکەوە
 > 
@@ -694,7 +694,7 @@
 
 **2.** چی ڕێگری لە SQL Injection دەکات؟
 
-*What prevents SQL Injection?*
+@en What prevents SQL Injection?
 
 > **وەڵام:** بەکارهێنانی `?` لەبری بەستنەوەی دەقەکان
 > 
@@ -702,7 +702,7 @@
 
 **3.** XSS چییە؟
 
-*What is XSS?*
+@en What is XSS?
 
 > **وەڵام:** کۆدێک لە خانەیەکەوە دەخرێتە پەڕەکە و کاردەکات
 > 
@@ -710,7 +710,7 @@
 
 **4.** چی ڕێگری لە XSS دەکات؟
 
-*What prevents XSS?*
+@en What prevents XSS?
 
 > **وەڵام:** `esc()` / `html.escape()`
 > 
@@ -718,7 +718,7 @@
 
 **5.** «defence in depth» واتای چییە؟
 
-*What does "defence in depth" mean?*
+@en What does "defence in depth" mean?
 
 > **وەڵام:** چەند پاراستنێک لەسەر یەک — یەکێک هەرگیز بەس نییە
 > 
@@ -726,7 +726,7 @@
 
 **6.** `html.escape()` چەند پیت دەگۆڕێت؟
 
-*How many characters does `html.escape()` change?*
+@en How many characters does `html.escape()` change?
 
 > **وەڵام:** `<`، `>`، `&`، `"` و `'`
 > 
@@ -734,7 +734,7 @@
 
 **7.** «Stored XSS» بۆچی بەم ناوە ناسراوە؟
 
-*Why is it called "Stored XSS"?*
+@en Why is it called "Stored XSS"?
 
 > **وەڵام:** چونکە کۆدەکە لە داتابەیسدا پاشەکەوت دەکرێت
 > 
@@ -742,7 +742,7 @@
 
 **8.** کام دوو پاراستن لە هەنگاوی ١٢دا لایاندەبەین و دەیانگەڕێنینەوە؟
 
-*Which two defences do we remove and restore in Step 12?*
+@en Which two defences do we remove and restore in Step 12?
 
 > **وەڵام:** `?` لە SQLدا، و `esc()` لە نیشاندان
 
@@ -752,7 +752,7 @@
 
 **1.** `run.bat` چی دەکات؟
 
-*What does `run.bat` do?*
+@en What does `run.bat` do?
 
 > **وەڵام:** بە یەک دوو کلیک سێرڤەرەکە هەڵدەستێنێت
 > 
@@ -760,7 +760,7 @@
 
 **2.** کۆدی `200` واتای چییە؟
 
-*What does status `200` mean?*
+@en What does status `200` mean?
 
 > **وەڵام:** باشە — ئەمە پەڕەکەت
 > 
@@ -768,7 +768,7 @@
 
 **3.** کۆدی `303` واتای چییە؟
 
-*What does status `303` mean?*
+@en What does status `303` mean?
 
 > **وەڵام:** بڕۆ بۆ ڕێڕەوێکی تر
 > 
@@ -776,7 +776,7 @@
 
 **4.** کۆدی `404` واتای چییە؟
 
-*What does status `404` mean?*
+@en What does status `404` mean?
 
 > **وەڵام:** نەدۆزرایەوە
 > 
@@ -784,7 +784,7 @@
 
 **5.** پڕۆژەکەت بۆ هاوڕێیەکت ناردووە. کام فایل **پێویست نییە** بینێریت؟
 
-*You are sending the project to a friend. Which file is **not** needed?*
+@en You are sending the project to a friend. Which file is **not** needed?
 
 > **وەڵام:** students.db
 > 
@@ -792,7 +792,7 @@
 
 **6.** `@echo off` لە `run.bat`دا چی دەکات؟
 
-*What does `@echo off` do in `run.bat`?*
+@en What does `@echo off` do in `run.bat`?
 
 > **وەڵام:** فەرمانەکان لە پیشاندان دەشارێتەوە
 > 
@@ -800,7 +800,7 @@
 
 **7.** `pause` لە کۆتایی `run.bat`دا بۆچییە؟
 
-*Why is `pause` at the end of `run.bat`?*
+@en Why is `pause` at the end of `run.bat`?
 
 > **وەڵام:** تاکو پەنجەرەکە خێرا دانەخرێت و پەیامەکە ببینیت
 > 
@@ -808,7 +808,7 @@
 
 **8.** کام سێ فایل و دوو فۆڵدەر پڕۆژەکە پێکدەهێنن؟
 
-*Which three files and two folders make up the project?*
+@en Which three files and two folders make up the project?
 
 > **وەڵام:** app.py، database.py، run.bat — و templates و static
 
