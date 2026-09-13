@@ -10,6 +10,10 @@
 > The midterm and the final ask more besides, which are not here. The last
 > page explains what kind those are and how to prepare for them.
 
+> **Practical marks:** quiz **8** (the average of every quiz) · midterm **15** · final **20** — total **43**.
+
+> **Mock:** before the first quiz, the midterm and the final there is a mock. Its mark does not count — it is there so you know the shape of the questions and of Google Forms.
+
 ---
 
 ## Step 1 — Preparing the computer
@@ -624,18 +628,20 @@ None of this is a secret. Knowing what is coming is how you prepare for it.
 
 |  | Quiz | Midterm | Final |
 |---|---|---|---|
-| Time | 15 minutes | 60 minutes | 60 minutes |
-| Questions | 12 | 22 | 26 |
-| Marks | ~15 | ~30 | ~36 |
-| Which steps | whatever has been taught | 1 – 8 | all of them |
-| From this sheet | **most of it** | about half | about 40% |
-| Harder questions | a few | **most of it** | **most of it** |
-| Written answers | 2 – 3 | 7 – 9 | 10 – 12 |
+| Marks | **8** — the average of every quiz | **15** | **20** |
+| Time | ~10 minutes | 60 minutes | 60 minutes |
+| Questions | ~7 | ~12 | ~15 |
+| Which steps | what has been taught — about 3 steps | 1 – 6 | everything that has been taught |
+| From this sheet | **most of it** | **~75%** | **~70%** |
+| Harder questions | a few | ~25% | ~30% |
+| Written answers | 0 – 1 | 2 – 4 | 3 – 5 |
+| Mock — not counted | before quiz 1, in class | online, before the midterm | online, before the final |
 
-> **Memorise this sheet alone** and you will do well in the quiz.
+> **Read this sheet well** and you will pass the quizzes, and most of the
+> midterm and the final, comfortably.
 >
-> It is not enough for the midterm or the final. Those questions **put code
-> in front of you** and ask you to read it — and that only comes from
+> For a high mark in the midterm and the final, the harder questions **put
+> code in front of you** and ask you to read it — and that only comes from
 > having written the project yourself.
 
 ---
