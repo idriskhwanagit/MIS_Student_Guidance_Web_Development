@@ -181,6 +181,7 @@ body {
 }
 
 .seg button:hover { color: var(--ink); }
+.seg button:disabled { opacity: .4; cursor: not-allowed; }
 
 .seg button[aria-pressed="true"] {
   background: var(--surface);
@@ -1545,6 +1546,8 @@ body {
   function setDoc(which) {
     state.doc = which;
     remember("doc", which);
+    applyLock();
+    drawTabs();
     document.getElementById("tab-guide").className =
       which === "guide" ? "on" : "";
     document.getElementById("tab-study").className =
@@ -1558,17 +1561,38 @@ body {
     document.getElementById("tab-study").textContent = TABS.study[n];
   }
 
-  /* Read on every load, so the page can be taken down from the repository
-     without republishing anything else. */
+  /* Before a quiz the teacher can hold the revision sheet to English, since
+     the quiz is in English only. The guide itself keeps its Kurdish, and the
+     reader's own choice is kept for when the sheet is let go again. */
+  var lockStudy = false;
+  var chosenLang = state.lang;
+  var LOCKED = "کوردی بۆ پرسیار و وەڵام ڕاگیراوە تا کویز — بە ئینگلیزی بیخوێنەوە" +
+               "  ·  Kurdish is off for this sheet until the quiz — read it in English";
+
+  function applyLock() {
+    var held = lockStudy && state.doc === "study";
+    state.lang = held ? "en" : chosenLang;
+    var ku = document.querySelector('#langSeg [data-lang="ku"]');
+    ku.disabled = held;
+    ku.title = held ? LOCKED : "";
+  }
+
+  /* Read on every load, so the page can be taken down — or the sheet held
+     to English — from the repository without republishing anything else.
+     Resolves to whether the page may be drawn. */
   function checkOpen() {
-    fetch("closed.json", { cache: "no-store" }).then(function (r) {
+    return fetch("closed.json", { cache: "no-store" }).then(function (r) {
       return r.ok ? r.json() : null;
     }).then(function (flag) {
-      if (!flag || !flag.closed) { return; }
-      var say = SHUT[state.lang] || SHUT.ku;
-      document.querySelector(".app").innerHTML =
-        '<div class="shut"><h2>' + say[0] + "</h2><p>" + say[1] + "</p></div>";
-    })["catch"](function () { /* no switch published: stay open */ });
+      if (flag && flag.closed) {
+        var say = SHUT[state.lang] || SHUT.ku;
+        document.querySelector(".app").innerHTML =
+          '<div class="shut"><h2>' + say[0] + "</h2><p>" + say[1] + "</p></div>";
+        return false;
+      }
+      lockStudy = !!(flag && flag.study_english);
+      return true;
+    }, function () { return true; });   // no switch published: stay open
   }
 
 
@@ -1821,6 +1845,10 @@ body {
        the student is examined on — say so, and only while it is showing */
     if (NOTICE_KU && state.lang === "ku") {
       notice.querySelector(".text").textContent = NOTICE_KU;
+      notice.hidden = false;
+    } else if (lockStudy && state.doc === "study") {
+      /* a phone has no tooltip, so the greyed button says why out loud */
+      notice.querySelector(".text").textContent = LOCKED;
       notice.hidden = false;
     } else {
       notice.hidden = true;
@@ -3757,8 +3785,9 @@ body {
   document.getElementById("langSeg").addEventListener("click", function (e) {
     var b = e.target.closest("button");
     if (!b) { return; }
-    state.lang = b.dataset.lang;
-    remember(STORE + ".lang", state.lang);
+    chosenLang = b.dataset.lang;
+    remember(STORE + ".lang", chosenLang);
+    applyLock();
     drawTabs();
     paint();
   });
@@ -3881,13 +3910,18 @@ body {
   var savedTheme = recall("guide.theme");
   if (savedTheme) { document.documentElement.setAttribute("data-theme", savedTheme); }
   var savedLang = recall(STORE + ".lang");
-  if (savedLang === "ku" || savedLang === "en") { state.lang = savedLang; }
+  if (savedLang === "ku" || savedLang === "en") { chosenLang = state.lang = savedLang; }
   var savedDoc = recall("doc");
   if (savedDoc === "study") { state.doc = "study"; }
 
   drawTabs();
-  if (STUDY) { checkOpen(); }
-  setDoc(state.doc);
+  /* the switch is read before the first paint, so a held sheet never
+     flashes its Kurdish while the flag is on its way */
+  if (STUDY) {
+    checkOpen().then(function (open) { if (open) { setDoc(state.doc); } });
+  } else {
+    setDoc(state.doc);
+  }
 })();
 </script>
 <!-- ARTIFACT:END -->
