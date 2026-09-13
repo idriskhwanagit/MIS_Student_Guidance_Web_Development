@@ -4,7 +4,7 @@
   "_en": "To close the page during an exam: set closed to true, then commit.",
   "message_ku": "لاپەڕەکە لە کاتی تاقیکردنەوەدا داخراوە.",
   "message_en": "This page is closed during the examination.",
-  "study_english": false,
+  "study_english": true,
   "_study_ku": "بۆ ڕاگرتنی کوردی لە پرسیار و وەڵام: study_english بکە بە true، پاشان Commit.",
   "_study_en": "To hold the revision sheet to English: set study_english to true, then commit."
 }
