@@ -12,7 +12,7 @@
 
 > **Practical marks:** quiz **8** (the average of every quiz) · midterm **15** · final **20** — total **43**.
 
-> **Mock:** before the first quiz, the midterm and the final there is a mock. Its mark does not count — it is there so you know the shape of the questions and of Google Forms.
+> **Mock:** before the first quiz, the midterm and the final there is a mock. Its mark does not count, and it is a little harder than the real paper — it is there so you know the shape of the questions and of Google Forms, and find the real one the easier.
 
 ---
 
@@ -632,10 +632,10 @@ None of this is a secret. Knowing what is coming is how you prepare for it.
 | Time | ~10 minutes | 60 minutes | 60 minutes |
 | Questions | ~7 | ~12 | ~15 |
 | Which steps | what has been taught — about 3 steps | 1 – 6 | everything that has been taught |
-| From this sheet | **most of it** | **~75%** | **~70%** |
-| Harder questions | a few | ~25% | ~30% |
+| From this sheet | **most of it** | **~90%** | **~85%** |
+| Harder questions | a few | ~10% | ~15% |
 | Written answers | 0 – 1 | 2 – 4 | 3 – 5 |
-| Mock — not counted | before quiz 1, in class | online, before the midterm | online, before the final |
+| Mock — not counted | before quiz 1, in class | online, before the midterm — a little harder | online, before the final — a little harder |
 
 > **Read this sheet well** and you will pass the quizzes, and most of the
 > midterm and the final, comfortably.
