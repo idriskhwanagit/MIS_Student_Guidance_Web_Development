@@ -108,8 +108,8 @@ body {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 1rem 1.5rem;
-  padding: .75rem 1.5rem;
+  gap: .6rem 1.1rem;
+  padding: .7rem 1.25rem;
   background: color-mix(in srgb, var(--surface) 88%, transparent);
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--rule);
@@ -511,7 +511,7 @@ body {
   border-radius: 999px;
 }
 .tabs-doc button {
-  padding: .3rem .9rem;
+  padding: .3rem .75rem;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -1373,8 +1373,20 @@ body {
      Wider than a phone, and because the page is right-to-left the
      surplus hangs off the left edge where it cannot be scrolled to. */
   .reader { max-width: 100%; padding: 1.5rem 1.25rem 2rem; }
-  .topbar { gap: .6rem 1rem; padding: .6rem 1rem; }
+  /* Below 60rem the step picker joins the bar. Everything stays on one row
+     down to a small laptop by tightening type and spacing, never by hiding
+     or cutting a control; only a phone is narrow enough to need a second. */
+  .topbar { gap: .4rem .45rem; padding: .45rem .6rem; }
   .brand .crud { display: none; }
+  .brand b { font-size: .85rem; }
+  .tabs-doc { gap: .15rem; padding: .15rem; }
+  .tabs-doc button { padding: .22rem .45rem; font-size: .76rem; }
+  .switch { gap: .25rem; }
+  .switch > .lbl { font-size: .62rem; letter-spacing: .03em; }
+  .seg { padding: 1px; }
+  .seg button { padding: .25rem .42rem; font-size: .76rem; }
+  .jump { padding: .28rem .35rem; font-size: .76rem; }
+  .icon-btn { width: 1.7rem; height: 1.7rem; font-size: .8rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1383,6 +1395,18 @@ body {
 
 /* --- print --------------------------------------------------------------- */
 @page { margin: 14mm 13mm; }
+
+/* a tablet held upright: tighter again, still one row where it can be */
+@media (max-width: 50rem) {
+  .topbar { gap: .35rem .35rem; padding: .4rem .5rem; }
+  .brand b { font-size: .8rem; }
+  .tabs-doc button { padding: .2rem .36rem; font-size: .72rem; }
+  .switch { gap: .2rem; }
+  .switch > .lbl { font-size: .58rem; letter-spacing: 0; }
+  .seg button { padding: .22rem .36rem; font-size: .72rem; }
+  .jump { padding: .25rem .3rem; font-size: .72rem; }
+  .icon-btn { width: 1.6rem; height: 1.6rem; font-size: .76rem; }
+}
 
 @media print {
   .topbar, .rail, .copy, .toast, .show-me, .player, .stage,
