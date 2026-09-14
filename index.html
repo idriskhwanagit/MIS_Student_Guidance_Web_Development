@@ -1466,6 +1466,7 @@ body {
 
     <select class="jump" id="jump" aria-label="Steps"></select>
     <button type="button" class="icon-btn" id="themeBtn" title="Theme" aria-label="Theme">◐</button>
+    <button type="button" class="icon-btn" id="fullBtn" title="Full screen" aria-label="Full screen" hidden>⛶</button>
     <button type="button" class="icon-btn" id="printBtn" title="Print" aria-label="Print">⎙</button>
   </header>
 
@@ -1505,6 +1506,7 @@ body {
           act: { new: "فایلێکی نوێ", add: "زیادی بکە",
                  edit: "بیگۆڕە", read: "تەنها بیخوێنەوە" },
           showMe: "ئەم هەنگاوە پیشانم بدە",
+          full: "تەواوی شاشە",
           loading: "دەقەکە دەهێنرێت…",
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
     en: { brand: "Student Guide", langLabel: "Language", tocLabel: "Contents",
@@ -1515,6 +1517,7 @@ body {
           act: { new: "new file", add: "add this",
                  edit: "change this", read: "just read it" },
           showMe: "Show me this step",
+          full: "Full screen",
           loading: "Loading the text…",
           failed: "The text could not be loaded. Check your connection and reload the page." }
   };
@@ -1540,7 +1543,8 @@ body {
   state.doc = "guide";
 
   function docFiles(lang) {
-    return state.doc === "study" ? STUDY[lang] : FETCH[lang];
+    /* an offline copy has neither list: its text is already in DOCS */
+    return state.doc === "study" ? (STUDY && STUDY[lang]) : (FETCH && FETCH[lang]);
   }
 
   function setDoc(which) {
@@ -1827,6 +1831,7 @@ body {
   var toc = document.getElementById("toc");
   var jump = document.getElementById("jump");
   var app = document.querySelector(".app");
+  var fullBtn = document.getElementById("fullBtn");
 
   function paint() {
     var key = state.doc + ":" + state.lang;
@@ -1878,6 +1883,9 @@ body {
       var w = words[el.getAttribute("data-t")];
       if (w) { el.textContent = w; }
     });
+
+    fullBtn.title = words.full;
+    fullBtn.setAttribute("aria-label", words.full);
 
     /* The tab, and the header the browser prints on every sheet, both come
        from the document title — so it follows the guide and its language. */
@@ -3819,6 +3827,23 @@ body {
   document.getElementById("printBtn").addEventListener("click", function () {
     window.print();
   });
+
+  /* ---- full screen, for a projector -------------------------------------
+     Offered only where the browser has it: Safari on an iPhone does not,
+     for an ordinary page, so the button stays hidden there. */
+  var root = document.documentElement;
+  var goFull = root.requestFullscreen || root.webkitRequestFullscreen;
+  var leaveFull = document.exitFullscreen || document.webkitExitFullscreen;
+  if (goFull) {
+    fullBtn.hidden = false;
+    fullBtn.addEventListener("click", function () {
+      if (document.fullscreenElement || document.webkitFullscreenElement) {
+        leaveFull.call(document);
+      } else {
+        goFull.call(root);
+      }
+    });
+  }
 
   reader.addEventListener("click", function (e) {
     var btn = e.target.closest(".copy");
