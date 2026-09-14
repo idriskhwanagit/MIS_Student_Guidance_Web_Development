@@ -216,7 +216,12 @@ body {
    ------------------------------------------------------------------------ */
 .jump {
   display: none;
-  max-width: 12rem;
+  /* grows into the bar's spare room so a step's whole name shows, and
+     never shrinks below the width it had before, so the row breaks no
+     sooner than it did */
+  flex: 1 1 12rem;
+  min-width: 12rem;   /* without it a select's minimum is its longest step */
+  max-width: 28rem;
   padding: .4rem .6rem;
   border: 1px solid var(--rule);
   border-radius: 8px;
