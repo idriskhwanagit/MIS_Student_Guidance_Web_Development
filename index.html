@@ -403,6 +403,12 @@ body {
   border-top: 1px solid var(--rule);
 }
 
+/* A name in code is its own island: isolate, not embed. With embed the code
+   joins the Latin and the signs around it into one left-to-right run, and a
+   tick, a cross or a comma beside it lands next to the wrong name. Bold and
+   italic take plaintext, which reads their own first letter — so an English
+   menu stays left to right inside a Kurdish line, and a Kurdish phrase does
+   not. */
 .reader code {
   padding: .12em .38em;
   border-radius: 4px;
@@ -411,8 +417,12 @@ body {
   font-family: var(--f-mono);
   font-size: .85em;
   direction: ltr;
-  unicode-bidi: embed;
+  unicode-bidi: isolate;
 }
+
+.reader strong,
+.reader b,
+.reader em { unicode-bidi: plaintext; }
 
 /* the English line the study sheet prints under a Kurdish question — see
    the "@en " marker handled in flushPara() */
