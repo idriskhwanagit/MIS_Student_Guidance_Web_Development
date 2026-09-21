@@ -171,6 +171,31 @@ In that case go to 1.3.
    open terminal still does not know that Python was installed
 6. Open a new terminal and type `python --version` again
 
+### The quick way — from the terminal
+
+Instead of the six steps above, you can install Python with one command. Type
+this in the VS Code terminal:
+
+```bash
+winget install -e --id Python.Python.3.14 --custom "PrependPath=1"
+```
+
+`winget` downloads and installs Python itself, and `PrependPath=1` does the
+same job as the **Add python.exe to PATH** box — there is nothing to tick.
+
+Then **close VS Code completely and open it again**, and type
+`python --version` in a new terminal.
+
+> If the terminal says `winget` is not recognised, this computer does not have
+> it — use the way above instead.
+
+**If you do not have VS Code either:** right-click the **Start** button →
+**Terminal**, and type:
+
+```bash
+winget install -e --id Microsoft.VisualStudioCode
+```
+
 ---
 
 ## 1.4 — Confirm the database is there
