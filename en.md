@@ -342,13 +342,18 @@ dir
 ## What you should see
 
 ```out
-    Directory: C:\Users\...\Documents\student-system
+    Directory: C:\Users\Ali\Documents\student-system
 
-Mode      Name
-----      ----
-d-----    static
-d-----    templates
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        21/09/2026   3:14 PM                static
+d-----        21/09/2026   3:14 PM                templates
+
+PS C:\Users\Ali\Documents\student-system>
 ```
+
+The date, the time and the user name (`Ali`) will be different on yours — that is normal.
 
 Check two things:
 

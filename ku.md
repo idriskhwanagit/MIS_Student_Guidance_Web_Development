@@ -345,13 +345,18 @@ dir
 ## چی دەبینیت
 
 ```out
-    Directory: C:\Users\...\Documents\student-system
+    Directory: C:\Users\Ali\Documents\student-system
 
-Mode      Name
-----      ----
-d-----    static
-d-----    templates
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d-----        21/09/2026   3:14 PM                static
+d-----        21/09/2026   3:14 PM                templates
+
+PS C:\Users\Ali\Documents\student-system>
 ```
+
+بەروار، کات و ناوی بەکارهێنەر (`Ali`) لای تۆ جیاواز دەبن — ئەوە ئاساییە.
 
 دوو شت بپشکنە:
 
