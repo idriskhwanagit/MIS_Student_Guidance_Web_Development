@@ -574,6 +574,74 @@ body {
   text-decoration-color: rgba(231, 170, 170, .6);
 }
 
+/* A part — green lines to add, or red ones to delete — carries its own
+   tools at its end: a copy button beside the green, a "delete" beside the
+   red, and on a long change a tick. They show when the part is pointed at;
+   on a touch screen, where nothing is pointed at, they always show. */
+.block pre code .part { position: relative; }
+.block pre code .ptools {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: .3rem;
+  display: flex;
+  gap: .3rem;
+  align-items: center;
+  min-height: 0;
+  height: 1.65em;
+  opacity: 0;
+  transition: opacity .15s;
+  text-decoration: none;
+}
+.block pre code .part:hover > .ptools,
+.block pre code .ptools:focus-within { opacity: 1; }
+@media (hover: none) { .block pre code .ptools { opacity: 1; } }
+
+.pcopy, .tick {
+  padding: 0 .5rem;
+  height: 1.35em;
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 5px;
+  background: #0f2a33;
+  color: #cfe2e8;
+  font-family: var(--f-ui);
+  font-size: .7rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.pcopy { border-color: rgba(143, 227, 200, .45); color: #bff0d9; }
+.pcopy[data-done="1"] { color: #8fe3c8; border-color: #8fe3c8; }
+.block pre code .pdel {
+  display: inline-flex;
+  align-items: center;
+  min-height: 0;
+  height: 1.35em;
+  padding: 0 .5rem;
+  border: 1px solid rgba(231, 170, 170, .45);
+  border-radius: 5px;
+  background: #3a1f23;
+  color: #f2c2c2;
+  font-family: var(--f-ui);
+  font-size: .7rem;
+  text-decoration: none;
+  unicode-bidi: plaintext;
+}
+.tick { padding: 0 .35rem; color: rgba(207, 226, 232, .55); }
+.tick[aria-pressed="true"] { background: #1c4a37; border-color: #8fe3c8; color: #8fe3c8; }
+
+/* a part ticked off steps back, and keeps its tick in view */
+.block pre code .part.done { opacity: .5; }
+.block pre code .part.done > .ptools { opacity: 1; }
+
+/* the order to work in, where the filename is */
+.block > .where .order {
+  margin-inline-start: auto;
+  font-family: var(--f-sans);
+  font-size: .72rem;
+  letter-spacing: 0;
+  color: #f0d494;
+  unicode-bidi: plaintext;
+}
+
 /* --- code blocks --------------------------------------------------------- */
 .block {
   min-width: 0;
@@ -1425,7 +1493,8 @@ body {
 
 @media print {
   .topbar, .rail, .copy, .toast, .show-me, .player, .stage,
-  .jump { display: none !important; }
+  .jump, .ptools { display: none !important; }
+  .block pre code .part.done { opacity: 1; }
   .explain { border: 0; background: none; }
   .explain > summary { padding-inline: 0; color: var(--ink); }
   .explain > :not(summary) { margin-inline: 0; }
@@ -1539,6 +1608,8 @@ body {
   var UI = {
     ku: { brand: "ڕێنمایی قوتابی", langLabel: "زمان", tocLabel: "ناوەڕۆک",
           copy: "کۆپی", copied: "کۆپی کرا",
+          del: "بیسڕەوە", done: "تەواو بوو",
+          order: "سەرەتا سەوزەکان زیاد بکە، پاشان سوورەکان بسڕەوە",
           keep: "بۆ هێشتنەوەی کۆپییەک، Ctrl + P دابگرە و وەک PDF چاپی بکە",
           terminal: "تێرمیناڵ",
           output: "ئەنجام",
@@ -1550,6 +1621,8 @@ body {
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
     en: { brand: "Student Guide", langLabel: "Language", tocLabel: "Contents",
           copy: "Copy", copied: "Copied",
+          del: "delete this", done: "done",
+          order: "First add the green, then delete the red",
           keep: "To keep a copy, press Ctrl + P and print to PDF",
           terminal: "Terminal",
           output: "Output",
@@ -1671,6 +1744,23 @@ body {
     return s;
   }
 
+  /* ---- a long change, ticked off part by part ---------------------------
+     Kept in this browser under the change's own text, so the same change
+     keeps its ticks in either language and after the page is reloaded. */
+  var DONE_KEY = "mis-guide-done";
+
+  function blockKey(text) {
+    var h = 5381;
+    for (var c = 0; c < text.length; c += 1) { h = ((h << 5) + h + text.charCodeAt(c)) | 0; }
+    return (h >>> 0).toString(36);
+  }
+
+  function doneMap() {
+    try { return JSON.parse(recall(DONE_KEY)) || {}; } catch (e) { return {}; }
+  }
+
+  function doneParts(key) { return doneMap()[key] || []; }
+
   var LIST_ORDERED = /^[0-9٠-٩۰-۹]+[.)]\s+/;
   var LIST_BULLET = /^[-*]\s+/;
 
@@ -1720,18 +1810,54 @@ body {
         while (i < lines.length && !/^```/.test(lines[i])) { code.push(lines[i]); i++; }
         i++;
         var inner, clean = code.join('\n');
+        var green = 0, red = 0;
         if (lang === "diff") {
-          inner = code.map(function (row) {
+          /* Lines of one kind that follow each other make a part. The class
+             works through a change part by part: each green part is copied
+             on its own, beside it, and pasted in its place; then each red
+             part is deleted. Adding first keeps the student's place, since a
+             new line usually goes where an old one was. */
+          var parts = [];
+          code.forEach(function (row) {
             var mark = row.charAt(0);
             var kind = mark === '+' ? 'add' : (mark === '-' ? 'del' : 'same');
+            var last = parts[parts.length - 1];
             /* the marker is dropped — the colour says it, and dropping it
                keeps the indentation lined up with the context lines */
-            return '<span class="' + kind + '">' + esc(row.slice(1)) + '</span>';
+            if (last && last.kind === kind && kind !== 'same') { last.rows.push(row.slice(1)); }
+            else { parts.push({ kind: kind, rows: [row.slice(1)] }); }
+          });
+          parts.forEach(function (part) {
+            if (part.kind === 'add') { green++; }
+            if (part.kind === 'del') { red++; }
+          });
+          /* a long change gets a tick per part, so the place is not lost */
+          var ticks = green + red >= 3;
+          var key = blockKey(clean);
+          var done = doneParts(key);
+          var partNo = 0;
+          inner = parts.map(function (part) {
+            var rows = part.rows.map(function (row) {
+              return '<span>' + esc(row) + '</span>';
+            }).join('');
+            if (part.kind === 'same') { return '<span class="same">' + esc(part.rows[0]) + '</span>'; }
+            var k = partNo++;
+            var isDone = ticks && done.indexOf(k) > -1;
+            /* what is copied is the code, not the blank lines around it: the
+               student pastes where the cursor already is. A part that is
+               only a blank line is an Enter, with nothing to copy. */
+            var take = part.rows.join('\n').replace(/^\s*\n/, '').replace(/\n\s*$/, '');
+            return '<span class="part ' + part.kind + (isDone ? ' done' : '') + '">' +
+              '<span class="ptools">' +
+              (ticks ? '<button type="button" class="tick" data-key="' + key + '" data-part="' + k +
+                       '" aria-pressed="' + isDone + '" title="' + UI[state.lang].done + '">✓</button>' : '') +
+              (part.kind === 'del' ? '<span class="pdel">' + UI[state.lang].del + '</span>'
+                : (take.trim() ? '<button type="button" class="pcopy" data-copy="' + esc(take) + '">' +
+                    UI[state.lang].copy + '</button>' : '')) +
+              '</span>' + rows + '</span>';
           }).join('');
-          /* A diff block is one contiguous region of the file, so the copy
-             button hands over that whole region as it should look afterwards:
-             deleted lines dropped, kept lines still there. Copying only the
-             green lines would give fragments that paste back nowhere. */
+          /* What the step player types out, and what the file looks like
+             afterwards: deleted lines dropped, kept lines still there. */
           clean = code.filter(function (row) { return row.charAt(0) !== '-'; })
                       .map(function (row) { return row.replace(/^[+ ]/, ''); })
                       .join('\n');
@@ -1739,12 +1865,15 @@ body {
           inner = esc(clean);
         }
 
+        /* A change is copied part by part, so it has no copy-all button; the
+           order to work in is said where the filename is. */
+        var order = green && red ? '<span class="order">' + UI[state.lang].order + '</span>' : '';
         out.push('<div class="block' + (isOut ? ' out' : '') + '">' +
-          (isOut ? '' : '<button type="button" class="copy">' +
+          (isOut || green ? '' : '<button type="button" class="copy">' +
             UI[state.lang].copy + '</button>') +
-          (where || act ? '<div class="where"><span>' + esc(where) + '</span>' +
+          (where || act || order ? '<div class="where"><span>' + esc(where) + '</span>' +
             (act ? '<span class="act ' + act + '">' +
-              esc(UI[state.lang].act[act]) + '</span>' : '') + '</div>' : '') +
+              esc(UI[state.lang].act[act]) + '</span>' : '') + order + '</div>' : '') +
           '<pre><code data-lang="' + esc(lang) + '" data-copy="' +
           esc(clean) + '">' + inner + '</code></pre></div>');
         continue;
@@ -3885,9 +4014,21 @@ body {
   }
 
   reader.addEventListener("click", function (e) {
-    var btn = e.target.closest(".copy");
+    var tick = e.target.closest(".tick");
+    if (tick) {
+      var key = tick.dataset.key, k = Number(tick.dataset.part);
+      var map = doneMap(), list = map[key] || [];
+      var on = list.indexOf(k) < 0;
+      map[key] = on ? list.concat([k]) : list.filter(function (x) { return x !== k; });
+      if (!map[key].length) { delete map[key]; }
+      remember(DONE_KEY, JSON.stringify(map));
+      tick.setAttribute("aria-pressed", String(on));
+      tick.closest(".part").classList.toggle("done", on);
+      return;
+    }
+    var btn = e.target.closest(".copy, .pcopy");
     if (!btn) { return; }
-    var code = btn.parentElement.querySelector("code");
+    var code = btn.classList.contains("pcopy") ? btn : btn.parentElement.querySelector("code");
     var text = code.getAttribute("data-copy") || code.textContent;
     var done = function () {
       btn.textContent = UI[state.lang].copied;
