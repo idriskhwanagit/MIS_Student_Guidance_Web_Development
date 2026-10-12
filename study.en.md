@@ -82,19 +82,13 @@
 > 
 > The terminal reads a space as the boundary between two things.
 
-**5.** Where do we create the project?
-
-> **Answer:** Documents
-> 
-> `Documents\student-system`
-
-**6.** Which menu opens the project folder in VS Code?
+**5.** Which menu opens the project folder in VS Code?
 
 > **Answer:** File → Open Folder
 > 
 > The folder is opened, not a single file.
 
-**7.** What are the two folders inside the project called?
+**6.** What are the two folders inside the project called?
 
 > **Answer:** templates and static
 
@@ -106,41 +100,35 @@
 
 > **Answer:** python app.py
 
-**2.** Which port does the server run on?
-
-> **Answer:** 8000
-> 
-> HTTPServer(("localhost", 8000), …)
-
-**3.** After `python app.py` the terminal stops responding. What does that mean?
+**2.** After `python app.py` the terminal stops responding. What does that mean?
 
 > **Answer:** The server is running and waiting for requests
 > 
 > A server never finishes — not until you stop it.
 
-**4.** How do you stop the server?
+**3.** How do you stop the server?
 
 > **Answer:** Ctrl + C
 
-**5.** You changed `app.py` and saved it. What must you do for the change to show?
+**4.** You changed `app.py` and saved it. What must you do for the change to show?
 
 > **Answer:** Stop the server and start it again
 > 
 > Python code is read once, when the server starts.
 
-**6.** What is `BaseHTTPRequestHandler`?
+**5.** What is `BaseHTTPRequestHandler`?
 
 > **Answer:** A class that handles the requests
 > 
 > It comes with Python, from `http.server`.
 
-**7.** What does `self.send_response(200)` do?
+**6.** What does `self.send_response(200)` do?
 
 > **Answer:** Tells the browser the request succeeded
 > 
 > `200` means OK. The content follows after it.
 
-**8.** Why do we use `.encode("utf-8")`?
+**7.** Why do we use `.encode("utf-8")`?
 
 > **Answer:** Because a server sends bytes, not text
 

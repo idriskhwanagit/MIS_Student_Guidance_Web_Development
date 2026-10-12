@@ -104,15 +104,7 @@
 > 
 > تێرمیناڵ بۆشایی وەک جیاکەرەوەی دوو شت دەبینێت.
 
-**5.** پڕۆژەکە لە کام فۆڵدەردا دروست دەکەین؟
-
-@en Where do we create the project?
-
-> **وەڵام:** Documents
-> 
-> `Documents\student-system`
-
-**6.** لە VS Code، بۆ کردنەوەی فۆڵدەری پڕۆژە کام مێنیو؟
+**5.** لە VS Code، بۆ کردنەوەی فۆڵدەری پڕۆژە کام مێنیو؟
 
 @en Which menu opens the project folder in VS Code?
 
@@ -120,7 +112,7 @@
 > 
 > فۆڵدەرەکە دەکرێتەوە، نەک فایلێکی تاک.
 
-**7.** دوو فۆڵدەری ناو پڕۆژەکە ناویان چییە؟
+**6.** دوو فۆڵدەری ناو پڕۆژەکە ناویان چییە؟
 
 @en What are the two folders inside the project called?
 
@@ -136,15 +128,7 @@
 
 > **وەڵام:** python app.py
 
-**2.** سێرڤەرەکە لەسەر کام پۆرت کاردەکات؟
-
-@en Which port does the server run on?
-
-> **وەڵام:** 8000
-> 
-> HTTPServer(("localhost", 8000), …)
-
-**3.** دوای `python app.py`، تێرمیناڵ ناجوڵێت. واتای چییە؟
+**2.** دوای `python app.py`، تێرمیناڵ ناجوڵێت. واتای چییە؟
 
 @en After `python app.py` the terminal stops responding. What does that mean?
 
@@ -152,13 +136,13 @@
 > 
 > سێرڤەرێک هەرگیز «تەواو نابێت» — تا ئەو کاتەی دەیوەستێنیت.
 
-**4.** چۆن سێرڤەرەکە دەوەستێنیت؟
+**3.** چۆن سێرڤەرەکە دەوەستێنیت؟
 
 @en How do you stop the server?
 
 > **وەڵام:** Ctrl + C
 
-**5.** `app.py`ت گۆڕی و پاشەکەوتت کرد. چی دەکەیت تا گۆڕانکارییەکە دەربکەوێت؟
+**4.** `app.py`ت گۆڕی و پاشەکەوتت کرد. چی دەکەیت تا گۆڕانکارییەکە دەربکەوێت؟
 
 @en You changed `app.py` and saved it. What must you do for the change to show?
 
@@ -166,7 +150,7 @@
 > 
 > کۆدی Python تەنها یەک جار دەخوێنرێتەوە، لە کاتی هەڵسانی سێرڤەرەکەدا.
 
-**6.** `BaseHTTPRequestHandler` چییە؟
+**5.** `BaseHTTPRequestHandler` چییە؟
 
 @en What is `BaseHTTPRequestHandler`?
 
@@ -174,7 +158,7 @@
 > 
 > لەگەڵ Pythonـدا دێت — لە `http.server`ـەوە.
 
-**7.** `self.send_response(200)` چی دەکات؟
+**6.** `self.send_response(200)` چی دەکات؟
 
 @en What does `self.send_response(200)` do?
 
@@ -182,7 +166,7 @@
 > 
 > `200` واتای «باشە». ناوەڕۆکەکە دواتر دەنێردرێت.
 
-**8.** بۆچی `.encode("utf-8")` بەکاردەهێنین؟
+**7.** بۆچی `.encode("utf-8")` بەکاردەهێنین؟
 
 @en Why do we use `.encode("utf-8")`?
 
