@@ -160,7 +160,7 @@
 > 
 > `DEFAULT (datetime('now', 'localtime'))`
 
-**5.** You changed a column and nothing happened. Why?
+**5.** You changed a column in `database.py`, saved it and restarted the server, but the table did not change. Why?
 
 > **Answer:** `CREATE TABLE IF NOT EXISTS` leaves an existing table alone
 > 
@@ -470,7 +470,7 @@
 
 **1.** What does `LIKE` do in SQL?
 
-> **Answer:** Matches part of the text
+> **Answer:** Compares text with a pattern — with `%`, part of the text is enough
 > 
 > `LIKE '%ahmad%'` finds anything containing *ahmad*.
 

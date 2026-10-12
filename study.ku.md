@@ -208,9 +208,9 @@
 > 
 > `DEFAULT (datetime('now', 'localtime'))`
 
-**5.** ستوونێکت لە خشتەکەدا گۆڕی، بەڵام هیچ نەگۆڕا. بۆچی؟
+**5.** ستوونێکت لە `database.py` گۆڕی، پاشەکەوتت کرد و سێرڤەرەکەت دووبارە هەڵستاندەوە، بەڵام خشتەکە نەگۆڕا. بۆچی؟
 
-@en You changed a column and nothing happened. Why?
+@en You changed a column in `database.py`, saved it and restarted the server, but the table did not change. Why?
 
 > **وەڵام:** `CREATE TABLE IF NOT EXISTS` خشتەی هەبوو نایگۆڕێت
 > 
@@ -618,7 +618,7 @@
 
 @en What does `LIKE` do in SQL?
 
-> **وەڵام:** بەدوای بەشێکی دەقەکەدا دەگەڕێت
+> **وەڵام:** دەق لەگەڵ نموونەیەک بەراورد دەکات — بە `%` بەشێکی دەقەکە بەسە
 > 
 > `LIKE '%ahmad%'` هەرچی *ahmad*ی تێدا بێت.
 
