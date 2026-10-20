@@ -2400,7 +2400,7 @@ student-system/
 لە `app.py`، **دوای دێڕی `STATIC_DIR`** و **پێش `def render(...)`**.
 لە چەپەوە بەبێ بۆشایی — ئەمە لە دەرەوەی هەموو کلاس و فەنکشنێکە:
 
-```out
+```out app.py read
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -2446,7 +2446,7 @@ def build_department_options(selected):
 `send_static`** — کە کۆتا فەنکشنی کلاسەکەیە — و **پێش دێڕی
 `database.init_db()`**:
 
-```out
+```out app.py read
 class StudentAppHandler(BaseHTTPRequestHandler):
     def do_GET(self): ...
     def page_home(self): ...
@@ -2605,7 +2605,7 @@ server = HTTPServer(("localhost", 8000), StudentAppHandler)
 
 کاتێک `do_GET` تەواو بوو، دێڕێکی بەتاڵ بەجێبهێڵە و ئەمە لەژێری بنووسە:
 
-```out
+```out app.py read
 class StudentAppHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         ...

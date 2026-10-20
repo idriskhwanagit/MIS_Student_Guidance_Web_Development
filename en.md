@@ -2401,7 +2401,7 @@ In `app.py`, **after the `STATIC_DIR` line** and **before
 `def render(...)`**. At the far left, with no indentation — this sits
 outside every class and function:
 
-```out
+```out app.py read
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
 STATIC_DIR = os.path.join(BASE_DIR, "static")
@@ -2447,7 +2447,7 @@ These three go **inside the `StudentAppHandler` class**, straight
 **after `send_static`** — the last method there — and **before the
 `database.init_db()` line**:
 
-```out
+```out app.py read
 class StudentAppHandler(BaseHTTPRequestHandler):
     def do_GET(self): ...
     def page_home(self): ...
@@ -2608,7 +2608,7 @@ This is a **completely new method** — do not rename `do_GET`.
 
 Where `do_GET` ends, leave a blank line and write this below it:
 
-```out
+```out app.py read
 class StudentAppHandler(BaseHTTPRequestHandler):
     def do_GET(self):
         ...
