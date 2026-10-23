@@ -10,7 +10,7 @@
 > The midterm also has practical questions, which are not here as they are:
 > the "Mock and midterm guide" tab at the top of the page shows the five ways
 > they come and how to do them, and their worked examples are at the end of
-> this sheet. The final asks more besides, explained there too.
+> this sheet. The table further down shows what the final holds.
 
 > **Practical marks:** quiz **8** (the average of every quiz) · midterm **15** · final **20** — total **43**.
 
@@ -620,23 +620,20 @@ None of this is a secret. Knowing what is coming is how you prepare for it.
 |---|---|---|---|
 | Marks | **8** — the average of every quiz | **15** | **20** |
 | Time | ~10 minutes | 60 minutes | 60 minutes |
-| Questions | ~7 | 11 — 7 choice, 4 practical | ~15 |
+| Questions | ~7 | 11 — 7 choice, 4 practical | ~20 — all choice |
 | Which steps | what has been taught — about 3 steps | 1 – 9 | everything that has been taught |
-| From this sheet | **most of it** | **7 marks** — the choice questions | **~85%** |
-| Harder questions | a few | none | ~15% |
-| Written answers | 0 – 1 | none | 3 – 5 |
+| From this sheet | **most of it** | **7 marks** — the choice questions | **all of it** |
+| Harder questions | a few | none | none |
+| Written answers | 0 – 1 | none | none |
 | Practical questions | none | **4** × 2 marks — on the laptop | to be announced |
-| Mock — not counted | before quiz 1, in class | online at home, before the midterm — the same shape | online, before the final — a little harder |
+| Mock — not counted | before quiz 1, in class | online at home, before the midterm — the same shape | online, before the final — the same shape |
 
-> **Read this sheet well** and you will pass the quizzes and the midterm's
-> choice questions comfortably.
+> **Read this sheet well** and you will pass the quizzes, the midterm's
+> choice questions and the final comfortably.
 >
 > The rest of the midterm's marks are in the **practical questions**: read the
 > "Mock and midterm guide" tab and the worked examples at the end of this
 > sheet, and do the five ways on your laptop, with the exam copy.
->
-> In the final, the harder questions **put code in front of you** and ask you
-> to read it — and that only comes from having written the project yourself.
 
 ---
 
@@ -850,139 +847,3 @@ A red message: **Full name is required.** — and Sara's name stays as it was.
 > **Answer:** Option B — Full name is required.
 > 
 > The browser counts a space as something typed and lets it through, but the server takes the spaces off both ends (`strip`), and nothing is left.
-
----
-
-# The harder questions — how to prepare
-
-> **These questions are not on this sheet.** They are not in the midterm —
-> its practical questions take their place. For the final, it will be
-> announced later. Memorising will not help — the code will be different.
-
-> But there are four kinds, and knowing the kind tells you how to think.
-> Each carries **two worked examples** with a full answer.
-
-> ⚠️ **These examples themselves will not come back.**
->
-> The same **kind** of question will, but **the code will be different**.
-> Memorising these answers buys you nothing — what pays is understanding
-> **how** each answer was reached.
->
-> Learn to look for an `elif` that can never run and the habit works on any
-> code. Memorise this one answer and it works on nothing else.
-
-## 1. What does this code do?
-
-You read a piece of code and say, in your own words, what happens.
-
-**How to answer:**
-
-- Read it line by line — do not skim.
-- Ask: **when** does this line run? Once, or on every request?
-- Ask: where does the result go?
-- Start your answer with one sentence, then explain it.
-
-**Example 1**
-
-```
-with get_connection() as connection:
-    connection.execute(
-        "INSERT INTO students (student_id) VALUES (?)",
-        (student_id,),
-    )
-```
-
-> **Answer:** It opens a connection, adds one row, and when the block ends it **commits the change and closes the connection by itself**. The number travels through a `?`, not joined onto the statement.
-
-**Example 2**
-
-```
-def render(template_name, **values):
-    path = os.path.join(TEMPLATE_DIR, template_name)
-    with open(path, encoding="utf-8") as file:
-        page = file.read()
-    ...
-```
-
-> **Answer:** It reads the template file afresh **on every call**. That is why an HTML change shows without restarting the server — and why a Python change does not, since Python is read once.
-
-## 2. What is the fault?
-
-You are shown code that **fails, or works wrongly**. Find the fault and say why it is one.
-
-**How to answer:**
-
-- Check these four: a duplicate? a line that is never reached? a missing `WHERE`? a missing `?`?
-- Ask: does Python **warn** about it? If not, it is worse.
-- Do not just say "it is wrong" — say **what happens** because of it.
-
-**Example 1**
-
-```
-def do_GET(self):
-    if url.path == "/":
-        self.page_home()
-    if url.path.startswith("/static/"):
-        self.send_static(...)
-    else:
-        self.send_response(404)
-```
-
-> **Answer:** The second `if` should be an `elif`. As written, a request for `/` sends the page, and then the `else` sends a `404` as well — **two answers to one request**.
-
-**Example 2**
-
-```
-sql = "SELECT * FROM students WHERE full_name = " + name
-connection.execute(sql)
-```
-
-> **Answer:** There is no `?` — the name goes straight into the statement. That is **SQL Injection**: someone can type SQL into the name field. It should be `execute("... = ?", (name,))`
-
-## 3. Give two causes
-
-You are given a symptom and asked for **more than one** possible cause.
-
-**How to answer:**
-
-- One cause is not enough — the marks are split between them.
-- Look in two different places: the code, and what surrounds it (the server, the file, the browser).
-- Think of the mistakes **you** made during the practical.
-
-**Example 1**
-
-> A student changed `style.css` and pressed `F5`.
-> The design did not change.
-
-> **Answer:** **1.** The browser is holding an old copy of the CSS — it needs `Ctrl + Shift + R`, not `F5`.
-**2.** The `/static/` route is missing from `do_GET`, so the server never sends the file at all.
-
-**Example 2**
-
-> A student registers someone new.
-> The page returns to the list, but the name is not there.
-
-> **Answer:** **1.** `save_student` only redirects and never calls `database.add_student()`.
-**2.** The row was stored, but `page_home` still does not call `get_all_students()`, so the list is stale.
-
-## 4. Why is it written this way?
-
-You are asked to justify a decision in the code — not what it does, but **why it was done that way**.
-
-**How to answer:**
-
-- Never write "because that is how it is written" — that is not an answer.
-- Ask: **what happens without it?** That is the answer.
-- Where you can, give an example from your own project.
-
-**Example 1**
-
-> Why does `students.db` live in the project folder rather than wherever the terminal happens to be?
-
-> **Answer:** Because of `os.path.dirname(os.path.abspath(__file__))`. Without it, running `python app.py` from another folder makes **a second, empty database**, and it looks as though every student has vanished.
-
-**Example 2**
-
-> Why is the `id` field on the edit form `hidden` rather than shown?
-
-> **Answer:** The server needs it to know which row to change, but it means nothing to the user — it is the database's own number. Showing it only confuses, and invites them to edit it.
