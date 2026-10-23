@@ -514,9 +514,10 @@ body {
 }
 
 
-/* --- the two documents ---------------------------------------------------
+/* --- the documents --------------------------------------------------------
    The guide is what the class works through; the sheet is what they revise
-   from. Both are fetched the same way, so the tab only says which. */
+   from; the practical page gets them ready for the practical questions. All
+   are fetched the same way, so the tab only says which. */
 .tabs-doc {
   display: inline-flex;
   gap: .25rem;
@@ -1563,6 +1564,7 @@ body {
       <div class="tabs-doc" role="tablist">
         <button type="button" id="tab-guide" class="on" data-doc="guide"></button>
         <button type="button" id="tab-study" data-doc="study"></button>
+        <button type="button" id="tab-practical" data-doc="practical" hidden></button>
       </div>
     <div class="switch">
       <span class="lbl" data-t="langLabel">زمان</span>
@@ -1641,12 +1643,15 @@ body {
 
 
   /* ---- which document, and whether the page is open at all -------------
-     STUDY holds the revision sheet's two files. The tab picks a pair; the
-     rest of the page does not care which pair it was handed. */
+     STUDY holds the revision sheet's two files, PRACTICAL the practical
+     page's. The tab picks a pair; the rest of the page does not care which
+     pair it was handed. */
   var STUDY = {"ku": "study.ku.md", "en": "study.en.md"};
+  var PRACTICAL = {"ku": "practical.ku.md", "en": "practical.en.md"};
   var TABS = {
     guide: ["پراکتیکی پ.وێبەکان", "Web Dev Practical"],
     study: ["پرسیار و وەڵام", "Questions and Answers"],
+    practical: ["پرسیارە کردەییەکان", "Practical questions"],
   };
   var SHUT = {
     ku: ["لاپەڕەکە داخراوە", "لە کاتی تاقیکردنەوەدا ئەم لاپەڕەیە دەستناکەوێت."],
@@ -1655,8 +1660,10 @@ body {
   state.doc = "guide";
 
   function docFiles(lang) {
-    /* an offline copy has neither list: its text is already in DOCS */
-    return state.doc === "study" ? (STUDY && STUDY[lang]) : (FETCH && FETCH[lang]);
+    /* an offline copy has none of the lists: its text is already in DOCS */
+    var pair = state.doc === "study" ? STUDY :
+               state.doc === "practical" ? PRACTICAL : FETCH;
+    return pair && pair[lang];
   }
 
   function setDoc(which) {
@@ -1664,17 +1671,17 @@ body {
     remember("doc", which);
     applyLock();
     drawTabs();
-    document.getElementById("tab-guide").className =
-      which === "guide" ? "on" : "";
-    document.getElementById("tab-study").className =
-      which === "study" ? "on" : "";
+    document.querySelectorAll(".tabs-doc button").forEach(function (b) {
+      b.className = b.dataset.doc === which ? "on" : "";
+    });
     paint();
   }
 
   function drawTabs() {
     var n = state.lang === "en" ? 1 : 0;
-    document.getElementById("tab-guide").textContent = TABS.guide[n];
-    document.getElementById("tab-study").textContent = TABS.study[n];
+    document.querySelectorAll(".tabs-doc button").forEach(function (b) {
+      b.textContent = TABS[b.dataset.doc][n];
+    });
   }
 
   /* Before a quiz the teacher can hold the revision sheet to English, since
@@ -2091,12 +2098,14 @@ body {
   /* ---- fetching the text ------------------------------------------------ */
   function fetchGuide(lang) {
     var words = UI[lang];
+    /* kept under the tab that asked for it, though another be open by now */
+    var doc = state.doc;
     reader.innerHTML = '<p class="state">' + words.loading + "</p>";
     fetch(docFiles(lang), { cache: "no-cache" }).then(function (response) {
       if (!response.ok) { throw new Error(response.status); }
       return response.text();
     }).then(function (text) {
-      DOCS[state.doc + ":" + lang] = text;
+      DOCS[doc + ":" + lang] = text;
       paint();
     })["catch"](function () {
       reader.innerHTML = '<p class="state">' + words.failed + "</p>";
@@ -4116,8 +4125,10 @@ body {
   if (savedTheme) { document.documentElement.setAttribute("data-theme", savedTheme); }
   var savedLang = recall(STORE + ".lang");
   if (savedLang === "ku" || savedLang === "en") { chosenLang = state.lang = savedLang; }
+  /* the practical page is a tab of the hosted page only */
+  document.getElementById("tab-practical").hidden = !PRACTICAL;
   var savedDoc = recall("doc");
-  if (savedDoc === "study") { state.doc = "study"; }
+  if (savedDoc === "study" || (savedDoc === "practical" && PRACTICAL)) { state.doc = savedDoc; }
 
   drawTabs();
   /* the switch is read before the first paint, so a held sheet never
