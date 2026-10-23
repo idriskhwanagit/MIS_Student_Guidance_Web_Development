@@ -123,7 +123,7 @@ Sara Ali و Ahmad Karim پیشان بدات، و ئەوی تریان فۆڕمی 
 
 ## پێنج شێوازەکە
 
-بۆ هەر شێوازێک: چی دەپرسرێت، چی دەکەیت، و دوو نموونە بە وەڵامەکانیانەوە. نموونەکان لەسەر کۆپی تاقیکردنەوەکە ڕەن کراون، بۆیە ئەگەر خۆت بیانکەیت، ڕێک هەمان ئەنجام دەبینیت.
+بۆ هەر شێوازێک: چی دەپرسرێت، چی دەکەیت، و دوو نموونە بە وەڵامەکانیانەوە. نموونەکان لەسەر کۆپی تاقیکردنەوەکە ڕەن کراون، بۆیە ئەگەر خۆت بیانکەیت، ڕێک هەمان ئەنجام دەبینیت. پرسیارەکان بە ئینگلیزین، وەک لە تاقیکردنەوەدا دێن؛ ڕوونکردنەوەکان بە کوردین.
 
 ### شێوازی 1 — پرسین لە داتابەیس
 
@@ -135,7 +135,9 @@ Sara Ali و Ahmad Karim پیشان بدات، و ئەوی تریان فۆڕمی 
 - لە تێرمیناڵی دووەمدا Paste ی بکە و `Enter` دابگرە.
 - ئەو دێڕەی دەینووسێت بخوێنەوە، و هەمان شت لە وەڵامەکاندا هەڵبژێرە.
 
-**نموونەی 1.** خشتەی `students` چەند ستوونی هەیە؟ ئەم فەرمانە ڕەن بکە:
+**نموونەی 1.**
+
+@en How many columns does the `students` table have? Run this command:
 
 ```bash
 python -c "import database; print(len(database.get_connection().execute('PRAGMA table_info(students)').fetchall()))"
@@ -156,7 +158,9 @@ python -c "import database; print(len(database.get_connection().execute('PRAGMA 
 > 
 > فەرمانەکە `8` دەنووسێت: هەمان هەشت ستوونەکەی بەشی 4.4، لە `id` ـەوە تا `created_at`.
 
-**نموونەی 2.** ئەو قوتابییەی `id` ـەکەی 2 ـە لە کام بەشی زانکۆدایە؟ ئەم فەرمانە ڕەن بکە:
+**نموونەی 2.**
+
+@en Which department is the student whose `id` is 2 in? Run this command:
 
 ```bash
 python -c "import database; print(database.get_student(2)['department'])"
@@ -187,7 +191,9 @@ Accounting
 - نووسینێکی سوور دەردەکەوێت. تەنها دوایین دێڕەکەی بخوێنەوە.
 - ئەو وەڵامە هەڵبژێرە کە هەمان دوایین دێڕە.
 
-**نموونەی 1.** ئەم فەرمانە ڕەن بکە. دوایین دێڕی هەڵەکە چی دەڵێت؟
+**نموونەی 1.**
+
+@en Run this command. What does the last line of the error say?
 
 ```bash
 python -c "import database; print(database.get_connection().execute('SELECT * FROM student').fetchall())"
@@ -208,7 +214,9 @@ sqlite3.OperationalError: no such table: student
 > 
 > ناوی خشتەکە `students` ـە، بە `s` ـەوە. فەرمانەکە `student` ی نووسیوە، بۆیە SQLite دەڵێت خشتەیەکی وا نییە.
 
-**نموونەی 2.** ئەم فەرمانە ڕەن بکە. دوایین دێڕی هەڵەکە چی دەڵێت؟
+**نموونەی 2.**
+
+@en Run this command. What does the last line of the error say?
 
 ```bash
 python -c "import database; print(database.get_student(5)['full_name'])"
@@ -239,7 +247,9 @@ TypeError: 'NoneType' object is not subscriptable
 - ناونیشانەکە لە شریتی ناونیشانی Chrome دابنێ و `Enter` دابگرە.
 - سەیری لاپەڕەکە بکە: سەردێڕەکەی و خانەکانی. ئەگەر لاپەڕەکە نەبێت، Chrome پەڕەی هەڵەی خۆی پیشان دەدات، کە `HTTP ERROR 404` ی تێدایە.
 
-**نموونەی 1.** سێرڤەرەکە کار دەکات. ئەم ناونیشانە بکەرەوە. لە خانەی **Full name** دا چی نووسراوە؟
+**نموونەی 1.**
+
+@en With the server running, open this address. What is written in the **Full name** box?
 
 ```
 http://localhost:8000/edit?id=2
@@ -258,7 +268,9 @@ http://localhost:8000/edit?id=2
 > 
 > `id=2` قوتابیی ژمارە 2 ـە، واتە Sara Ali. Edit فۆڕمەکە بە زانیارییەکانی ئەو پڕ دەکاتەوە — هەمان بەشی 9.8.
 
-**نموونەی 2.** ئەم ناونیشانە بکەرەوە، بەبێ `?id=`. سەردێڕی لاپەڕەکە چییە؟
+**نموونەی 2.**
+
+@en Open this address, with no `?id=`. What is the page's heading?
 
 ```
 http://localhost:8000/edit
@@ -287,7 +299,9 @@ http://localhost:8000/edit
 - کلیکی ڕاست ڕێک لەسەر ئەو بەشە بکە کە پرسیارەکە ناوی دەبات ← **Inspect**.
 - لە بەشی **Styles** ئەو ڕێسایە بدۆزەوە کە پرسیارەکە باسی دەکات، و بەهاکەی بخوێنەوە.
 
-**نموونەی 1.** لە لاپەڕەی سەرەکیدا، سەردێڕی ستوونەکانی خشتەکە بە پیتی گەورەن، وەک `FULL NAME`. کلیکی ڕاست لەسەر یەکێکیان بکە ← **Inspect**. لە Styles، کام دێڕی CSS پیتەکانی گەورە کردووە؟
+**نموونەی 1.**
+
+@en On the home page the table's column headings are in capitals, like `FULL NAME`. Right-click one of them → **Inspect**. In Styles, which CSS line makes the letters capitals?
 
 - بژاردەی A: `font-weight: bold`
 - بژاردەی B: `text-transform: uppercase`
@@ -302,7 +316,9 @@ http://localhost:8000/edit
 > 
 > `text-transform: uppercase` نووسینەکە بە پیتی گەورە پیشان دەدات، بەبێ ئەوەی HTML ـەکە بگۆڕێت: لە `list.html` دا هێشتا `Full name` نووسراوە.
 
-**نموونەی 2.** کلیکی ڕاست لەسەر سەردێڕە شینە گەورەکەی سەرەوە بکە، **Students** ← **Inspect**. لە Styles، `font-size` ی چەندە؟
+**نموونەی 2.**
+
+@en Right-click the big blue heading at the top, **Students** → **Inspect**. In Styles, what is its `font-size`?
 
 - بژاردەی A: `16px`
 - بژاردەی B: `20px`
@@ -328,14 +344,19 @@ http://localhost:8000/edit
 - خانەکان ڕێک وەک پرسیارەکە دەڵێت پڕ بکەرەوە، و دوگمەکە دابگرە.
 - پەیامە سوورەکەی سەرەوەی فۆڕمەکە بخوێنەوە.
 
-**نموونەی 1.** کلیک لە لینکی **Register a new student** بکە، و خانەکان بەم شێوەیە پڕ بکەرەوە:
+**نموونەی 1.**
 
-- خانەی **Student ID:** `MIS-2025-001`
-- خانەی **Full name:** `Test`
-- خانەی **Department:** هەر یەکێک
-- خانەی **Gender:** `Male`
+@en Click **+ Register a new student**, and fill in the boxes like this:
 
-پاشان **Register student** دابگرە. چی دەردەکەوێت؟
+@en • **Student ID:** `MIS-2025-001`
+
+@en • **Full name:** `Test`
+
+@en • **Department:** any one
+
+@en • **Gender:** `Male`
+
+@en Then press **Register student**. What appears?
 
 - بژاردەی A: *The student is added at the top of the list*
 - بژاردەی B: *This student ID is already registered.*
@@ -350,9 +371,11 @@ http://localhost:8000/edit
 > 
 > `MIS-2025-001` ژمارەی Ahmad Karim ـە، و سێرڤەرەکە ژمارەی دووبارە ڕەت دەکاتەوە — هەمان بەشی 8.9.
 
-**نموونەی 2.** لە لیستەکەدا کلیک لە **Edit** ی تەنیشت **Sara Ali** بکە. ناوەکەی خانەی **Full name** بسڕەوە و تەنها یەک بۆشایی تێدا بنووسە، واتە یەک جار کلیلی Space.
+**نموونەی 2.**
 
-پاشان **Save changes** دابگرە. چی دەردەکەوێت؟
+@en In the list, click **Edit** next to **Sara Ali**. Delete the name in the **Full name** box and type only one space — the Space key, once.
+
+@en Then press **Save changes**. What appears?
 
 - بژاردەی A: *Sara's name becomes empty in the list*
 - بژاردەی B: *Full name is required.*
