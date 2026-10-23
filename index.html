@@ -205,6 +205,37 @@ body {
 
 .icon-btn:hover { color: var(--accent-ink); border-color: var(--accent); }
 
+/* --- help: what the open tab holds ---------------------------------------
+   A "?" in the top bar opens a short note on the tab in front of the reader
+   and its parts. The note fills the dialog, so a click on the dialog itself
+   is a click on the backdrop. */
+.help-btn { color: var(--accent); font-weight: 700; }
+.help {
+  width: min(34rem, calc(100% - 2rem));
+  padding: 0;
+  border: 1px solid var(--rule);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+  font-family: var(--f-ui);
+}
+.help::backdrop { background: rgba(16, 32, 43, .45); }
+.help-in { position: relative; padding: 1.2rem 1.4rem 1rem; line-height: 1.8; }
+.help-in h2 {
+  margin: 0 0 .6rem;
+  padding-inline-end: 2.4rem;
+  font-size: 1.05rem;
+  color: var(--accent-ink);
+}
+.help-in p { margin: 0 0 .7rem; }
+.help-in ol, .help-in ul { margin: 0 0 .7rem; padding-inline-start: 1.3rem; }
+.help-in li { margin-bottom: .45rem; }
+.help-close { position: absolute; top: .9rem; inset-inline-end: .9rem; }
+/* a part's English name, on a line of its own under the Kurdish: kept whole,
+   since an English run that wraps inside a Kurdish line comes out scrambled */
+.help-en { display: inline-block; font-size: .86em; color: var(--ink-soft); }
+
 :where(button, a):focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
@@ -1586,10 +1617,18 @@ body {
     </div>
 
     <select class="jump" id="jump" aria-label="Steps"></select>
+    <button type="button" class="icon-btn help-btn" id="helpBtn" title="Help" aria-label="Help" hidden>?</button>
     <button type="button" class="icon-btn" id="themeBtn" title="Theme" aria-label="Theme">◐</button>
     <button type="button" class="icon-btn" id="fullBtn" title="Full screen" aria-label="Full screen" hidden>⛶</button>
     <button type="button" class="icon-btn" id="printBtn" title="Print" aria-label="Print">⎙</button>
   </header>
+
+  <dialog class="help" id="help">
+    <div class="help-in">
+      <button type="button" class="icon-btn help-close">✕</button>
+      <div class="help-body"></div>
+    </div>
+  </dialog>
 
   <div class="shell">
     <div class="notice" id="notice" hidden>
@@ -1630,6 +1669,7 @@ body {
                  edit: "بیگۆڕە", read: "تەنها بیخوێنەوە" },
           showMe: "ئەم هەنگاوە پیشانم بدە",
           full: "تەواوی شاشە",
+          help: "یارمەتی", close: "داخستن",
           loading: "دەقەکە دەهێنرێت…",
           failed: "نەتوانرا دەقەکە بهێنرێت. پەیوەندی ئینتەرنێتەکەت بپشکنە و لاپەڕەکە دووبارە بارکە." },
     en: { brand: "Student Guide", langLabel: "Language", tocLabel: "Contents",
@@ -1643,6 +1683,7 @@ body {
                  edit: "change this", read: "just read it" },
           showMe: "Show me this step",
           full: "Full screen",
+          help: "Help", close: "Close",
           loading: "Loading the text…",
           failed: "The text could not be loaded. Check your connection and reload the page." }
   };
@@ -2121,6 +2162,8 @@ body {
 
     fullBtn.title = words.full;
     fullBtn.setAttribute("aria-label", words.full);
+    helpBtn.title = words.help;
+    helpBtn.setAttribute("aria-label", words.help);
 
     /* The tab, and the header the browser prints on every sheet, both come
        from the document title — so it follows the guide and its language. */
@@ -4179,6 +4222,105 @@ body {
     e.clipboardData.setData("text/plain",
       text + "\n\n" + rule + "\n" + NOTICE_KU);
     e.preventDefault();
+  });
+
+  /* ---- help: what the tab in front of the reader holds -------------------
+     A held sheet reads in English, but its help explains rather than asks,
+     so the note follows the language the reader chose (the lecturer,
+     2026-10-23). The hosted page only: an offline copy has one document. */
+  var HELP = {
+    guide: [
+      "<p>ڕێنمایی پراکتیکییە: لە 13 هەنگاودا پڕۆژەکە دروست دەکەیت، لە " +
+      "ئامادەکردنی کۆمپیوتەرەکەوە تا تاقیکردنەوەی کۆتایی. هەر هەنگاوێک کۆد و " +
+      "ڕوونکردنەوەی خۆی هەیە.</p><p>دوو تابەکەی تر:</p><ul>" +
+      "<li><b>پرسیار و وەڵام:</b> ورقەی خوێندنەوە، کە پرسیارەکانی کویز و " +
+      "میدتێرمی لێوە دێن.</li>" +
+      "<li><b>ڕێنمایی مۆک و میدتێرم:</b> هەموو ئەوەی بۆ پرسیارە کردەییەکان " +
+      "پێویستە.</li></ul>" +
+      "<p>لە ڕۆژی تاقیکردنەوەدا ئەم تابە داخراوە.</p>",
+      "<p>The practical guide: in 13 steps you build the project, from " +
+      "preparing the computer to the final test. Each step has its code and " +
+      "its explanation.</p><p>The other two tabs:</p><ul>" +
+      "<li><b>Questions and Answers:</b> the revision sheet the quiz and " +
+      "midterm questions come from.</li>" +
+      "<li><b>Mock and midterm guide:</b> all you need for the practical " +
+      "questions.</li></ul>" +
+      "<p>On an exam day this tab is closed.</p>"
+    ],
+    study: [
+      "<p>ئەم تابە چوار بەشی هەیە. بۆ چوونە سەر هەر بەشێک، ناوەڕۆکەکە " +
+      "بەکاربهێنە. ناوی ئینگلیزیی هەر بەشێکیش لە ژێریدا نووسراوە.</p><ol>" +
+      "<li><b>پرسیار و وەڵام:</b> پرسیارەکان بە وەڵامەکانیانەوە، هەنگاو بە " +
+      "هەنگاو. پرسیارەکانی کویز و پرسیارە هەڵبژاردنەکانی میدتێرم لێرەوە " +
+      "دێن.<br><span class=\"help-en\" dir=\"ltr\">Questions and Answers</span></li>" +
+      "<li><b>میدتێرم و فاینەل:</b> خشتەیەک کە پیشان دەدات هەر " +
+      "تاقیکردنەوەیەک چەند پرسیار و چ جۆرێکی تێدایە.<br>" +
+      "<span class=\"help-en\" dir=\"ltr\">The midterm and the final</span></li>" +
+      "<li><b>پرسیارە کردەییەکان — نموونە:</b> دوو نموونە بۆ هەر یەک لە پێنج " +
+      "شێوازە کردەییەکە، بە وەڵامەوە. پرسیارەکانی تاقیکردنەوە وەک ئەمانە " +
+      "نایەن، بەڵام بە هەمان شێواز دێن.<br>" +
+      "<span class=\"help-en\" dir=\"ltr\">Practical questions — worked examples</span></li>" +
+      "<li><b>پرسیارە قورسەکان:</b> چوار جۆری پرسیاری قورس، هەر یەکە بە دوو " +
+      "نموونەوە. لە میدتێرمدا نایەن.<br>" +
+      "<span class=\"help-en\" dir=\"ltr\">The harder questions</span></li></ol>" +
+      "<p>لە ڕۆژی تاقیکردنەوەدا ئەم تابە داخراوە.</p>",
+      "<p>This tab has four parts. Use the contents to jump to one.</p><ol>" +
+      "<li><b>Questions and Answers:</b> the questions with their answers, " +
+      "step by step. The quiz questions and the midterm's choice questions " +
+      "come from here.</li>" +
+      "<li><b>The midterm and the final:</b> a table of how many questions, " +
+      "and of what kind, each paper holds.</li>" +
+      "<li><b>Practical questions — worked examples:</b> two examples of each " +
+      "of the five practical ways, with their answers. The exam's questions " +
+      "will not be these, but they come in the same ways.</li>" +
+      "<li><b>The harder questions:</b> four kinds of harder question, each " +
+      "with two examples. They are not in the midterm.</li></ol>" +
+      "<p>On an exam day this tab is closed.</p>"
+    ],
+    practical: [
+      "<p>هەموو ئەوەی بۆ پرسیارە کردەییەکانی مۆک و میدتێرم پێویستە:</p><ul>" +
+      "<li><b>پێداویستییەکان:</b> ئەوەی دەبێت لەگەڵ خۆت بیهێنیت.</li>" +
+      "<li><b>جارێک لە ماڵەوە، پێش مۆک:</b> ئامادەکردنی کۆپی تاقیکردنەوەکە " +
+      "لەسەر لاپتۆپەکەت.</li>" +
+      "<li><b>لە ڕۆژی تاقیکردنەوەدا:</b> هەنگاوەکانی ئەو ڕۆژە.</li>" +
+      "<li><b>ئەگەر کێشەیەک هات:</b> هەڵە باوەکان و چارەسەریان.</li>" +
+      "<li><b>کارە بنەڕەتییەکان و پێنج شێوازەکە:</b> چۆن هەر پرسیارێکی " +
+      "کردەیی دەکەیت.</li></ul>" +
+      "<p>ئەم تابە لە ڕۆژی تاقیکردنەوەدا کراوە دەمێنێت. نموونەکان لە تابی " +
+      "«پرسیار و وەڵام» دان، کە ئەو ڕۆژە داخراوە.</p>",
+      "<p>All you need for the practical questions of the mock and the " +
+      "midterm:</p><ul>" +
+      "<li><b>What you need:</b> what to bring.</li>" +
+      "<li><b>Once at home, before the mock:</b> getting the exam copy ready " +
+      "on your laptop.</li>" +
+      "<li><b>On the exam day:</b> the steps of that day.</li>" +
+      "<li><b>If something goes wrong:</b> the usual errors and their fixes.</li>" +
+      "<li><b>The basics and the five ways:</b> how each practical question is " +
+      "done.</li></ul>" +
+      "<p>This tab stays open on an exam day. The worked examples are in the " +
+      "Questions and Answers tab, which is closed that day.</p>"
+    ]
+  };
+  var helpBox = document.getElementById("help");
+  var helpBtn = document.getElementById("helpBtn");
+  helpBtn.hidden = !(STUDY && PRACTICAL);
+
+  helpBtn.addEventListener("click", function () {
+    var n = chosenLang === "en" ? 1 : 0;
+    var close = helpBox.querySelector(".help-close");
+    helpBox.setAttribute("dir", n ? "ltr" : "rtl");
+    helpBox.setAttribute("lang", n ? "en" : "ckb");
+    helpBox.querySelector(".help-body").innerHTML =
+      "<h2>" + TABS[state.doc][n] + "</h2>" + HELP[state.doc][n];
+    close.title = UI[n ? "en" : "ku"].close;
+    close.setAttribute("aria-label", close.title);
+    helpBox.showModal();
+  });
+  helpBox.querySelector(".help-close").addEventListener("click", function () {
+    helpBox.close();
+  });
+  helpBox.addEventListener("click", function (e) {
+    if (e.target === helpBox) { helpBox.close(); }
   });
 
   /* ---- start ------------------------------------------------------------- */
