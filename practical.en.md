@@ -29,14 +29,16 @@
 - **Your own internet** for the laptop — your phone's hotspot, say — with
   enough balance. The phone is for the internet only, not for answering.
 - **The exam copy:** `student-system-exam-step9.zip`, downloaded beforehand
-  from [this link](https://drive.google.com/file/d/1idEb8HPngN5aYx2i9M_dpxw5XgY885OJ/view?usp=drive_link).
+  from [this link](https://drive.google.com/uc?export=download&id=1idEb8HPngN5aYx2i9M_dpxw5XgY885OJ).
 
 ## Once at home, before the mock
 
-**1.** Download the zip from [this link](https://drive.google.com/file/d/1idEb8HPngN5aYx2i9M_dpxw5XgY885OJ/view?usp=drive_link): on the Drive page press
-**Download**, at the top right; if Google asks, sign in with your university
-account. Then right-click the zip → **Extract All** → **Extract**. Inside the
-new folder is a folder called `student-system-exam` — that is the project.
+**1.** Download the zip with [this link](https://drive.google.com/uc?export=download&id=1idEb8HPngN5aYx2i9M_dpxw5XgY885OJ). If Google asks,
+sign in with your university account, and the file downloads by itself. If it
+does not, open [this Drive page](https://drive.google.com/file/d/1idEb8HPngN5aYx2i9M_dpxw5XgY885OJ/view?usp=drive_link): at the top of the page, under the
+file's name, click the round button with a down arrow ⬇, next to **Comment**.
+Then right-click the zip → **Extract All** → **Extract**. Inside the new
+folder is a folder called `student-system-exam` — that is the project.
 
 **2.** In VS Code: **File → Open Folder** → choose `student-system-exam`.
 
