@@ -1662,11 +1662,20 @@ body {
   var TABS = {
     guide: ["پراکتیکی پ.وێبەکان", "Web Dev Practical"],
     study: ["پرسیار و وەڵام", "Questions and Answers"],
-    practical: ["پرسیارە کردەییەکان", "Practical questions"],
+    practical: ["ڕێنمایی مۆک و میدتێرم", "Mock and midterm guide"],
   };
   var SHUT = {
     ku: ["لاپەڕەکە داخراوە", "لە کاتی تاقیکردنەوەدا ئەم لاپەڕەیە دەستناکەوێت."],
     en: ["This page is closed", "It is not available during an examination."],
+  };
+  /* Closed for an examination, the hosted page keeps one tab open: the
+     Mock and midterm guide, which the student may need that day and which
+     holds no worked example. The guide and the sheet would answer the
+     paper, so they close (the lecturer, 2026-10-23). */
+  var examMode = false;
+  var EXAM = {
+    ku: "لە کاتی تاقیکردنەوەدا تەنها ئەم ڕێنماییە کراوەیە.",
+    en: "During the examination only this guide is open.",
   };
   state.doc = "guide";
 
@@ -1678,6 +1687,7 @@ body {
   }
 
   function setDoc(which) {
+    if (examMode) { which = "practical"; }
     state.doc = which;
     remember("doc", which);
     applyLock();
@@ -1711,18 +1721,27 @@ body {
     ku.title = held ? LOCKED : "";
   }
 
-  /* Read on every load, so the page can be taken down — or the sheet held
-     to English — from the repository without republishing anything else.
-     Resolves to whether the page may be drawn. */
+  /* Read on every load, so the page can be closed for an examination — all
+     but the Mock and midterm guide — or the sheet held to English, from the
+     repository without republishing anything else. Resolves to whether the
+     page may be drawn. */
   function checkOpen() {
     return fetch("closed.json", { cache: "no-store" }).then(function (r) {
       return r.ok ? r.json() : null;
     }).then(function (flag) {
       if (flag && flag.closed) {
-        var say = SHUT[state.lang] || SHUT.ku;
-        document.querySelector(".app").innerHTML =
-          '<div class="shut"><h2>' + say[0] + "</h2><p>" + say[1] + "</p></div>";
-        return false;
+        if (PRACTICAL) {
+          examMode = true;
+          state.doc = "practical";
+          document.querySelectorAll(".tabs-doc button").forEach(function (b) {
+            b.hidden = b.dataset.doc !== "practical";
+          });
+        } else {
+          var say = SHUT[state.lang] || SHUT.ku;
+          document.querySelector(".app").innerHTML =
+            '<div class="shut"><h2>' + say[0] + "</h2><p>" + say[1] + "</p></div>";
+          return false;
+        }
       }
       lockStudy = !!(flag && flag.study_english);
       return true;
@@ -2060,7 +2079,11 @@ body {
 
     /* the Kurdish text is a translation to read alongside, not the one
        the student is examined on — say so, and only while it is showing */
-    if (NOTICE_KU && state.lang === "ku") {
+    if (examMode) {
+      notice.querySelector(".text").textContent = EXAM[state.lang] +
+        (NOTICE_KU && state.lang === "ku" ? "  ·  " + NOTICE_KU : "");
+      notice.hidden = false;
+    } else if (NOTICE_KU && state.lang === "ku") {
       notice.querySelector(".text").textContent = NOTICE_KU;
       notice.hidden = false;
     } else if (lockStudy && state.doc === "study") {

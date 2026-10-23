@@ -8,9 +8,9 @@
 > Kurdish.
 
 > The midterm also has practical questions, which are not here as they are:
-> the "Practical questions" tab at the top of the page shows the five ways
-> they come and how to do them. The final asks more besides, explained at the
-> end of this sheet.
+> the "Mock and midterm guide" tab at the top of the page shows the five ways
+> they come and how to do them, and their worked examples are at the end of
+> this sheet. The final asks more besides, explained there too.
 
 > **Practical marks:** quiz **8** (the average of every quiz) · midterm **15** · final **20** — total **43**.
 
@@ -632,11 +632,224 @@ None of this is a secret. Knowing what is coming is how you prepare for it.
 > choice questions comfortably.
 >
 > The rest of the midterm's marks are in the **practical questions**: read the
-> "Practical questions" tab, and do the five ways on your laptop, with the
-> exam copy.
+> "Mock and midterm guide" tab and the worked examples at the end of this
+> sheet, and do the five ways on your laptop, with the exam copy.
 >
 > In the final, the harder questions **put code in front of you** and ask you
 > to read it — and that only comes from having written the project yourself.
+
+---
+
+# Practical questions — worked examples
+
+> ⚠️ **The practical questions of the mock and the midterm will not come as
+> these examples are.** But every one comes in one of these five ways only,
+> and is done exactly the same way; only the details change. How each way is
+> done is in the Mock and midterm guide tab.
+
+> The examples were run on the exam copy, so if you do them yourself you will
+> see exactly the same.
+
+## Way 1 — Asking the database
+
+**Example 1.** How many columns does the `students` table have? Run this command:
+
+```bash
+python -c "import database; print(len(database.get_connection().execute('PRAGMA table_info(students)').fetchall()))"
+```
+
+- Option A: `6`
+- Option B: `7`
+- Option C: `8`
+- Option D: `9`
+
+**What you see:**
+
+```out
+8
+```
+
+> **Answer:** Option C — `8`
+> 
+> The command prints `8`: the eight columns of section 4.4, from `id` to `created_at`.
+
+**Example 2.** Which department is the student whose `id` is 2 in? Run this command:
+
+```bash
+python -c "import database; print(database.get_student(2)['department'])"
+```
+
+- Option A: `MIS`
+- Option B: `Accounting`
+- Option C: `Management Information Systems`
+- Option D: `Statistics`
+
+**What you see:**
+
+```out
+Accounting
+```
+
+> **Answer:** Option B — `Accounting`
+> 
+> The command prints `Accounting`. Row 2 of the table is Sara Ali, added in section 7.2 with the department `Accounting`.
+
+## Way 2 — Reading the last line of an error
+
+**Example 1.** Run this command. What does the last line of the error say?
+
+```bash
+python -c "import database; print(database.get_connection().execute('SELECT * FROM student').fetchall())"
+```
+
+- Option A: `sqlite3.OperationalError: no such table: student`
+- Option B: `sqlite3.OperationalError: no such column: student`
+- Option C: `sqlite3.IntegrityError: UNIQUE constraint failed: students.student_id`
+- Option D: `[]`
+
+**What you see:**
+
+```out
+sqlite3.OperationalError: no such table: student
+```
+
+> **Answer:** Option A — `sqlite3.OperationalError: no such table: student`
+> 
+> The table is called `students`, with an `s`. The command asks for `student`, so SQLite says there is no such table.
+
+**Example 2.** Run this command. What does the last line of the error say?
+
+```bash
+python -c "import database; print(database.get_student(5)['full_name'])"
+```
+
+- Option A: `TypeError: 'NoneType' object is not subscriptable`
+- Option B: `IndexError: list index out of range`
+- Option C: `KeyError: 'full_name'`
+- Option D: `None`
+
+**What you see:**
+
+```out
+TypeError: 'NoneType' object is not subscriptable
+```
+
+> **Answer:** Option A — `TypeError: 'NoneType' object is not subscriptable`
+> 
+> No student has `id` 5, so `get_student(5)` returns `None`, and `None['full_name']` gives this error.
+
+## Way 3 — Opening an address
+
+**Example 1.** With the server running, open this address. What is written in the **Full name** box?
+
+```
+http://localhost:8000/edit?id=2
+```
+
+- Option A: Ahmad Karim
+- Option B: Sara Ali
+- Option C: Nothing — the box is empty
+- Option D: HTTP ERROR 404
+
+**What you see:**
+
+The **Edit student** form opens, and the Full name box says **Sara Ali**.
+
+> **Answer:** Option B — Sara Ali
+> 
+> `id=2` is student number 2, Sara Ali. Edit fills the form with her details — the same as section 9.8.
+
+**Example 2.** Open this address, with no `?id=`. What is the page's heading?
+
+```
+http://localhost:8000/edit
+```
+
+- Option A: Edit student
+- Option B: Register a new student
+- Option C: HTTP ERROR 404
+- Option D: Students
+
+**What you see:**
+
+An empty form headed **Register a new student**.
+
+> **Answer:** Option B — Register a new student
+> 
+> With no `id` the code reads no student, so it shows the form for a new one. With `?id=9999` it would have been `HTTP ERROR 404`, as in section 9.8.
+
+## Way 4 — The Inspect tool
+
+**Example 1.** On the home page the table's column headings are in capitals, like `FULL NAME`. Right-click one of them → **Inspect**. In Styles, which CSS line makes the letters capitals?
+
+- Option A: `font-weight: bold`
+- Option B: `text-transform: uppercase`
+- Option C: `font-size: 13px`
+- Option D: `color: #6b7280`
+
+**What you see:**
+
+In the rule `thead th`: `text-transform: uppercase;`
+
+> **Answer:** Option B — `text-transform: uppercase`
+> 
+> `text-transform: uppercase` shows the text in capitals without changing the HTML: `list.html` still says `Full name`.
+
+**Example 2.** Right-click the big blue heading at the top, **Students** → **Inspect**. In Styles, what is its `font-size`?
+
+- Option A: `16px`
+- Option B: `20px`
+- Option C: `24px`
+- Option D: `32px`
+
+**What you see:**
+
+In the rule `h1`: `font-size: 24px;`
+
+> **Answer:** Option C — `24px`
+> 
+> The heading is an `h1`, and the `h1` rule in `style.css` has `font-size: 24px`.
+
+## Way 5 — Trying the form
+
+**Example 1.** Click **+ Register a new student**, and fill in the boxes like this:
+
+- **Student ID:** `MIS-2025-001`
+- **Full name:** `Test`
+- **Department:** any one
+- **Gender:** `Male`
+
+Then press **Register student**. What appears?
+
+- Option A: The student is added at the top of the list
+- Option B: This student ID is already registered.
+- Option C: The email address is not valid.
+- Option D: Full name is required.
+
+**What you see:**
+
+A red message at the top of the form: **This student ID is already registered.** — and no student is added.
+
+> **Answer:** Option B — This student ID is already registered.
+> 
+> `MIS-2025-001` is Ahmad Karim's number, and the server refuses a number twice — the same as section 8.9.
+
+**Example 2.** In the list, click **Edit** next to **Sara Ali**. Delete the name in the **Full name** box and type only one space — the Space key, once.
+
+Then press **Save changes**. What appears?
+
+- Option A: Sara's name becomes empty in the list
+- Option B: Full name is required.
+- Option C: This student ID is already registered.
+- Option D: Student ID is required.
+
+**What you see:**
+
+A red message: **Full name is required.** — and Sara's name stays as it was.
+
+> **Answer:** Option B — Full name is required.
+> 
+> The browser counts a space as something typed and lets it through, but the server takes the spaces off both ends (`strip`), and nothing is left.
 
 ---
 
