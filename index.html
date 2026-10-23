@@ -436,6 +436,17 @@ body {
   font-style: italic;
 }
 
+/* an English block on the Kurdish page: a practical question, its choices
+   and its answer, set as the English page sets them — see "<!-- en -->" in
+   render() */
+.reader .en-block {
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: left;
+  font-family: var(--f-la);
+  line-height: 1.7;
+}
+
 /* --- collapsed explanations ----------------------------------------------
    A reader who already follows the code walks straight past these; one who
    does not opens them. Closed by default so the page stays short.
@@ -1771,11 +1782,16 @@ body {
   var LIST_ORDERED = /^[0-9٠-٩۰-۹]+[.)]\s+/;
   var LIST_BULLET = /^[-*]\s+/;
 
+  /* the language of the labels render() writes — a code box's "Terminal",
+     its "Copy" — when it differs from the page's: inside an English block */
+  var uiLang = null;
+
   function render(md, headings) {
     var lines = md.replace(/\r\n/g, "\n").split("\n");
     var out = [];
     var i = 0;
     var para = [];
+    var words = UI[uiLang || state.lang];
 
     function flushPara() {
       if (para.length) {
@@ -1806,12 +1822,12 @@ body {
            the code lives but not what to do there. */
         var rest = fence.slice(1);
         var act = "";
-        if (rest.length && UI[state.lang].act[rest[rest.length - 1]]) {
+        if (rest.length && words.act[rest[rest.length - 1]]) {
           act = rest.pop();
         }
         var where = rest.join(" ") ||
-          (lang === "bash" ? UI[state.lang].terminal :
-           (isOut ? UI[state.lang].output : ""));
+          (lang === "bash" ? words.terminal :
+           (isOut ? words.output : ""));
         var code = [];
         i++;
         while (i < lines.length && !/^```/.test(lines[i])) { code.push(lines[i]); i++; }
@@ -1857,10 +1873,10 @@ body {
             return '<span class="part ' + part.kind + (isDone ? ' done' : '') + '">' +
               '<span class="ptools">' +
               (ticks ? '<button type="button" class="tick" data-key="' + key + '" data-part="' + k +
-                       '" aria-pressed="' + isDone + '" title="' + UI[state.lang].done + '">✓</button>' : '') +
-              (part.kind === 'del' ? '<span class="pdel">' + UI[state.lang].del + '</span>'
+                       '" aria-pressed="' + isDone + '" title="' + words.done + '">✓</button>' : '') +
+              (part.kind === 'del' ? '<span class="pdel">' + words.del + '</span>'
                 : (take.trim() ? '<button type="button" class="pcopy" data-copy="' + esc(take) + '">' +
-                    UI[state.lang].copy + '</button>' : '')) +
+                    words.copy + '</button>' : '')) +
               '</span>' + rows + '</span>';
           }).join('');
           /* What the step player types out, and what the file looks like
@@ -1874,13 +1890,13 @@ body {
 
         /* A change is copied part by part, so it has no copy-all button; the
            order to work in is said where the filename is. */
-        var order = green && red ? '<span class="order">' + UI[state.lang].order + '</span>' : '';
+        var order = green && red ? '<span class="order">' + words.order + '</span>' : '';
         out.push('<div class="block' + (isOut ? ' out' : '') + '">' +
           (isOut || green ? '' : '<button type="button" class="copy">' +
-            UI[state.lang].copy + '</button>') +
+            words.copy + '</button>') +
           (where || act || order ? '<div class="where"><span>' + esc(where) + '</span>' +
             (act ? '<span class="act ' + act + '">' +
-              esc(UI[state.lang].act[act]) + '</span>' : '') + order + '</div>' : '') +
+              esc(words.act[act]) + '</span>' : '') + order + '</div>' : '') +
           '<pre><code data-lang="' + esc(lang) + '" data-copy="' +
           esc(clean) + '">' + inner + '</code></pre></div>');
         continue;
@@ -1917,6 +1933,27 @@ body {
         headings.push({ id: id, level: level, text: h[2].replace(/[*`]/g, "") });
         out.push("<h" + level + ' id="' + id + '">' + inline(h[2]) + "</h" + level + ">");
         i++;
+        continue;
+      }
+
+      /* an English block, from "<!-- en -->" to "<!-- /en -->": a practical
+         question, its choices and its answer, English on the Kurdish page
+         too, as the paper asks them. Drawn left to right as the English page
+         draws them, and its code boxes are labelled in English as well. */
+      if (/^<!--\s*en\s*-->\s*$/.test(line)) {
+        flushPara();
+        i++;
+        var english = [];
+        while (i < lines.length && !/^<!--\s*\/en\s*-->\s*$/.test(lines[i])) {
+          english.push(lines[i]);
+          i++;
+        }
+        i++;
+        var was = uiLang;
+        uiLang = "en";
+        out.push('<div class="en-block" dir="ltr" lang="en">' +
+          render(english.join("\n"), headings) + "</div>");
+        uiLang = was;
         continue;
       }
 
@@ -4039,11 +4076,12 @@ body {
     if (!btn) { return; }
     var code = btn.classList.contains("pcopy") ? btn : btn.parentElement.querySelector("code");
     var text = code.getAttribute("data-copy") || code.textContent;
+    var said = UI[btn.closest(".en-block") ? "en" : state.lang];
     var done = function () {
-      btn.textContent = UI[state.lang].copied;
+      btn.textContent = said.copied;
       btn.dataset.done = "1";
       setTimeout(function () {
-        btn.textContent = UI[state.lang].copy;
+        btn.textContent = said.copy;
         btn.dataset.done = "";
       }, 1400);
     };
@@ -4129,6 +4167,12 @@ body {
   document.getElementById("tab-practical").hidden = !PRACTICAL;
   var savedDoc = recall("doc");
   if (savedDoc === "study" || (savedDoc === "practical" && PRACTICAL)) { state.doc = savedDoc; }
+  /* a link can open a tab of its own, ahead of the one last read:
+     …/?tab=practical, ?tab=study or ?tab=guide */
+  var asked = (location.search.match(/[?&]tab=(\w+)/) || [])[1];
+  if (asked === "guide" || (asked === "study" && STUDY) || (asked === "practical" && PRACTICAL)) {
+    state.doc = asked;
+  }
 
   drawTabs();
   /* the switch is read before the first paint, so a held sheet never

@@ -123,7 +123,7 @@ Sara Ali و Ahmad Karim پیشان بدات، و ئەوی تریان فۆڕمی 
 
 ## پێنج شێوازەکە
 
-بۆ هەر شێوازێک: چی دەپرسرێت، چی دەکەیت، و دوو نموونە بە وەڵامەکانیانەوە. نموونەکان لەسەر کۆپی تاقیکردنەوەکە ڕەن کراون، بۆیە ئەگەر خۆت بیانکەیت، ڕێک هەمان ئەنجام دەبینیت. پرسیارەکان بە ئینگلیزین، وەک لە تاقیکردنەوەدا دێن؛ ڕوونکردنەوەکان بە کوردین.
+بۆ هەر شێوازێک: چی دەپرسرێت، چی دەکەیت، و دوو نموونە بە وەڵامەکانیانەوە. نموونەکان لەسەر کۆپی تاقیکردنەوەکە ڕەن کراون، بۆیە ئەگەر خۆت بیانکەیت، ڕێک هەمان ئەنجام دەبینیت. پرسیار و بژاردە و وەڵامەکان بە ئینگلیزین، وەک لە تاقیکردنەوەدا دێن؛ ڕوونکردنەوەکان بە کوردین.
 
 ### شێوازی 1 — پرسین لە داتابەیس
 
@@ -135,18 +135,18 @@ Sara Ali و Ahmad Karim پیشان بدات، و ئەوی تریان فۆڕمی 
 - لە تێرمیناڵی دووەمدا Paste ی بکە و `Enter` دابگرە.
 - ئەو دێڕەی دەینووسێت بخوێنەوە، و هەمان شت لە وەڵامەکاندا هەڵبژێرە.
 
-**نموونەی 1.**
-
-@en How many columns does the `students` table have? Run this command:
+<!-- en -->
+**Example 1.** How many columns does the `students` table have? Run this command:
 
 ```bash
 python -c "import database; print(len(database.get_connection().execute('PRAGMA table_info(students)').fetchall()))"
 ```
 
-- بژاردەی A: `6`
-- بژاردەی B: `7`
-- بژاردەی C: `8`
-- بژاردەی D: `9`
+- Option A: `6`
+- Option B: `7`
+- Option C: `8`
+- Option D: `9`
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
@@ -154,22 +154,24 @@ python -c "import database; print(len(database.get_connection().execute('PRAGMA 
 8
 ```
 
-> **وەڵام:** بژاردەی C — `8`
+> <!-- en -->
+> **Answer:** Option C — `8`
+> <!-- /en -->
 > 
 > فەرمانەکە `8` دەنووسێت: هەمان هەشت ستوونەکەی بەشی 4.4، لە `id` ـەوە تا `created_at`.
 
-**نموونەی 2.**
-
-@en Which department is the student whose `id` is 2 in? Run this command:
+<!-- en -->
+**Example 2.** Which department is the student whose `id` is 2 in? Run this command:
 
 ```bash
 python -c "import database; print(database.get_student(2)['department'])"
 ```
 
-- بژاردەی A: `MIS`
-- بژاردەی B: `Accounting`
-- بژاردەی C: `Management Information Systems`
-- بژاردەی D: `Statistics`
+- Option A: `MIS`
+- Option B: `Accounting`
+- Option C: `Management Information Systems`
+- Option D: `Statistics`
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
@@ -177,7 +179,9 @@ python -c "import database; print(database.get_student(2)['department'])"
 Accounting
 ```
 
-> **وەڵام:** بژاردەی B — `Accounting`
+> <!-- en -->
+> **Answer:** Option B — `Accounting`
+> <!-- /en -->
 > 
 > فەرمانەکە `Accounting` دەنووسێت. قوتابیی ژمارە 2 ـی خشتەکە Sara Ali ـیە، کە لە بەشی 7.2 دا بە بەشی `Accounting` زیاد کرا.
 
@@ -191,18 +195,18 @@ Accounting
 - نووسینێکی سوور دەردەکەوێت. تەنها دوایین دێڕەکەی بخوێنەوە.
 - ئەو وەڵامە هەڵبژێرە کە هەمان دوایین دێڕە.
 
-**نموونەی 1.**
-
-@en Run this command. What does the last line of the error say?
+<!-- en -->
+**Example 1.** Run this command. What does the last line of the error say?
 
 ```bash
 python -c "import database; print(database.get_connection().execute('SELECT * FROM student').fetchall())"
 ```
 
-- بژاردەی A: `sqlite3.OperationalError: no such table: student`
-- بژاردەی B: `sqlite3.OperationalError: no such column: student`
-- بژاردەی C: `sqlite3.IntegrityError: UNIQUE constraint failed: students.student_id`
-- بژاردەی D: `[]`
+- Option A: `sqlite3.OperationalError: no such table: student`
+- Option B: `sqlite3.OperationalError: no such column: student`
+- Option C: `sqlite3.IntegrityError: UNIQUE constraint failed: students.student_id`
+- Option D: `[]`
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
@@ -210,22 +214,24 @@ python -c "import database; print(database.get_connection().execute('SELECT * FR
 sqlite3.OperationalError: no such table: student
 ```
 
-> **وەڵام:** بژاردەی A — `sqlite3.OperationalError: no such table: student`
+> <!-- en -->
+> **Answer:** Option A — `sqlite3.OperationalError: no such table: student`
+> <!-- /en -->
 > 
 > ناوی خشتەکە `students` ـە، بە `s` ـەوە. فەرمانەکە `student` ی نووسیوە، بۆیە SQLite دەڵێت خشتەیەکی وا نییە.
 
-**نموونەی 2.**
-
-@en Run this command. What does the last line of the error say?
+<!-- en -->
+**Example 2.** Run this command. What does the last line of the error say?
 
 ```bash
 python -c "import database; print(database.get_student(5)['full_name'])"
 ```
 
-- بژاردەی A: `TypeError: 'NoneType' object is not subscriptable`
-- بژاردەی B: `IndexError: list index out of range`
-- بژاردەی C: `KeyError: 'full_name'`
-- بژاردەی D: `None`
+- Option A: `TypeError: 'NoneType' object is not subscriptable`
+- Option B: `IndexError: list index out of range`
+- Option C: `KeyError: 'full_name'`
+- Option D: `None`
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
@@ -233,7 +239,9 @@ python -c "import database; print(database.get_student(5)['full_name'])"
 TypeError: 'NoneType' object is not subscriptable
 ```
 
-> **وەڵام:** بژاردەی A — `TypeError: 'NoneType' object is not subscriptable`
+> <!-- en -->
+> **Answer:** Option A — `TypeError: 'NoneType' object is not subscriptable`
+> <!-- /en -->
 > 
 > هیچ قوتابییەک `id` ی 5 نییە، بۆیە `get_student(5)` شتی `None` دەگەڕێنێتەوە، و `None['full_name']` ئەم هەڵەیە دەدات.
 
@@ -247,45 +255,49 @@ TypeError: 'NoneType' object is not subscriptable
 - ناونیشانەکە لە شریتی ناونیشانی Chrome دابنێ و `Enter` دابگرە.
 - سەیری لاپەڕەکە بکە: سەردێڕەکەی و خانەکانی. ئەگەر لاپەڕەکە نەبێت، Chrome پەڕەی هەڵەی خۆی پیشان دەدات، کە `HTTP ERROR 404` ی تێدایە.
 
-**نموونەی 1.**
-
-@en With the server running, open this address. What is written in the **Full name** box?
+<!-- en -->
+**Example 1.** With the server running, open this address. What is written in the **Full name** box?
 
 ```
 http://localhost:8000/edit?id=2
 ```
 
-- بژاردەی A: *Ahmad Karim*
-- بژاردەی B: *Sara Ali*
-- بژاردەی C: *Nothing — the box is empty*
-- بژاردەی D: *HTTP ERROR 404*
+- Option A: Ahmad Karim
+- Option B: Sara Ali
+- Option C: Nothing — the box is empty
+- Option D: HTTP ERROR 404
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
 فۆڕمی **Edit student** دەکرێتەوە، و لە خانەی Full name دا نووسراوە **Sara Ali**.
 
-> **وەڵام:** بژاردەی B — *Sara Ali*
+> <!-- en -->
+> **Answer:** Option B — Sara Ali
+> <!-- /en -->
 > 
 > `id=2` قوتابیی ژمارە 2 ـە، واتە Sara Ali. Edit فۆڕمەکە بە زانیارییەکانی ئەو پڕ دەکاتەوە — هەمان بەشی 9.8.
 
-**نموونەی 2.**
-
-@en Open this address, with no `?id=`. What is the page's heading?
+<!-- en -->
+**Example 2.** Open this address, with no `?id=`. What is the page's heading?
 
 ```
 http://localhost:8000/edit
 ```
 
-- بژاردەی A: *Edit student*
-- بژاردەی B: *Register a new student*
-- بژاردەی C: *HTTP ERROR 404*
-- بژاردەی D: *Students*
+- Option A: Edit student
+- Option B: Register a new student
+- Option C: HTTP ERROR 404
+- Option D: Students
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
 فۆڕمێکی بەتاڵ بە سەردێڕی **Register a new student**.
 
-> **وەڵام:** بژاردەی B — *Register a new student*
+> <!-- en -->
+> **Answer:** Option B — Register a new student
+> <!-- /en -->
 > 
 > بەبێ `id`، کۆدەکە هیچ قوتابییەک ناخوێنێتەوە، بۆیە هەمان فۆڕمی تۆمارکردنی نوێ پیشان دەدات. بە `?id=9999` بوایە، `HTTP ERROR 404` دەبوو، وەک بەشی 9.8.
 
@@ -299,37 +311,41 @@ http://localhost:8000/edit
 - کلیکی ڕاست ڕێک لەسەر ئەو بەشە بکە کە پرسیارەکە ناوی دەبات ← **Inspect**.
 - لە بەشی **Styles** ئەو ڕێسایە بدۆزەوە کە پرسیارەکە باسی دەکات، و بەهاکەی بخوێنەوە.
 
-**نموونەی 1.**
+<!-- en -->
+**Example 1.** On the home page the table's column headings are in capitals, like `FULL NAME`. Right-click one of them → **Inspect**. In Styles, which CSS line makes the letters capitals?
 
-@en On the home page the table's column headings are in capitals, like `FULL NAME`. Right-click one of them → **Inspect**. In Styles, which CSS line makes the letters capitals?
-
-- بژاردەی A: `font-weight: bold`
-- بژاردەی B: `text-transform: uppercase`
-- بژاردەی C: `font-size: 13px`
-- بژاردەی D: `color: #6b7280`
+- Option A: `font-weight: bold`
+- Option B: `text-transform: uppercase`
+- Option C: `font-size: 13px`
+- Option D: `color: #6b7280`
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
 لە ڕێسای `thead th` دا: `text-transform: uppercase;`
 
-> **وەڵام:** بژاردەی B — `text-transform: uppercase`
+> <!-- en -->
+> **Answer:** Option B — `text-transform: uppercase`
+> <!-- /en -->
 > 
 > `text-transform: uppercase` نووسینەکە بە پیتی گەورە پیشان دەدات، بەبێ ئەوەی HTML ـەکە بگۆڕێت: لە `list.html` دا هێشتا `Full name` نووسراوە.
 
-**نموونەی 2.**
+<!-- en -->
+**Example 2.** Right-click the big blue heading at the top, **Students** → **Inspect**. In Styles, what is its `font-size`?
 
-@en Right-click the big blue heading at the top, **Students** → **Inspect**. In Styles, what is its `font-size`?
-
-- بژاردەی A: `16px`
-- بژاردەی B: `20px`
-- بژاردەی C: `24px`
-- بژاردەی D: `32px`
+- Option A: `16px`
+- Option B: `20px`
+- Option C: `24px`
+- Option D: `32px`
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
 لە ڕێسای `h1` دا: `font-size: 24px;`
 
-> **وەڵام:** بژاردەی C — `24px`
+> <!-- en -->
+> **Answer:** Option C — `24px`
+> <!-- /en -->
 > 
 > سەردێڕەکە `h1` ـە، و ڕێسای `h1` لە `style.css` دا `font-size: 24px` ی تێدایە.
 
@@ -344,48 +360,49 @@ http://localhost:8000/edit
 - خانەکان ڕێک وەک پرسیارەکە دەڵێت پڕ بکەرەوە، و دوگمەکە دابگرە.
 - پەیامە سوورەکەی سەرەوەی فۆڕمەکە بخوێنەوە.
 
-**نموونەی 1.**
+<!-- en -->
+**Example 1.** Click **+ Register a new student**, and fill in the boxes like this:
 
-@en Click **+ Register a new student**, and fill in the boxes like this:
+- **Student ID:** `MIS-2025-001`
+- **Full name:** `Test`
+- **Department:** any one
+- **Gender:** `Male`
 
-@en • **Student ID:** `MIS-2025-001`
+Then press **Register student**. What appears?
 
-@en • **Full name:** `Test`
-
-@en • **Department:** any one
-
-@en • **Gender:** `Male`
-
-@en Then press **Register student**. What appears?
-
-- بژاردەی A: *The student is added at the top of the list*
-- بژاردەی B: *This student ID is already registered.*
-- بژاردەی C: *The email address is not valid.*
-- بژاردەی D: *Full name is required.*
+- Option A: The student is added at the top of the list
+- Option B: This student ID is already registered.
+- Option C: The email address is not valid.
+- Option D: Full name is required.
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
 پەیامێکی سوور لە سەرەوەی فۆڕمەکە: **This student ID is already registered.** — و هیچ قوتابییەک زیاد ناکرێت.
 
-> **وەڵام:** بژاردەی B — *This student ID is already registered.*
+> <!-- en -->
+> **Answer:** Option B — This student ID is already registered.
+> <!-- /en -->
 > 
 > `MIS-2025-001` ژمارەی Ahmad Karim ـە، و سێرڤەرەکە ژمارەی دووبارە ڕەت دەکاتەوە — هەمان بەشی 8.9.
 
-**نموونەی 2.**
+<!-- en -->
+**Example 2.** In the list, click **Edit** next to **Sara Ali**. Delete the name in the **Full name** box and type only one space — the Space key, once.
 
-@en In the list, click **Edit** next to **Sara Ali**. Delete the name in the **Full name** box and type only one space — the Space key, once.
+Then press **Save changes**. What appears?
 
-@en Then press **Save changes**. What appears?
-
-- بژاردەی A: *Sara's name becomes empty in the list*
-- بژاردەی B: *Full name is required.*
-- بژاردەی C: *This student ID is already registered.*
-- بژاردەی D: *Student ID is required.*
+- Option A: Sara's name becomes empty in the list
+- Option B: Full name is required.
+- Option C: This student ID is already registered.
+- Option D: Student ID is required.
+<!-- /en -->
 
 **ئەوەی دەیبینیت:**
 
 پەیامێکی سوور: **Full name is required.** — و ناوی Sara وەک خۆی دەمێنێتەوە.
 
-> **وەڵام:** بژاردەی B — *Full name is required.*
+> <!-- en -->
+> **Answer:** Option B — Full name is required.
+> <!-- /en -->
 > 
 > وێبگەڕەکە بۆشاییەک بە نووسین دەژمێرێت و ڕێگە دەدات، بەڵام سێرڤەرەکە بۆشاییەکانی سەرەتا و کۆتایی لادەبات (`strip`)، و ئیتر هیچ نامێنێت.
