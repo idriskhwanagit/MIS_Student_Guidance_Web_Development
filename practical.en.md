@@ -77,29 +77,25 @@ you see other names, your own project's server is answering: do step 4 again.
 **8.** Do the five ways below and their examples, one by one. This is your
 practice for the mock and the midterm.
 
+<!-- exam-day -->
 ## On the exam day
 
-> 🔓 This guide is open on that day, but the site's other two tabs are
-> closed. Know these beforehand.
+🔓 This guide is open on that day, but the site's other two tabs are
+closed. Know these beforehand.
 
-**1.** The laptop with its charger. Your internet on, and Chrome signed in with
-your university account.
+**1.** Bring the laptop and its charger, turn your own internet on, and open
+Chrome signed in with your university account.
 
-**2.** In VS Code open the `student-system-exam` folder, and stop every other
-server.
+**2.** In VS Code open the `student-system-exam` folder, type `python app.py`
+in the first terminal, and open the second terminal with **+** for the
+commands.
 
-**3.** In the first terminal type `python app.py`. Open the second terminal
-with **+**, for the commands.
+**3.** In Chrome open `http://localhost:8000`. You must see Sara Ali and Ahmad
+Karim; if you see other names, stop your own project's server.
 
-**4.** Open two tabs in Chrome: one at `http://localhost:8000`, which must show
-Sara Ali and Ahmad Karim, and the other with the exam form.
-
-**5.** Answer everything on the laptop. In the form the answers are in a
-different order from the examples, so choose them by what they say, not by
-their letter.
-
-**6.** The closing time is written at the top of the form: press **Submit**
-before it.
+**4.** Before the closing time written at the top of the form, press
+**Submit**.
+<!-- /exam-day -->
 
 ## If something goes wrong
 

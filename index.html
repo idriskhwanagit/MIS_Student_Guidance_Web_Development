@@ -775,6 +775,20 @@ body {
 
 [dir="rtl"] .reader blockquote { border-radius: 8px 0 0 8px; }
 
+/* the exam day's steps, in the warning colour no other box has — see
+   "<!-- exam-day -->" in render(); on an exam day the page opens on it */
+.reader .exam-day {
+  margin: 1.5rem 0;
+  padding: .3rem 1.2rem 1rem;
+  border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent);
+  border-inline-start: 4px solid var(--warn);
+  border-radius: 10px;
+  background: var(--warn-wash);
+  scroll-margin-top: 5rem;
+}
+.reader .exam-day h2 { color: var(--warn); }
+.reader .exam-day > :last-child { margin-bottom: 0; }
+
 .reader blockquote > :last-child { margin-bottom: 0; }
 
 .reader blockquote:has(h3) {
@@ -2017,6 +2031,23 @@ body {
         continue;
       }
 
+      /* the exam day's steps, from "<!-- exam-day -->" to "<!-- /exam-day -->":
+         one box in a colour of its own, which the page opens on while it is
+         closed for an examination (the lecturer, 2026-11-02) */
+      if (/^<!--\s*exam-day\s*-->\s*$/.test(line)) {
+        flushPara();
+        i++;
+        var day = [];
+        while (i < lines.length && !/^<!--\s*\/exam-day\s*-->\s*$/.test(lines[i])) {
+          day.push(lines[i]);
+          i++;
+        }
+        i++;
+        out.push('<section class="exam-day" id="exam-day">' +
+          render(day.join("\n"), headings) + "</section>");
+        continue;
+      }
+
       /* an explanation the reader opens if they want it — the heading after
          the marker becomes the summary, and everything under it the body */
       if (/^<!--\s*collapse\s*-->\s*$/.test(line)) {
@@ -2152,6 +2183,15 @@ body {
     reader.innerHTML = render(md, headings);
     reader.scrollIntoView({ block: "start" });
     window.scrollTo(0, 0);
+    /* closed for an examination, the guide opens on the day's own steps */
+    var today = examMode && document.getElementById("exam-day");
+    if (today) {
+      today.scrollIntoView({ block: "start" });
+      /* a face still loading moves the text above it: go again once it is in */
+      if (document.fonts) {
+        document.fonts.ready.then(function () { today.scrollIntoView({ block: "start" }); });
+      }
+    }
 
     /* labels follow the reading language */
     var words = UI[state.lang];
