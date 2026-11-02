@@ -95,6 +95,10 @@ Karim; if you see other names, stop your own project's server.
 
 **4.** Before the closing time written at the top of the form, press
 **Submit**.
+
+⚠️ **If your laptop shuts down and your answers do not arrive, you get zero.**
+
+⚠️ **If you do not press Submit, you get zero.**
 <!-- /exam-day -->
 
 ## If something goes wrong
