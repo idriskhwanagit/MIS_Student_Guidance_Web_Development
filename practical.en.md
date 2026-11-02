@@ -83,7 +83,7 @@ practice for the mock and the midterm.
 🔓 This guide is open on that day, but the site's other two tabs are
 closed. Know these beforehand.
 
-**1.** Bring the laptop and its charger, turn your own internet on, and open
+**1.** Bring the laptop and a power strip, turn your own internet on, and open
 Chrome signed in with your university account.
 
 **2.** In VS Code open the `student-system-exam` folder, type `python app.py`
