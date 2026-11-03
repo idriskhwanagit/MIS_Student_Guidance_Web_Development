@@ -91,7 +91,8 @@ in the first terminal, and open the second terminal with **+** for the
 commands.
 
 **3.** In Chrome open `http://localhost:8000`. You must see Sara Ali and Ahmad
-Karim; if you see other names, stop your own project's server.
+Karim; if you see other names, close every other project and open only
+`student-system-exam` in VS Code.
 
 **4.** Before the closing time written at the top of the form, press
 **Submit**.
