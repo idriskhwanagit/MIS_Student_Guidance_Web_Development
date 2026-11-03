@@ -31,6 +31,8 @@
   --accent-wash:#e2f1f0;
   --warn:       #9c5410;
   --warn-wash:  #fbf1e3;
+  --flag:       #b42318;
+  --flag-wash:  #fde4e1;
   --code-bg:    #12303a;
   --code-ink:   #dbe9ee;
   --shadow:     0 1px 2px rgba(18, 40, 56, .06), 0 8px 24px -16px rgba(18, 40, 56, .35);
@@ -59,6 +61,8 @@
     --accent-wash:#122e30;
     --warn:       #e0a464;
     --warn-wash:  #2c2317;
+    --flag:       #ff9b8f;
+    --flag-wash:  #3d1a17;
     --code-bg:    #0a1a20;
     --code-ink:   #cfe2e8;
     --shadow:     0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
@@ -79,6 +83,8 @@
   --accent-wash:#122e30;
   --warn:       #e0a464;
   --warn-wash:  #2c2317;
+  --flag:       #ff9b8f;
+  --flag-wash:  #3d1a17;
   --code-bg:    #0a1a20;
   --code-ink:   #cfe2e8;
   --shadow:     0 1px 2px rgba(0, 0, 0, .4), 0 8px 24px -16px rgba(0, 0, 0, .8);
@@ -788,6 +794,20 @@ body {
 }
 .reader .exam-day h2 { color: var(--warn); }
 .reader .exam-day > :last-child { margin-bottom: 0; }
+
+/* a word the reader must not miss, "==word==" in the text — see inline();
+   its colour prints too, and it keeps its edges when it wraps */
+.reader mark {
+  padding: 0 .3em;
+  border-radius: 4px;
+  background: var(--flag-wash);
+  color: var(--flag);
+  font-weight: 700;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
 
 .reader blockquote > :last-child { margin-bottom: 0; }
 
@@ -1827,6 +1847,9 @@ body {
     s = s.replace(/`([^`]+)`/g, function (m, c) { return "<code>" + c + "</code>"; });
     s = s.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
     s = s.replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>");
+    /* a word the reader must not miss (the lecturer, 2026-11-03). Code's
+       "a == b" has spaces inside, and a match never crosses into a tag. */
+    s = s.replace(/==([^=\s<`](?:[^=<`]*[^=\s<`])?)==/g, "<mark>$1</mark>");
     s = s.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (m, t, u) {
       var ext = /^https?:/.test(u);
       return '<a href="' + u + '"' + (ext ? ' target="_blank" rel="noopener"' : "") + ">" + t + "</a>";

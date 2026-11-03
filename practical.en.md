@@ -99,16 +99,16 @@ Karim; if you see other names, stop your own project's server.
 🚫 **The exam room's rules:**
 
 - No phone on you: turn its hotspot on and put it in your bag.
-- Only VS Code and Chrome may be open.
+- Only the Chrome and VS Code icons may be on the taskbar: close every other program, and remove other pinned icons with a right-click → Unpin from taskbar.
 - In Chrome only these three tabs may be open: the questions form, `localhost:8000`, and the Mock and midterm guide.
 
 ⚠️ **If your laptop shuts down and your answers do not arrive, you get zero.**
 
 ⚠️ **If you do not press Submit, you get zero.**
 
-⚠️ **If the invigilator sees anything more than these on your screen at any time, it counts as cheating.**
+⚠️ **If the ==invigilator== sees anything more than these on your screen at any time, it counts as ==cheating==.**
 
-⚠️ **If the internet drops, do not touch your phone without asking the invigilator; otherwise it counts as cheating.**
+⚠️ **If the internet drops, do not touch your phone without asking the ==invigilator==; otherwise it counts as ==cheating==.**
 <!-- /exam-day -->
 
 ## If something goes wrong
