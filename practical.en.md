@@ -27,7 +27,7 @@
   your `@epu.edu.iq` address, because the form takes university accounts
   only. If Google shows another account, choose **Switch account**.
 - **Your own internet** for the laptop — your phone's hotspot, say — with
-  enough balance. The phone is for the internet only, not for answering.
+  enough balance. The phone is for the internet only and stays in your bag.
 - **The exam copy:** `student-system-exam-step9.zip`, downloaded beforehand
   from [this link](https://drive.google.com/uc?export=download&id=1idEb8HPngN5aYx2i9M_dpxw5XgY885OJ).
 
@@ -96,9 +96,19 @@ Karim; if you see other names, stop your own project's server.
 **4.** Before the closing time written at the top of the form, press
 **Submit**.
 
+🚫 **The exam room's rules:**
+
+- No phone on you: turn its hotspot on and put it in your bag.
+- Only VS Code and Chrome may be open.
+- In Chrome only these three tabs may be open: the questions form, `localhost:8000`, and the Mock and midterm guide.
+
 ⚠️ **If your laptop shuts down and your answers do not arrive, you get zero.**
 
 ⚠️ **If you do not press Submit, you get zero.**
+
+⚠️ **If the invigilator sees anything more than these on your screen at any time, it counts as cheating.**
+
+⚠️ **If the internet drops, do not touch your phone without asking the invigilator; otherwise it counts as cheating.**
 <!-- /exam-day -->
 
 ## If something goes wrong
