@@ -1,5 +1,5 @@
 {
-  "closed": false,
+  "closed": true,
   "_ku": "بۆ داخستنی لاپەڕەکە لە کاتی تاقیکردنەوەدا: closed بکە بە true، پاشان Commit.",
   "_en": "To close the page during an exam: set closed to true, then commit.",
   "message_ku": "لاپەڕەکە لە کاتی تاقیکردنەوەدا داخراوە.",
